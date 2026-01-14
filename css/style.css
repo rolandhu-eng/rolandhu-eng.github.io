@@ -583,3 +583,48 @@ footer:hover p {
 * {
     scroll-behavior: smooth;
 }
+
+/* Ripple effect for project cards */
+.project-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.3);
+    width: 20px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: rippleEffect 0.6s cubic-bezier(0.28, 0.11, 0.32, 1);
+}
+
+@keyframes rippleEffect {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+    }
+    100% {
+        width: 400px;
+        height: 400px;
+        opacity: 0;
+    }
+}
+
+/* Loading animation */
+body {
+    opacity: 0;
+    transition: opacity 0.5s cubic-bezier(0.28, 0.11, 0.32, 1);
+}
+
+body.loaded {
+    opacity: 1;
+}
+
+/* Parallax scrolling enhancement */
+.hero {
+    transition: background-position 0.1s linear;
+}
