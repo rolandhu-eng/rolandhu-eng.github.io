@@ -1,18 +1,12 @@
-// Navbar scroll effect with smoother transition
-let lastScrollY = window.scrollY;
-
+// Navbar scroll effect
 window.addEventListener('scroll', () => {
     const navbar = document.getElementById('navbar');
-    const currentScrollY = window.scrollY;
-    
-    if (currentScrollY > 50) {
+    if (window.scrollY > 50) {
         navbar.classList.add('scrolled');
     } else {
         navbar.classList.remove('scrolled');
     }
-    
-    lastScrollY = currentScrollY;
-}, { passive: true }); // Passive for better performance
+}, { passive: true });
 
 // Smooth scrolling with offset for fixed navbar
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -21,7 +15,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
             const navHeight = document.getElementById('navbar').offsetHeight;
-            const targetPosition = target.offsetTop - navHeight;
+            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
             
             window.scrollTo({
                 top: targetPosition,
@@ -31,47 +25,117 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Enhanced fade-in animation on scroll with stagger effect
+// Fade-in animation on scroll
 const observerOptions = {
     threshold: 0.15,
-    rootMargin: '0px 0px -80px 0px'
+    rootMargin: '0px 0px -50px 0px'
 };
 
 const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, index) => {
+    entries.forEach(entry => {
         if (entry.isIntersecting) {
-            // Add a small delay for staggered animation effect
-            setTimeout(() => {
-                entry.target.classList.add('visible');
-            }, index * 100);
+            entry.target.classList.add('visible');
         }
     });
 }, observerOptions);
 
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-// Project cards - add click ripple effect
+// Typing effect for hero subtitle (optional - very engineering-like)
+const subtitle = document.querySelector('.hero .subtitle');
+if (subtitle) {
+    const text = subtitle.textContent;
+    subtitle.textContent = '';
+    let i = 0;
+    
+    const typeWriter = () => {
+        if (i < text.length) {
+            subtitle.textContent += text.charAt(i);
+            i++;
+            setTimeout(typeWriter, 100);
+        }
+    };
+    
+    // Start typing after a short delay
+    setTimeout(typeWriter, 500);
+}
+
+// Add cursor effect to hero name
+const heroName = document.querySelector('.hero h1');
+if (heroName) {
+    heroName.style.position = 'relative';
+    
+    // Create blinking cursor element
+    const cursor = document.createElement('span');
+    cursor.textContent = '|';
+    cursor.style.cssText = `
+        color: var(--accent);
+        animation: blink 1s step-end infinite;
+        margin-left: 5px;
+    `;
+    
+    // Add cursor animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Add cursor after delay
+    setTimeout(() => {
+        heroName.appendChild(cursor);
+    }, 1500);
+}
+
+// Add glitch effect on project cards (subtle, engineering-style)
 document.querySelectorAll('.project-card').forEach(card => {
-    card.addEventListener('click', function(e) {
-        const ripple = document.createElement('div');
-        ripple.className = 'ripple';
-        
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        ripple.style.left = `${x}px`;
-        ripple.style.top = `${y}px`;
-        
-        card.appendChild(ripple);
-        
+    card.addEventListener('mouseenter', function() {
+        this.style.animation = 'glitch 0.3s ease';
         setTimeout(() => {
-            ripple.remove();
-        }, 600);
+            this.style.animation = '';
+        }, 300);
     });
 });
 
-// Add loading animation
+// Add glitch animation
+const glitchStyle = document.createElement('style');
+glitchStyle.textContent = `
+    @keyframes glitch {
+        0% { transform: translateY(-7px) translateX(0); }
+        25% { transform: translateY(-7px) translateX(-2px); }
+        50% { transform: translateY(-7px) translateX(2px); }
+        75% { transform: translateY(-7px) translateX(-1px); }
+        100% { transform: translateY(-7px) translateX(0); }
+    }
+`;
+document.head.appendChild(glitchStyle);
+
+// Smooth page load
 window.addEventListener('load', () => {
-    document.body.classList.add('loaded');
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.5s ease';
+        document.body.style.opacity = '1';
+    }, 100);
 });
+
+// Console greeting (Easter egg for engineers who inspect)
+console.log(`
+%c█▀▀ █▀█ █▀▀ █▀▀ ▀█▀ █ █▄ █ █▀▀ █▀ 
+%c█▄█ █▀▄ ██▄ ██▄  █  █ █ ▀█ █▄█ ▄█ 
+
+%cHey there! 👋 
+Thanks for checking out my portfolio.
+Feel free to reach out if you want to collaborate!
+
+%c→ GitHub: https://github.com/rolandhu-eng
+→ Email: rhu2718@gmail.com
+`, 
+'color: #64ffda; font-weight: bold; font-size: 16px;',
+'color: #64ffda; font-weight: bold; font-size: 16px;',
+'color: #8892b0; font-size: 14px; line-height: 1.8;',
+'color: #00d4ff; font-size: 12px;'
+);
