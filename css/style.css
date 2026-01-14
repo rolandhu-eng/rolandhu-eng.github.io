@@ -82,11 +82,24 @@ nav.scrolled {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url('http://github.com/rolandhu-eng/rolandhu-eng.github.io/blob/main/images/plume.webp');
+    
+    /* 1. Use the 'raw' link for GitHub images */
+    background-image: url('https://raw.githubusercontent.com/rolandhu-eng/rolandhu-eng.github.io/main/images/plume.webp');
+    
+    /* 2. Fix the image in place while scrolling */
+    background-attachment: fixed;
+    
+    /* 3. Ensure the image covers the whole area and stays centered */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    /* 4. Fallback color so white text is visible if image fails to load */
+    background-color: #333; 
+
     color: white;
     text-align: center;
     padding: 0;
-    position: local;
     overflow: hidden;
 }
 
