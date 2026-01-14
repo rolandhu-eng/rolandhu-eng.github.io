@@ -1,2 +1,0 @@
-# Roland Hu
-## Hello World
