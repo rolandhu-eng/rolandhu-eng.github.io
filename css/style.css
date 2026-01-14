@@ -82,11 +82,11 @@ nav.scrolled {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #1a213d 0%, #1d1231 100%);
+    background: linear-gradient(135deg, #32186e 0%, #1d1231 100%);
     color: white;
     text-align: center;
     padding: 0;
-    position: relative;
+    position: absolute;
     overflow: hidden;
 }
 
