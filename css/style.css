@@ -82,7 +82,7 @@ nav.scrolled {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #000000 0%, #1d1231 100%);
+    background-image: url('http://github.com/rolandhu-eng/rolandhu-eng.github.io/blob/main/images/plume.webp');
     color: white;
     text-align: center;
     padding: 0;
