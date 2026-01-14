@@ -50,19 +50,6 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-// Add parallax effect to hero background (optional but very Apple-like)
-window.addEventListener('scroll', () => {
-    const hero = document.querySelector('.hero');
-    if (hero) {
-        const scrolled = window.scrollY;
-        const heroHeight = hero.offsetHeight;
-        
-        if (scrolled < heroHeight) {
-            hero.style.backgroundPositionY = `${scrolled * 0.5}px`;
-        }
-    }
-}, { passive: true });
-
 // Project cards - add click ripple effect
 document.querySelectorAll('.project-card').forEach(card => {
     card.addEventListener('click', function(e) {
