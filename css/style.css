@@ -624,7 +624,3 @@ body.loaded {
     opacity: 1;
 }
 
-/* Parallax scrolling enhancement */
-.hero {
-    transition: background-position 0.1s linear;
-}
