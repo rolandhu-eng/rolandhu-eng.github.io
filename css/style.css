@@ -50,7 +50,7 @@ nav {
     position: fixed;
     top: 0;
     width: 100%;
-    background: rgba(5, 7, 10, 0.9);
+    background: rgba(5, 7, 10, 0.5);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 0;
@@ -141,9 +141,9 @@ nav.scrolled {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url('https://raw.githubusercontent.com/rolandhu-eng/rolandhu-eng.github.io/main/images/plume.webp');
-    background-size: 140%;
-    background-position: center 0px;
+    background-image: url('https://raw.githubusercontent.com/rolandhu-eng/rolandhu-eng.github.io/main/images/plume2.jpg');
+    background-size: cover;
+    background-position: center -700px;
     background-repeat: no-repeat;
     background-attachment: fixed; /* Parallax effect */
     background-color: var(--space-black);
@@ -162,16 +162,20 @@ nav.scrolled {
     left: 0;
     right: 0;
     bottom: 0;
+
+    /* backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); /* Safari support */
+
     background: radial-gradient(
         circle at center,
         rgba(5, 7, 10, 0.3) 0%,
-        rgba(5, 7, 10, 0.85) 100%
+        rgba(5, 7, 10, 0.85) 50%
     );
 }
 
 .hero-content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     max-width: 1000px;
 }
 
