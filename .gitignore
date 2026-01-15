@@ -1,0 +1,7 @@
+# --- Security / Secrets ---
+.ssh/
+id_*
+*.pem
+*.key
+*.env
+secrets.txt
