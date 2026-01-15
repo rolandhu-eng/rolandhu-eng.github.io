@@ -1,0 +1,79 @@
+/* Projects Page Specific Styles */
+
+.projects-hero {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    background-size: cover;
+    padding: 150px 50px 100px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-primary);
+    max-width: none;
+    width: 100%;
+}
+
+.projects-hero-content h1 {
+    font-size: 64px;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.projects-hero-content p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Filter Buttons */
+.projects-filter {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 60px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 12px 24px;
+    background: transparent;
+    border: 1px solid var(--border-primary);
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: var(--accent-primary);
+    color: var(--text-on-dark);
+    border-color: var(--accent-primary);
+}
+
+.all-projects {
+    padding: 80px 50px;
+    background: var(--bg-primary);
+}
+
+/* Hide filtered out projects */
+.project-card.hidden {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .projects-hero-content h1 {
+        font-size: 40px;
+    }
+    
+    .all-projects {
+        padding: 60px 30px;
+    }
+}
