@@ -177,7 +177,7 @@ nav.scrolled {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url('https://raw.githubusercontent.com/rolandhu-eng/rolandhu-eng.github.io/main/images/plume2.jpg');
+    background-image: url('https://raw.githubusercontent.com/rolandhu-eng/rolandhu-eng.github.io/main/images/orbitsunrise.png');
     background-size: cover;
     background-position: center -700px;
     background-repeat: no-repeat;
@@ -213,7 +213,7 @@ nav.scrolled {
 
 .hero h1 {
     font-size: clamp(3rem, 10vw, 6rem);
-    font-weight: 400;
+    font-weight: 600;
     margin-bottom: 20px;
     color: rgba(255, 255, 255, 0.9);
     line-height: 0.9;
