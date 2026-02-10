@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Schlieren Imaging - Roland Hu">
+    <title>Schlieren Imaging | Roland Hu</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/project-detail.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="../index.html">Roland Hu</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../index.html#about">About</a></li>
+                <li><a href="../projects.html">Projects</a></li>
+                <li><a href="../index.html#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Project Header -->
+    <section class="project-header">
+        <div class="project-header-content">
+            <a href="../projects.html" class="back-link">← Back to Projects</a>
+            <h1>Schlieren Imaging</h1>
+            <p class="project-subtitle">Visualizing Fluid Flow</p>
+            <div class="project-meta">
+                <span class="meta-item">📅 Completed: November 2025</span>
+                <span class="meta-item">⏱️ Duration: 6 months</span>
+                <span class="meta-item">🔧 Type: Mechanical/Aerospace</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Content -->
+    <section class="project-detail">
+        <div class="detail-container">
+            <!-- Overview -->
+            <div class="detail-section">
+                <h2>Overview</h2>
+                <p>Most fascinating airflow phenomena are completely invisible to the naked eye. However, with the aid of a simple DIY setup, the invisible becomes visible. Schlieren imaging allows the normally invisible density gradients in air to become visible. On a hot summer day, you might have seen distortions when looking close to the horizon. This is due to hot air heated by the ground becoming less dense, which refracts light differently than the surrounding cooler air, causing images to be distorted. Schlieren imaging takes advantage of this changing index of refraction caused by changes in density, enhancing the effect enough that even hot air due to your body temperature can be seen.</p>
+            </div>
+
+            <!-- Main Image -->
+            <div class="project-image-large">
+                <img src="../images/wind-tunnel/main.jpg" alt="Wind Tunnel Complete">
+                <p class="image-caption">Completed wind tunnel assembly</p>
+            </div>
+
+            <!-- Technical Specs -->
+            <div class="detail-section">
+                <h2>Technical Specifications</h2>
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <h3>Test Section</h3>
+                        <p>12" x 12" x 24"</p>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Max Velocity</h3>
+                        <p>50 m/s</p>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Fan Power</h3>
+                        <p>2.5 HP</p>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Contraction Ratio</h3>
+                        <p>6:1</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Design Process -->
+            <div class="detail-section">
+                <h2>Design Process</h2>
+                <p>The design phase involved CFD analysis in ANSYS Fluent to optimize the contraction section and diffuser geometry. Multiple iterations were performed to minimize flow separation and ensure uniform velocity distribution in the test section.</p>
+                
+                <div class="image-grid">
+                    <div class="grid-image">
+                        <img src="../images/wind-tunnel/cfd.jpg" alt="CFD Analysis">
+                        <p class="image-caption">CFD velocity contours</p>
+                    </div>
+                    <div class="grid-image">
+                        <img src="../images/wind-tunnel/cad.jpg" alt="CAD Model">
+                        <p class="image-caption">SolidWorks assembly</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Build Process -->
+            <div class="detail-section">
+                <h2>Build & Fabrication</h2>
+                <p>The tunnel was constructed using 3/4" plywood for the outer shell and acrylic panels for the test section viewing windows. Honeycomb flow straighteners and screens were installed upstream of the contraction to reduce turbulence.</p>
+                
+                <ul class="build-list">
+                    <li>Laser-cut plywood components for precise geometry</li>
+                    <li>Custom-designed 3D-printed corners and mounting brackets</li>
+                    <li>Pressure-tapped test section for aerodynamic measurements</li>
+                    <li>Variable-speed motor controller for flow control</li>
+                </ul>
+            </div>
+
+            <!-- Results -->
+            <div class="detail-section">
+                <h2>Results & Testing</h2>
+                <p>Initial calibration tests showed excellent flow uniformity with velocity variation under 3% across the test section. The tunnel has been successfully used to test airfoil models and measure lift/drag coefficients.</p>
+                
+                <div class="project-image-large">
+                    <img src="../images/wind-tunnel/testing.jpg" alt="Testing">
+                    <p class="image-caption">Airfoil testing in progress</p>
+                </div>
+            </div>
+
+            <!-- Lessons Learned -->
+            <div class="detail-section">
+                <h2>Challenges & Lessons</h2>
+                <ul class="build-list">
+                    <li><strong>Flow separation:</strong> Required multiple iterations of diffuser angle to prevent separation</li>
+                    <li><strong>Vibration:</strong> Added rubber isolation mounts to reduce motor vibration</li>
+                    <li><strong>Sealing:</strong> Used weatherstripping and silicone to eliminate air leaks</li>
+                </ul>
+            </div>
+
+            <!-- Technologies Used -->
+            <div class="detail-section">
+                <h2>Tools & Technologies</h2>
+                <div class="tech-tags">
+                    <span class="tech-tag">SolidWorks</span>
+                    <span class="tech-tag">ANSYS Fluent</span>
+                    <span class="tech-tag">3D Printing</span>
+                    <span class="tech-tag">Laser Cutting</span>
+                    <span class="tech-tag">Python (Data Analysis)</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="project-nav">
+                <a href="../projects.html" class="nav-btn">← All Projects</a>
+                <a href="test-stand.html" class="nav-btn">Next Project →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Designed & Built by Roland Hu | © 2026</p>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>
