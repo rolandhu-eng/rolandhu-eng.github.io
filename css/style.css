@@ -179,7 +179,7 @@ nav.scrolled {
     justify-content: center;
     background-image: url('https://raw.githubusercontent.com/rolandhu-eng/rolandhu-eng.github.io/main/images/orbitsunrise.png');
     background-size: cover;
-    background-position: center -700px;
+    background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-color: var(--bg-primary);
