@@ -47,7 +47,7 @@ const target = document.querySelector('.hero');
 
 // Calculate how many pixels we have scrolled
 let scrolled = window.pageYOffset;
-let startingOffset = -700;
+let startingOffset = 0;
 
 // Adjust the '0.5' to change the speed (0.2 is slower, 0.8 is faster)
 // The negative sign moves it UP as you scroll DOWN
