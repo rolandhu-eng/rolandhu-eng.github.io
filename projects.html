@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Roland Hu - All Projects">
+    <meta name="description" content="Roland Hu - Project Archive">
     <title>Projects | Roland Hu</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/projects-page.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav id="navbar">
         <div class="nav-container">
             <div class="logo">
                 <a href="index.html">Roland Hu</a>
             </div>
-            <ul class="nav-links">
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-controls="nav-links" aria-expanded="false">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <ul class="nav-links" id="nav-links">
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="projects.html">Projects</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
@@ -23,36 +26,38 @@
         </div>
     </nav>
 
-    <!-- Projects Hero -->
-    <section class="projects-hero">
-        <div class="projects-hero-content">
+    <header class="page-hero">
+        <div class="page-hero-inner">
+            <div class="eyebrow">Project Archive</div>
             <h1>All Projects</h1>
-            <p>A collection of my engineering work.</p>
+            <p>Collection of engineering builds, experiments, and prototypes.</p>
         </div>
-    </section>
+    </header>
 
-    <!-- All Projects Grid -->
-    <section class="all-projects">
-        <div class="projects-filter">
-            <button class="filter-btn active" data-filter="all">All</button>
-
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <h2>Project Archive</h2>
+                <p class="section-subtitle">Full list of builds focused on design, fabrication, and testing.</p>
+            </div>
         </div>
-
         <div class="projects-grid">
-
-            <!-- Wind Tunnel Project -->
-            <div class="project-card" data-category="aerospace mechanical">
-                <video class="project-video" autoplay loop muted playsinline>
-                    <source src="images/windtunnelEAD.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+            <div class="project-card">
+                <div class="card-media">
+                    <video class="project-video" autoplay loop muted playsinline>
+                        <source src="images/windtunnelEAD.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
                 <div class="project-content">
-                    <h3>Wind Tunnel</h3>
-                    <p>Designed and built a subsonic wind tunnel for aerodynamic testing of scale models.</p>
-                    <div class="project-tags">
-                        <span class="project-tag">Aerodynamics</span>
-                        <span class="project-tag">CAD</span>
-                        <span class="project-tag">Fabrication</span>
+                    <div>
+                        <h3>Wind Tunnel</h3>
+                        <p>Designed and built a subsonic wind tunnel for aerodynamic testing of scale models.</p>
+                    </div>
+                    <div class="chip-row">
+                        <span class="chip">Aerodynamics</span>
+                        <span class="chip">CAD</span>
+                        <span class="chip">Fabrication</span>
                     </div>
                     <div class="project-links">
                         <a href="projects/wind-tunnel.html">View Details</a>
@@ -60,16 +65,19 @@
                 </div>
             </div>
 
-            <!-- Penny Hockey -->
-            <div class="project-card" data-category="aerospace">
-                <div class="project-img">🔧</div>
+            <div class="project-card">
+                <div class="card-media placeholder">
+                    <div class="placeholder-label">Project Image</div>
+                </div>
                 <div class="project-content">
-                    <h3>Penny Hockey</h3>
-                    <p>Penny hockey game board.</p>
-                    <div class="project-tags">
-                        <span class="project-tag">Arduino</span>
-                        <span class="project-tag">CAD</span>
-                        <span class="project-tag">Fabrication</span>
+                    <div>
+                        <h3>Penny Hockey</h3>
+                        <p>Penny hockey game board.</p>
+                    </div>
+                    <div class="chip-row">
+                        <span class="chip">Arduino</span>
+                        <span class="chip">CAD</span>
+                        <span class="chip">Fabrication</span>
                     </div>
                     <div class="project-links">
                         <a href="projects/penny-hockey.html">View Details</a>
@@ -77,32 +85,32 @@
                 </div>
             </div>
 
-            <!-- Schlieren Imaging -->
-            <div class="project-card" data-category="aerospace">
-                <div class="project-img">🔧</div>
+            <div class="project-card">
+                <div class="card-media placeholder">
+                    <div class="placeholder-label">Project Image</div>
+                </div>
                 <div class="project-content">
-                    <h3>Schlieren Imaging</h3>
-                    <p>Visualizing fluid flow using schlieren imaging techniques.</p>
-                    <div class="project-tags">
-                        <span class="project-tag">Arduino</span>
-                        <span class="project-tag">CAD</span>
-                        <span class="project-tag">Fabrication</span>
+                    <div>
+                        <h3>Schlieren Imaging</h3>
+                        <p>Visualizing fluid flow using schlieren imaging techniques.</p>
+                    </div>
+                    <div class="chip-row">
+                        <span class="chip">Arduino</span>
+                        <span class="chip">CAD</span>
+                        <span class="chip">Fabrication</span>
                     </div>
                     <div class="project-links">
                         <a href="projects/schlieren-imaging.html">View Details</a>
                     </div>
                 </div>
             </div>
-
         </div>
     </section>
 
-    <!-- Footer -->
     <footer>
         <p>Designed & Built by Roland Hu | © 2026</p>
     </footer>
 
     <script src="js/main.js"></script>
-    <script src="js/projects-filter.js"></script>
 </body>
 </html>

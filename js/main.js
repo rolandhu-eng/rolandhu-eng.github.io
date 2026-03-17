@@ -1,12 +1,20 @@
-// Navbar scroll effect
-window.addEventListener('scroll', () => {
-    const navbar = document.getElementById('navbar');
-    if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
-    }
-}, { passive: true });
+const navbar = document.getElementById('navbar');
+const navToggle = document.querySelector('.nav-toggle');
+const navLinks = document.getElementById('nav-links');
+
+if (navToggle && navbar && navLinks) {
+    navToggle.addEventListener('click', () => {
+        const isOpen = navbar.classList.toggle('open');
+        navToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    navLinks.addEventListener('click', (event) => {
+        if (event.target && event.target.tagName === 'A') {
+            navbar.classList.remove('open');
+            navToggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+}
 
 // Smooth scrolling
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -41,15 +49,36 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-//parallax with plume
-window.addEventListener('scroll', function(){
-const target = document.querySelector('.hero');
+const hero = document.querySelector('.hero');
 
-// Calculate how many pixels we have scrolled
-let scrolled = window.pageYOffset;
-let startingOffset = 0;
+// Scroll effects: navbar + hero parallax
+let lastKnownScrollY = 0;
+let ticking = false;
 
-// Adjust the '0.5' to change the speed (0.2 is slower, 0.8 is faster)
-// The negative sign moves it UP as you scroll DOWN
-target.style.backgroundPositionY = startingOffset-(scrolled * 1.5) + 'px';
-});
+const onScroll = () => {
+    lastKnownScrollY = window.scrollY || window.pageYOffset;
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            document.documentElement.style.setProperty('--scrollY', `${lastKnownScrollY}`);
+
+            if (navbar) {
+                if (lastKnownScrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+
+            document.documentElement.style.setProperty('--heroShift', `${Math.min(lastKnownScrollY, 220)}`);
+
+            if (hero) {
+                hero.style.backgroundPositionY = `${-(lastKnownScrollY * 0.6)}px`;
+            }
+            ticking = false;
+        });
+        ticking = true;
+    }
+};
+
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();

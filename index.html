@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Roland Hu - Maker Portfolio">
-    <title>Roland Hu | Maker Portfolio</title>
+    <meta name="description" content="Roland Hu - Engineering Portfolio">
+    <title>Roland Hu | Engineering Portfolio</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav id="navbar">
         <div class="nav-container">
             <div class="logo">
                 <a href="index.html">Roland Hu</a>
             </div>
-            <ul class="nav-links">
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-controls="nav-links" aria-expanded="false">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+            <ul class="nav-links" id="nav-links">
                 <li><a href="#about">About</a></li>
                 <li><a href="projects.html">Projects</a></li>
                 <li><a href="#contact">Contact</a></li>
@@ -22,36 +26,40 @@
         </div>
     </nav>
 
-    <!-- Hero Section with Rocket Plume -->
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <h1>Roland Hu</h1>
-            <div class="subtitle">Maker Portfolio</div>
-            <div class="cta-buttons">
-                <a href="#projects" class="btn btn-primary">View Projects</a>
-                <a href="#contact" class="btn btn-secondary">Get In Touch</a>
+    <section id="home" class="hero hero-simple">
+        <div class="hero-grid">
+            <div class="hero-main">
+                <h1>Roland Hu</h1>
+                <p class="hero-lead">Digital Portfolio</p>
             </div>
         </div>
     </section>
+    <div class="hero-spacer" aria-hidden="true"></div>
 
-
-    <!-- Projects Section -->
-
-    <section id="projects" class="fade-in">
-        <h2>Featured Projects</h2>
+    <section id="projects" class="section">
+        <div class="section-header">
+            <div>
+                <h2>Featured Projects</h2>
+                <p class="section-subtitle">Selected builds focused on airflow, fabrication, and experimental setups.</p>
+            </div>
+            <a class="text-link" href="projects.html">View All Projects</a>
+        </div>
         <div class="projects-grid">
-
             <div class="project-card">
-                <video class="project-video" autoplay loop muted playsinline>
-                    <source src="images/windtunnelEAD.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+                <div class="card-media">
+                    <video class="project-video" autoplay loop muted playsinline>
+                        <source src="images/windtunnelEAD.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
                 <div class="project-content">
-                    <h3>Wind Tunnel</h3>
-                    <p>Designed and built a subsonic wind tunnel for research.</p>
-                    <div class="project-tags">
-                        <span class="project-tag">Aerodynamics</span>
-                        <span class="project-tag">CAD</span>
+                    <div>
+                        <h3>Wind Tunnel</h3>
+                        <p>Designed and built a subsonic wind tunnel for research.</p>
+                    </div>
+                    <div class="chip-row">
+                        <span class="chip">Aerodynamics</span>
+                        <span class="chip">CAD</span>
                     </div>
                     <div class="project-links">
                         <a href="projects/wind-tunnel.html">View Details</a>
@@ -60,13 +68,17 @@
             </div>
 
             <div class="project-card">
-                <div class="project-img">🔧</div>
+                <div class="card-media placeholder">
+                    <div class="placeholder-label">Project Image</div>
+                </div>
                 <div class="project-content">
-                    <h3>Penny Hockey</h3>
-                    <p>Penny hockey game board.</p>
-                    <div class="project-tags">
-                        <span class="project-tag">CAD</span>
-                        <span class="project-tag">Arduino</span>
+                    <div>
+                        <h3>Penny Hockey</h3>
+                        <p>Penny hockey game board.</p>
+                    </div>
+                    <div class="chip-row">
+                        <span class="chip">CAD</span>
+                        <span class="chip">Arduino</span>
                     </div>
                     <div class="project-links">
                         <a href="projects/penny-hockey.html">View Details</a>
@@ -75,53 +87,74 @@
             </div>
 
             <div class="project-card">
-                <div class="project-img">🔧</div>
+                <div class="card-media placeholder">
+                    <div class="placeholder-label">Project Image</div>
+                </div>
                 <div class="project-content">
-                    <h3>Schlieren Imaging</h3>
-                    <p>Visualizing fluid flow using schlieren techniques.</p>
-                    <div class="project-tags">
-                        <span class="project-tag">CAD</span>
-                        <span class="project-tag">Arduino</span>
+                    <div>
+                        <h3>Schlieren Imaging</h3>
+                        <p>Visualizing fluid flow using schlieren techniques.</p>
+                    </div>
+                    <div class="chip-row">
+                        <span class="chip">CAD</span>
+                        <span class="chip">Arduino</span>
                     </div>
                     <div class="project-links">
                         <a href="projects/schlieren-imaging.html">View Details</a>
                     </div>
                 </div>
             </div>
-
         </div>
     </section>
 
-   <!-- About Section -->
-    <section id="about" class="fade-in">
-        <h2>About Me</h2>
-        <div class="about-content">
-            <div class="about-text">
-                <p>I'm a high school student with a passion for engineering and physics.</p>
-                <div class="skills">
-                    <span class="skill-tag">Computer Aided Design (CAD)</span>
-                    <span class="skill-tag">Computational Fluid Dynamics (CFD)</span>
-                    <span class="skill-tag">Python/C++</span>
-                    <span class="skill-tag">3D Printing & Fabrication</span>
+    <section id="about" class="section">
+        <div class="section-header">
+            <div>
+                <h2>About</h2>
+                <p class="section-subtitle">Engineering student focused on hands-on experimental builds.</p>
+            </div>
+        </div>
+        <div class="about-grid">
+            <div>
+                <p>I'm a high school student with a passion for engineering and physics. I enjoy building hardware that connects theory to real-world performance.</p>
+                <div class="about-actions">
+                    <a class="text-link" href="projects.html">Browse Projects</a>
                 </div>
             </div>
-            <!--<img src="https://via.placeholder.com/400" alt="Roland Hu" class="profile-img">-->
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact fade-in">
-        <h2>Get In Touch</h2>
-        <div class="contact-content">
-            <p>.</p>
-            <a href="mailto:rhu2718@gmail.com" class="btn btn-primary">Send Email</a>
-            <div class="contact-links">
-                <a href="https://linkedin.com/in/hu-roland" target="_blank">LinkedIn</a>
+            <div class="panel">
+                <div class="panel-title">Capabilities</div>
+                <div class="chip-grid">
+                    <span class="chip">Computer Aided Design (CAD)</span>
+                    <span class="chip">Computational Fluid Dynamics (CFD)</span>
+                    <span class="chip">Python/C++</span>
+                    <span class="chip">3D Printing & Fabrication</span>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
+    <section id="contact" class="section contact">
+        <div class="section-header">
+            <div>
+                <h2>Contact</h2>
+                <p class="section-subtitle">Open to collaborations, competitions, and hands-on engineering projects.</p>
+            </div>
+        </div>
+        <div class="contact-grid">
+            <div class="panel">
+                <div class="panel-title">Reach Out</div>
+                <p>Prefer email for project discussions and scheduling.</p>
+                <a href="mailto:rhu2718@gmail.com" class="btn btn-primary">Send Email</a>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Links</div>
+                <div class="link-list">
+                    <a href="https://linkedin.com/in/hu-roland" target="_blank" rel="noopener">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <footer>
         <p>Designed & Built by Roland Hu | © 2026</p>
     </footer>
