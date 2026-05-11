@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/project-detail.css">
 </head>
+
 <body>
     <nav id="navbar">
         <div class="nav-container">
@@ -27,7 +29,7 @@
         </div>
     </nav>
 
-    <header class="project-hero project-hero-static">
+    <header class="project-hero project-hero-static">       
         <div class="project-hero-overlay"></div>
         <div class="project-hero-content">
             <a class="text-link" href="../projects.html">Back to Projects</a>
@@ -47,7 +49,334 @@
             <div class="project-main">
                 <section class="project-section">
                     <h2>Overview</h2>
-                    <p>A compact penny hockey game board built to focus on clean mechanics, smooth play, and a durable surface.</p>
+                    <p>A compact penny hockey game board built to focus on clean mechanics, smooth play, and a durable
+                        surface.</p>
+                </section>
+
+                <section class="project-section">
+                    <h2>Design</h2>
+                    <p>The Penny Hockey Project was a very interesting and fun project, incorporating the many skills
+                        learned throughout the year. My project features the NASA logo in the center of the board laser
+                        engraved in clear plexiglass. This board is surrounded by a wooden frame, supported by dado cuts
+                        and assembled using miter joints nailed together. All these were cut on the table and miter
+                        saws. The goals for the penny to slide through were made by first drilling large holes in each
+                        corner and then using the jigsaw, and finally inserting 3d printed parts to allow the penny to
+                        slide smoothly. The 3d printed parts are also found in the feet and the holder for all the
+                        electronic components. I chose to 3d print these parts due to the ease of manufacturing and the
+                        ability to design the part to the exact form necessary, allowing the electronics to fit snugly
+                        in a small form factor. Finally, the LEDs and electronic components were soldered and wired
+                        together using solid core wire, which I chose due to its ability to retain its shape. Overall,
+                        this project was fun to create and challenging as well, significantly improving many skills I
+                        have learned prior. For instance, the 3d printed components have improved my 3d modeling
+                        capabilities due to the need for exact dimensions and form. Furthermore, these parts have also
+                        taught me many ways of assembling components, such as snap fitting, gluing, nailing, and
+                        screwing. Another aspect in which this project has improved my skills is using the Arduino. Due
+                        to the need to manage multiple components, such as the LEDs, LCDs, piezo, and pushbuttons
+                        simultaneously, I needed to learn an important concept: multitasking with the Arduino. Since the
+                        Arduino can only process one instruction at a time, I have learned how to write code to get
+                        around this and manage multiple components seemingly simultaneously. Finally, this project has
+                        also improved my soldering and wiring skills. I enjoyed the Penny Hockey Project a lot, and the
+                        skills learned through this will help me build more complex projects in the future.</p>
+
+                    <i class="mt-4">Problem Statement:</i>
+                    <p>A pressing problem that has developed recently is that more and more children are being drawn to
+                        smartphones and tablets. This is likely to continue as products are evolving to have more
+                        addictive and engaging features. Because of this trend, many children are suffering from
+                        attention deficiency and many other issues that can be directly attributed to looking at a
+                        digital screen for extended periods of time, as well as problems such as decreased social
+                        interaction and decreased physical activity that are indirectly caused by this.</p>
+
+                    <i class="mt-4">Design Statement:</i>
+                    <p>Design a fun and engaging board game that incentivizes them to play the game instead of spending
+                        time on digital devices. This is done through the use of colors, lights, and engaging gameplay.
+                    </p>
+                </section>
+
+                <section class="project-section">
+                    <h2>Constraints</h2>
+                    <ul class="bullet-list">
+                        <li>must be completed individually</li>
+                        <li>standard 9″ x 12″ playing surface</li>
+                        <li>additional, non-standard materials must be documented with annotated concept sketches</li>
+                        <li>walls must be ¾” wide by 1 ¼” tall</li>
+                        <li>must be within the $30 budget</li>
+                    </ul>
+                </section>
+
+                <section class="project-section">
+                    <h2>Research</h2>
+                    <p>I first conducted research on prior designs and rules of penny hockey sets made by other people.
+                        I decided to use a wooden frame and include “players” to block shots from certain angles, as
+                        well as rounded inside corners. However, while most penny hockey sets include a flat wooden base
+                        and a hole for the penny to fall through, I took inspiration from air hockey tables and decided
+                        to use a plexiglass surface with legs and a slit for the penny to slide through in the walls. I
+                        also decided to use a LCD display with buttons to keep the score and LED lights for more visual
+                        interest, as well as a buzzer for sound.</p>
+                    <p>I then had to learn and research the tools I would use to create this project. This includes the
+                        safety and operational guidelines, which I found from the Glenbrook South Engineering website.
+                        (GBS Engineering, n.d.).</p>
+                </section>
+
+                <section class="project-section">
+                    <h2>Research</h2>
+                    <p>Two concept drawings—one orthographic and one isometric—of my project. This includes dimensions.
+                    </p>
+                </section>
+
+                <section class="project-section">
+                    <h2>CAD model</h2>
+                    <p>I designed and modelled my project using Autodesk Fusion 360. All parts and assemblies were
+                        modelled and dimensioned accurately by me, except for the electronic components—the LCD
+                        (j.jacck44, 2020); Arduino (big_red_frog, 2014); and breadboard (3dmakernow, 2019)—were
+                        imported.</p>
+                </section>
+
+                <section class="project-section">
+                    <h2>Materials List</h2>
+                    <div class="iframe-container">
+                        <iframe id="pageswitcher-content" frameborder="0" marginheight="0" marginwidth="0"
+                            src="https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vS1ajyEot-leiiIv6zYOJYGO36VokDpA8ZCx27rZlDril_pw_pNDhlQQLfwU-hhX2m5D__rJop1LSvv/pubhtml/sheet?headers=false&amp;gid=3437598"
+                            style="display: block; width: 100%; height: 100%;"></iframe>
+                    </div>
+                    <!--div class="table-container">
+                        <div class="header penny">
+                            <div>VENDOR</div>
+                            <div>LINK</div>
+                            <div>ITEM</div>
+                            <div>ITEM COST</div>
+                            <div>AMOUNT USED</div>
+                            <div>TOTAL COST </div>
+                            <div>DESCRIPTION</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Home Depot</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.homedepot.com/p/1-in-x-6-in-x-8-ft-Premium-Kiln-Dried-Square-Edge-Whitewood-Common-Board-914770/100028725&amp;sa=D&amp;source=editors&amp;ust=1774389656874254&amp;usg=AOvVaw2X1ylkGVaSTx1oaFiHIf2e">1
+                                    in. x 6 in. x 8 ft. Premium Kiln-Dried Square Edge Whitewood Common Board</a>
+                            </div>
+                            <div>Wood frame</div>
+                            <div>$7.48</div>
+                            <div>0.0859375</div>
+                            <div>$0.64</div>
+                            <div>3/4" x 1 3/8" x 48" used for frame</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Home Depot</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.homedepot.com/p/OPTIX-48-in-x-96-in-x-0-118-1-8-in-Clear-Acrylic-Sheet-MC-100S/205351353&amp;sa=D&amp;source=editors&amp;ust=1774389656874980&amp;usg=AOvVaw103d4oMCLym5_YMyUXd3gt">48
+                                    in. x 96 in. x 0.118 (1/8) in. Clear Acrylic Sheet</a></div>
+                            <div>Acrylic playing surface</div>
+                            <div>$149.00</div>
+                            <div>0.0234375</div>
+                            <div>$3.49</div>
+                            <div>9" x 12" playing surface</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/OVERTURE-Filament-Consumables-Dimensional-Accuracy/dp/B07PGY2JP1/ref%3Dsr_1_3_sspa?dib%3DeyJ2IjoiMSJ9.W_cAi2NMdpoFg-BrCWtDNSG6OA9cdDZSz45u97kei65WfXT9BYsVoL2SEVwgROIK5D91NaVgkLIG5R5LmkxIIZ-PQQea-PdgAnVNu2KuaPYD93TWMofsUMybRqGOIyJuRqOtGHEIgj1VL_w5IhpmJowg9SvVEaldYaAflWWRtY7QmV1bXEhNPpFDtaMXq8-VDBEzz-RAT_RGGTjNAAbf3ODYk7KCgYdtX0XhDxnCgIY7m7jtgT5MrhCm5N6J7489hIZI70f4i3ePJyaLW4to1KH8V8WKMWy-H5dfD5omTgE.DZwJsEcFxnNIJKXEOhmvOW7U_tl_LZVRu7JCtewuios%26dib_tag%3Dse%26keywords%3Dpla%26qid%3D1738012297%26s%3Dindustrial%26sr%3D1-3-spons%26sp_csd%3Dd2lkZ2V0TmFtZT1zcF9hdGY%26th%3D1&amp;sa=D&amp;source=editors&amp;ust=1774389656875724&amp;usg=AOvVaw0biKszhom9C0dDU6vxqOfb">Amazon.com:
+                                    OVERTURE PLA Filament 1.75mm PLA 3D Printer Filament, 1kg Cardboard Spool
+                                    (2.2lbs), Dimensional Accuracy +/- 0.02mm, Fit Most FDM Printer (Black
+                                    1-Pack)</a></div>
+                            <div>PLA filament</div>
+                            <div>$14.99</div>
+                            <div>0.222</div>
+                            <div>$3.33</div>
+                            <div>222g used—3d printed components</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/LAFVIN-Board-ATmega328P-Micro-Controller-Arduino/dp/B07G99NNXL/ref%3Dsr_1_1?crid%3D1CWT3TETNH26G%26dib%3DeyJ2IjoiMSJ9.36oGyGSLCJUsTE1ZE7d3OIFr8PYynnuGRSOc7xegHXaCpVG6ppq-UrQJtbSbHVb_y3LYz9x6U6nenAtuBJFmAJINnkbToUa7Mk_IIRCDHN_aTq5RTxTRYcCx2zmg3xoYrzdfGN6dKnGB-7iqr5DbyQ5oNvDpUZ3YTfBZOrbaxeLJKKUtL4GKxHWnxtWi_LPiAbYY43_pdUd4E41kSgEBj-7vMIjUi3Ws6Ia1P08PXf0.DL4gnkqEAYNjFlR_CO5EKiug-OSmFedPNQrzrSih-6k%26dib_tag%3Dse%26keywords%3Darduino%2Bnano%26qid%3D1738206123%26sprefix%3Darduino%2Bnano%252Caps%252C163%26sr%3D8-1&amp;sa=D&amp;source=editors&amp;ust=1774389656876377&amp;usg=AOvVaw3hLOIVUGJVC8zGfeWeSvQt">Amazon.com:
+                                    Nano V3.0, Nano Board ATmega328P 5V 16M Micro-Controller Board Compatible with
+                                    Arduino IDE (Nano x 3 with USB Cable)</a></div>
+                            <div>Arduino Nano</div>
+                            <div>$15.99</div>
+                            <div>0.3333</div>
+                            <div>$5.33</div>
+                            <div>microcontroller—1 used, pack of 3</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/DEYUE-breadboard-Set-Prototype-Board/dp/B07LFD4LT6/ref%3Dpd_lpo_1?pd_rd_i%3DB07LFD4LT6%26psc%3D1&amp;sa=D&amp;source=editors&amp;ust=1774389656876999&amp;usg=AOvVaw06SGSTDM2yN3Y0ZgCXtivT">Amazon.com:
+                                    DEYUE breadboard Set Prototype Board - 6 PCS 400 Pin Solderless Board Kit for
+                                    Raspberry pi and Arduino Project</a></div>
+                            <div>Breadboard</div>
+                            <div>$7.88</div>
+                            <div>0.16666</div>
+                            <div>$1.31</div>
+                            <div>breadboard for wiring—1 used, pack of 6</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/SEZO-Individually-Addressable-Programmable-Non-Waterproof/dp/B097BWJGYK/ref%3Dsr_1_3_sspa?keywords%3Dws2812b%252B5v%252B5050%252Brgb%252Bled%252Bstrip%252Bnon-waterproof%26qid%3D1705600559%26sr%3D8-3-spons%26sp_csd%3Dd2lkZ2V0TmFtZT1zcF9hdGY%26th%3D1&amp;sa=D&amp;source=editors&amp;ust=1774389656877666&amp;usg=AOvVaw0BGWFAM4kK1fV7VPbZ_5qS">SEZO
+                                    WS2812B ECO LED Strip Light 16.4 FT/5M 60LEDs/m 300Pixels Individually
+                                    Addressable Programmable 5050SMD Digital RGB Alloy Wires Flexible Dream Color
+                                    IP30 Non-Waterproof PCB Black DC5V</a></div>
+                            <div>LED strip</div>
+                            <div>$13.99</div>
+                            <div>0.162601626</div>
+                            <div>$2.27</div>
+                            <div>led lights—32 inches used</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/SunFounder-Serial-Module-Display-Arduino/dp/B01E6N19YC/ref%3Dsr_1_1_sspa?s%3Delectronics%26rps%3D1%26ie%3DUTF8%26qid%3D1511966827%26sr%3D1-1-spons%26keywords%3Dlcd%2Bdisplay%2Barduino%26refinements%3Dp_85%253A2470955011%26psc%3D1&amp;sa=D&amp;source=editors&amp;ust=1774389656878243&amp;usg=AOvVaw08b5hVdh5kEDRqOsXMpmmQ">SunFounder
+                                    IIC I2C TWI 1602 Serial LCD Module Display for Arduino Uno R3 Mega 2560 16x2</a>
+                            </div>
+                            <div>LCD display</div>
+                            <div>$9.99</div>
+                            <div>1</div>
+                            <div>$9.99</div>
+                            <div>display </div>
+                        </div>
+                        <div class="row penny">
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/gp/aw/d/B07TX6BX47&amp;sa=D&amp;source=editors&amp;ust=1774389656878848&amp;usg=AOvVaw2u66zNFP9QOAVfyUGkT3SP">TUOFENG
+                                    22 awg Wire Solid Core Hookup Wires-6 Different Colored Breadboard Wires 30ft or
+                                    9m Each, 22 Gauge Electronic Wire PVC (OD: 1.60mm) Arduino Wire - Amazon.com</a>
+                            </div>
+                            <div>Wires</div>
+                            <div>$15.19</div>
+                            <div>0.015</div>
+                            <div>$0.23</div>
+                            <div>wiring for electronics</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Home Depot</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.homedepot.com/p/Everbilt-8-32-x-1-in-Combo-Truss-Head-Zinc-Plated-Machine-Screw-100-Pack-800942/204596465&amp;sa=D&amp;source=editors&amp;ust=1774389656879453&amp;usg=AOvVaw1d7AL_aH7NrMYZxuYkaChn">Everbilt
+                                    #8-32 x 1 in. Combo Truss Head Zinc Plated Machine Screw (100-Pack) 800942 - The
+                                    Home Depot</a></div>
+                            <div>#8-32 x 1 in screw</div>
+                            <div>$10.32</div>
+                            <div>0.08</div>
+                            <div>$0.83</div>
+                            <div>screw for players</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Home Depot</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.homedepot.com/p/Everbilt-8-32-Zinc-Plated-Machine-Screw-Nut-100-Pack-800252/204273373&amp;sa=D&amp;source=editors&amp;ust=1774389656880018&amp;usg=AOvVaw3wtWda4WwennlXf_JexhO3">Everbilt
+                                    #8-32 Zinc Plated Machine Screw Nut (100-Pack) 800252 - The Home Depot</a></div>
+                            <div>#8-32 nut</div>
+                            <div>$7.67</div>
+                            <div>0.08</div>
+                            <div>$0.61</div>
+                            <div>nut for screw</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/DAOKI-Miniature-Momentary-Tactile-Quality/dp/B01CGMP9GY/ref%3Dsr_1_4?crid%3DKBQYUAAPAGC0%26dib%3DeyJ2IjoiMSJ9.wSVbQNUWppVc07s-E6PhMDxzW5gpwzFPMfaYVwFwgz4B7cEKEZ83ulFbWoLBNLefCf2LNhfNtbm_uQDzhtiBKffHVnWcWaxTzw6DU1hrzjYWtzdqZc_8T-KuCzDOH-nm77sNqphuJY3zeIhxnD_MlKGlFLWDdCijadS9-FPZIn14OAwMgIH6kI0y4TxCYMe9Eb8GwY9onCPyoXMV1xP0e8i1PXylAkZZHCD65pIR7_M.suXcH9FIRbokO3mT0rCXUaPhRCY6vZYPO3S9LWuOK_U%26dib_tag%3Dse%26keywords%3Dpushbutton%26qid%3D1738893597%26sprefix%3Dpushbutt%252Caps%252C152%26sr%3D8-4%26th%3D1&amp;sa=D&amp;source=editors&amp;ust=1774389656880557&amp;usg=AOvVaw3ioyDvV-h8AlJ5xdSjJmYg">DAOKI
+                                    100Pcs Tact Button Switch 2 Pin DIP 6x6x5mm PCB Momentary Tactile Tact Push
+                                    Button Switch: Amazon.com</a></div>
+                            <div>Pushbutton</div>
+                            <div>$5.49</div>
+                            <div>0.02</div>
+                            <div>$0.11</div>
+                            <div>pushbuttons for score keeping</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/Potentiometer-Breadboard-Resistors-Assortment-Compatible/dp/B09L5MGNFZ/ref%3Dsxin_16_pa_sp_search_thematic_sspa?content-id%3Damzn1.sym.c5787da2-212d-48eb-a894-9ea5a87adeb3%253Aamzn1.sym.c5787da2-212d-48eb-a894-9ea5a87adeb3%26crid%3DFLT44ACA596J%26cv_ct_cx%3Dpotentiometer%26keywords%3Dpotentiometer%26pd_rd_i%3DB09L5MGNFZ%26pd_rd_r%3Dba7bb02c-8d45-49fc-b77e-45c539ee5382%26pd_rd_w%3DbCLHX%26pd_rd_wg%3DojIDP%26pf_rd_p%3Dc5787da2-212d-48eb-a894-9ea5a87adeb3%26pf_rd_r%3D22PEV09J2P83Q58CK3GE%26qid%3D1738893679%26sbo%3DRZvfv%252F%252FHxDF%252BO5021pAnSA%253D%253D%26sprefix%3Dpotentiomet%252Caps%252C171%26sr%3D1-4-6024b2a3-78e4-4fed-8fed-e1613be3bcce-spons%26sp_csd%3Dd2lkZ２V0TmFtZT1zcF9zZWFy２hfdGhlbWF0aWM%２6th%３D1&amp;sa=D&amp;source=editors&amp;ust=177438965688113２&amp;usg=AOvVaw３a_zIaez９bor0VnVi_UJb">Amazon.com:
+                                    Flutesan 1２ Pieces 10K Ohm Trim Potentiometer Kit with Knob Variable Resistors
+                                    Breadboard Trimmer Potentiometer Assortment Kit Compatible with Arduino,
+                                    Blue</a></div>
+                            <div>Potentiometer</div>
+                            <div>$9.99</div>
+                            <div>0.0416666</div>
+                            <div>$0.42</div>
+                            <div>potentiometer for volumel control</div>
+                        </div>
+                        <div class="row penny">
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/Cylewet-Terminals-Electronic-Electromagnetic-Impedance/dp/B01NCOXB2Q/ref%3Dsr_1_3?crid%3D1MLUPDUCBF0NI%26dib%3DeyJ2IjoiMSJ9.sqzgeELbTu6jB9J5iARu38nbf86zep0___fgG67l96GCApzPgqSwAP4_yORmBJV2QYEIQZ_kiu8gkAr9cTV15exAlgvIEOwG02vnbZnZuQJWPLrW-XLn0VRyZ1JTcV5RBbK-P0S69shrtVAqFW89Ui4owYo-yWmr1lvz-EETYxi-FRUV_err-vgpfDzXIV5VLYbVLWLct-_uFHV6BNr3t1OQxGErvPGYrfDZYemE6pk.E-ftFYJVO4Co2iH9o9GVcLBkjZe1VEK4XcQJemcO4cY%26dib_tag%3Dse%26keywords%3Darduino%2Bpiezo%26qid%3D1738893830%26sprefix%3Darduino%2Bpie%252Caps%252C144%26sr%3D8-3&amp;sa=D&amp;source=editors&amp;ust=1774389656881781&amp;usg=AOvVaw2tXFxNl6NhPqXn_QHzdaCU">Amazon.com:
+                                    Cylewet 10Pcs 5V 2 Terminals Passive Electronic Alarm Buzzer Electromagnetic
+                                    Beeper AC Impedance for Arduino (Pack of 10) CYT1008</a></div>
+                            <div>Piezo</div>
+                            <div>$5.99</div>
+                            <div>0.1</div>
+                            <div>$0.60</div>
+                            <div>piezo for sound</div>
+                        </div>
+                        <div class="row penny">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div>Project Total</div>
+                            <div>$29.16</div>
+                            <div></div>
+                        </div>
+                    </div-->
+                </section>
+
+                <section class="project-section">
+                    <h2>References</h2>
+                    <ul class="bullet-list">
+                        <li><i>3dmakernow (2019) Arduino breadboard 83x55m [3D model]. Autodesk.
+                                <a href="https://www.autodesk.com/community/gallery/project/140202/arduino-breadboard-83x55mm"
+                                    target="_blank">Link</a>
+                            </i>
+                        </li>
+                        <li>
+                            <i>
+                                big_red_frog (2014) Arduino Nano V3 [3D model]. Autodesk.
+                                <a href="https://www.autodesk.com/community/gallery/project/25248/arduino-nano-v3"
+                                    target="_blank">Link</a>
+                            </i>
+                        </li>
+                        <li>
+                            <i>
+                                GBS Engineering. (n.d.). Machines and tools. GBS Engineering. <a
+                                    href="https://gbsengineering.org/machines-and-tools/" target="_blank">Link</a>
+                            </i>
+                        </li>
+                        <li>
+                            <i>
+                                j.jacck44 (2020) LCD 1602 I2C [3D model]. Autodesk. <a
+                                    href="https://www.autodesk.com/community/gallery/project/155964/lcd-1602-i2c"
+                                    target="_blank">Link</a>
+                            </i>
+                        </li>
+                        <li>
+                            <i>
+                                Mike’s Woodwork. (2010, February 16). Oak penny hockey board. Mike’s Woodwork. Retrieved
+                                from <a href="http://toys.mikeswoodwork.net/2010/02/oak-penny-hockey-board.html"
+                                    target="_blank">Link</a>
+                            </i>
+                        </li>
+                        <li>
+                            <i>
+                                School Specialty. (n.d.). Triumph air hockey table [Product page]. School Specialty.
+                                Retrieved from <a
+                                    href="https://www.schoolspecialty.com/triumph-air-hockey-table-1592965"
+                                    target="_blank">Link</a>
+                            </i>
+                        </li>
+                        <li>
+                            <i>
+                                Wacky Booth. (n.d.). LED 7.5′ air hockey table. Wacky Booth. Retrieved from <a
+                                    href="https://www.wackybooth.co.uk/led-7-5%E2%80%B2-air-hockey-table/"
+                                    target="_blank">Link</a>
+                            </i>
+                        </li>
+                        <li>
+                            <i>
+                                Woodworking_Wizard. (2017, March 8). Penny hockey game board from rough sawn maple and
+                                walnut [Post]. Reddit. <a
+                                    href="https://www.reddit.com/r/woodworking/comments/5ed4c5/penny_hockey_game_board_from_rough_sawn_maple_and/"
+                                    target="_blank">Link</a>
+                            </i>
+                        </li>
+                    </ul>
                 </section>
 
                 <section class="project-section">
@@ -83,4 +412,5 @@
 
     <script src="../js/main.js"></script>
 </body>
+
 </html>

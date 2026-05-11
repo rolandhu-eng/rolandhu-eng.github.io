@@ -288,7 +288,7 @@ nav.scrolled {
 }
 
 .section {
-    padding: 100px 40px;
+    padding: 100px 40px 10px 40px;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -549,4 +549,35 @@ footer {
 .fade-in.visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+.mt-1 {
+    display: block;
+    margin-top: .2rem;
+}
+
+.mt-2 {
+    display: block;
+    margin-top: .4rem;
+}
+
+.mt-3 {
+     display: block;
+    margin-top: .6rem;
+}
+
+.mt-4 {
+    display: block;
+    margin-top: .8rem;
+}
+
+.mt-5 {
+    display: block;
+    margin-top: 1rem;
+}
+
+.ship-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
 }

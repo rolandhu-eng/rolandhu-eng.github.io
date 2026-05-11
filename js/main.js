@@ -49,6 +49,42 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
+/*
+// Collapsible Daily Log
+const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+collapsibleHeaders.forEach(header => {
+    header.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+            // Toggle the collapsed class on both header and content
+            this.classList.toggle('collapsed');
+            targetElement.classList.toggle('collapsed');
+            
+            // Save the state in localStorage
+            const isCollapsed = this.classList.contains('collapsed');
+            localStorage.setItem(`collapsible-${targetId}`, isCollapsed);
+        }
+    });
+});
+
+// Restore collapsed state from localStorage
+document.addEventListener('DOMContentLoaded', function() {
+    collapsibleHeaders.forEach(header => {
+        const targetId = header.getAttribute('data-target');
+        const isCollapsed = localStorage.getItem(`collapsible-${targetId}`) === 'true';
+        
+        if (isCollapsed) {
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                header.classList.add('collapsed');
+                targetElement.classList.add('collapsed');
+            }
+        }
+    });
+});*/
+
 const hero = document.querySelector('.hero');
 
 // Scroll effects: navbar + hero parallax
