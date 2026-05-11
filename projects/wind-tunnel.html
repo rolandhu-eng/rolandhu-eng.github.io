@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/project-detail.css">
 </head>
+
 <body>
     <nav id="navbar">
         <div class="nav-container">
@@ -50,12 +52,39 @@
             <div class="project-main">
                 <section class="project-section">
                     <h2>Abstract</h2>
-                    <p>Many aspiring STEM students who may be interested in aerodynamics do not have a way to learn and study it, especially aerodynamic forces and airflow around objects. Therefore, our goal was to design and develop a tool that can be used to understand aerodynamics in an intuitive and engaging way. It should be constructed to be affordable and accessible, and its operation should not be extremely complicated.</p>
+                    <p>Many aspiring STEM students who may be interested in aerodynamics do not have a way to learn and
+                        study it, especially aerodynamic forces and airflow around objects. Therefore, our goal was to
+                        design and develop a tool that can be used to understand aerodynamics in an intuitive and
+                        engaging way. It should be constructed to be affordable and accessible, and its operation should
+                        not be extremely complicated.</p>
+                </section>
+
+                <section class="project-section">
+                    <h2>Design</h2>
+                    <p>
+                        Our wind tunnel uses foam board and acrylic windows for the main tunnel section with a 3D
+                        printed adapter to connect the fan. Straws were used to straighten the airflow, which ensures
+                        the incoming air flows straight through the tunnel with minimal turbulence. For the test stand,
+                        we used two load cells to measure force and a servo motor to control the angle of the test
+                        object. These were connected to an Arduino, allowing us to control and visualize the forces on
+                        the object. Also, to visualize the airflow, a smoke generator was used. However, a challenge was
+                        that the airflow was too fast even on the lowest fan setting, resulting in unavoidable
+                        turbulence in the airstream, which caused the smoke to disperse and be faint. Another challenge
+                        was attaching all the straws, which took a significant amount of time. Overall, I learned many
+                        things throughout this project. I learned how to use load cells to measure forces and then plot
+                        the data using an Arduino, creating a real time graph of the forces. Also, I learned how to use
+                        the laser cutter to cut materials. Finally, my 3D modelling and 3D printing skills have
+                        significantly improved as a result of this project since it uses a variety of 3D printed parts.
+                        If I were to do anything differently, I would use a fine honeycomb mesh instead of individual
+                        straws, and I would use a larger smoke generator with a higher smoke output.
+                    </p>
                 </section>
 
                 <section class="project-section">
                     <h2>Build & Fabrication</h2>
-                    <p>The tunnel was constructed using 3/4" plywood for the outer shell and acrylic panels for the test section viewing windows. Honeycomb flow straighteners and screens were installed upstream of the contraction to reduce turbulence.</p>
+                    <p>The tunnel was constructed using 3/4" plywood for the outer shell and acrylic panels for the test
+                        section viewing windows. Honeycomb flow straighteners and screens were installed upstream of the
+                        contraction to reduce turbulence.</p>
                     <ul class="bullet-list">
                         <li>Laser-cut plywood components for precise geometry</li>
                         <li>Custom-designed 3D-printed corners and mounting brackets</li>
@@ -65,17 +94,503 @@
                 </section>
 
                 <section class="project-section">
+                    <h2>Materials List</h2>
+                    <div class="iframe-container">
+                        <iframe
+                            src="https://docs.google.com/spreadsheets/d/e/2PACX-1vT-glcq7bKmy-9AkKgCuUQBpq0rWlXGB5gYYL2ekwoJLCFAXFxT46j6jy74n18SSjE-MlkJu9mn44hI/pubhtml?widget=true&amp;headers=false"
+                            frameborder="0" width="100%" height="560" marginheight="0" marginwidth="0"
+                            allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+                    </div>
+
+                    <!--div class="table-container">
+                        <div class="header wind-tunnel">
+                            <div>Class</div>
+                            <div>Group / Project</div>
+                            <div>Item Description</div>
+                            <div>Vendor</div>
+                            <div>Item detail / link</div>
+                            <div>Quantity </div>
+                            <div>Unit Price</div>
+                            <div>Total Price</div>
+                            <div>Request / In Kind</div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div>Blue 4 - SELC IED</div>
+                            <div>Wind Tunnel</div>
+                            <div>Ducted fan for creating wind-623 cfm flow rate</div>
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/Hon-Guan-Inline-Booster-Controller/dp/B0D2NDVGWZ/ref%3Dsxin_13_pa_sp_search_thematic_sspa?content-id%3Damzn1.sym.c5787da2-212d-48eb-a894-9ea5a87adeb3%253Aamzn1.sym.c5787da2-212d-48eb-a894-9ea5a87adeb3%26crid%3D3S0TWL3MV83K8%26cv_ct_cx%3Dduct%252Bfan%26keywords%3Dduct%252Bfan%26pd_rd_i%3DB0D2NDVGWZ%26pd_rd_r%3Dd7f16c3e-0140-4ae2-89f3-54a57d5fd241%26pd_rd_w%3DrucPD%26pd_rd_wg%3DVG1Pc%26pf_rd_p%3Dc5787da2-212d-48eb-a894-9ea5a87adeb3%26pf_rd_r%3DZNYY97Y7E6ZGZDAR680V%26qid%3D1740278012%26sbo%3DRZvfv%252F%252FHxDF%252BO5021pAnSA%253D%253D%26sprefix%3Dduct%252Bf%252Caps%252C167%26sr%3D1-1-6024b2a3-78e4-4fed-8fed-e1613be3bcce-spons%26sp_csd%3Dd2lkZ2V0TmFtZT1zcF9zZWFyY2hfdGhlbWF0aWM%26th%3D1&amp;sa=D&amp;source=editors&amp;ust=1774563553510044&amp;usg=AOvVaw0rDf-ISlLLg5vfHQeSqIcC">Amazon.com:
+                                    Hon&amp;Guan 8 Inch Inline Booster Duct Fan with Speed Controller - 623 CFM Airflow
+                                    with
+                                    44W Ultra-Low Power and Low Noise</a></div>
+                            <div>1</div>
+                            <div>$56.99</div>
+                            <div>$56.99</div>
+                            <div><span class="s3"
+                                    style="background-color: #d4edbc; color: #11734b; width: 196.0px; max-width: 196.0px; margin-left: 6.0px;  padding: 1.0px 5.0px 1.0px 5.0px ; ">Request
+                                    / Need to Purchase</span></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div>Blue 4 - SELC IED</div>
+                            <div>Wind Tunnel</div>
+                            <div>Smoke machine for visualizing airflow</div>
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/HSETIY-Handheld-Remote-Controlled-Activities-Halloween/dp/B0DFH99PL3/ref%3Dsr_1_16?crid%3D1VBI9P6CR3TOT%26dib%3DeyJ2IjoiMSJ9.sAtktz7_bWQIILfqfYxnSvP3cCD8THN9klrL7F2B8TzfEIgk3GiQjbUUkBryGHbkImu1ExUjFZAGZ0rJTXqqu6iy8MSibNvHNQHokhYKZhCmAKRWhOeayUe2fQ-qIalOUhX9CO8ibDQEgV8RwnPeE5EkE4PQFbT6WEZPxntOKax9qtrI6i2R3Xtz1Vkbc47j75zb7wtaXjykWodjC2Wqbxycf1mVWAISLUp8broOt1jo7ZwAcGtKVRz2am2d-k6sLjyDqgL4QrmcCREnIUmryHp5oKf9OSRtlKuM7OgGiG6g1ZZbsD7d-A-QG-RKZGfWYM6ACJCPLQJPNNNaFf9QSzXNqMCAzq1pLJkg0W8sUBY.0iVVIKMpBQB0OzH33ttatY9KMtY9fyrE9cERf28W0v4%26dib_tag%3Dse%26keywords%3Dcheap%252Bhandheld%252Bfog%252Bmachines%26qid%3D1740516280%26refinements%3Dp_72%253A1248939011%26rnid%3D1248937011%26s%3Dmusical-instruments%26sprefix%3Dcheap%252Bhandheald%252Bfog%252Bmachines%252Caps%252C84%26sr%3D1-16%26th%3D1&amp;sa=D&amp;source=editors&amp;ust=1774563553510669&amp;usg=AOvVaw0ucS9xwbQ4_W-1BX4kmGI3">Mini
+                                    Handheld Fog Machine, Remote-Controlled Smoke Machine for Filming,Battery Powered
+                                    Fog
+                                    Machine, Shooting Videos, Outdoor Activities, Halloween</a></div>
+                            <div>1</div>
+                            <div>$42.99</div>
+                            <div>$42.99</div>
+                            <div><span class="s3"
+                                    style="background-color: #d4edbc; color: #11734b; width: 196.0px; max-width: 196.0px; margin-left: 6.0px;  padding: 1.0px 5.0px 1.0px 5.0px ; ">Request
+                                    / Need to Purchase</span></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div>Blue 4 - SELC IED</div>
+                            <div>Wind Tunnel</div>
+                            <div>Straws to straighten airflow</div>
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/Comfy-Package-Disposable-Drinking-Straws/dp/B08TDVXLBS/ref%3Dsr_1_2_sspa?crid%3D3CX9N0NYGQ17Q%26dib%3DeyJ2IjoiMSJ9.fxH6PNLyunLJLj4QR9TsnlGPuTzGU8nsLbuY5Vb1Up58loeGzY2sCYmPRelp6Vk6YV4sN8Sopvcuhcq2QpxrSQ3LCC1FceUrXOyUSlA7dm5LdaRfEHjnr-K1Jt41RRhAs0d4CPkWAcIXjMS22DLG3HucpulwaJ_3kHOzIf40EA2p6ItCVFciaTk1e9a7RH2Jg8qblQVFjUzIvUqDGz3ThEp4rwjOWQdI5iV2gvhBsPuRVvc9LEzbB-jWIJLScPOqQv1Iuuso5QHkKRrQcKVJ5fAW481ZYE__24iUJ97bcEQ.UILsQujVS5-QaV2HYfvM6tFtkhaZY3xChBZsLcU1t_A%26dib_tag%3Dse%26keywords%3Dstraws%26qid%3D1740517332%26sprefix%3Dstraws%252Caps%252C240%26sr%3D8-2-spons%26sp_csd%3Dd2lkZ2V0TmFtZT1zcF9hdGY%26th%3D1&amp;sa=D&amp;source=editors&amp;ust=1774563553511126&amp;usg=AOvVaw2JJCVEByvTmFlkIF--gGzd">[500
+                                    Pack] Disposable Plastic Drinking Straws - 7.75" High - Clear</a></div>
+                            <div>2</div>
+                            <div>$8.98</div>
+                            <div>$17.96</div>
+                            <div><span class="s3"
+                                    style="background-color: #d4edbc; color: #11734b; width: 196.0px; max-width: 196.0px; margin-left: 6.0px;  padding: 1.0px 5.0px 1.0px 5.0px ; ">Request
+                                    / Need to Purchase</span></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div>Blue 4 - SELC IED</div>
+                            <div>Wind Tunnel</div>
+                            <div>MDF board for base</div>
+                            <div>Home Depot</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.homedepot.com/p/DPI-Hardboard-Tempered-Panel-Common-3-16-in-x-4-ft-x-8-ft-Actual-0-155-in-x-47-7-in-x-95-7-in-SS2204825/321726020&amp;sa=D&amp;source=editors&amp;ust=1774563553511588&amp;usg=AOvVaw3i_dnCRw5ox1gsaQw9Ou-z">DPI
+                                    Hardboard Tempered Panel (Common: 3/16 in. x 4 ft. x 8 ft., Actual: 0.155 in. x 47.7
+                                    in.
+                                    x 95.7 in.) SS2204825 - The Home Depot</a></div>
+                            <div>1</div>
+                            <div>$22.52</div>
+                            <div>$22.52</div>
+                            <div><span class="s3"
+                                    style="background-color: #b10202; color: #ffcfc9; width: 196.0px; max-width: 196.0px; margin-left: 6.0px;  padding: 1.0px 5.0px 1.0px 5.0px ; ">In
+                                    Kind / Currently Have</span></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div>Blue 4 - SELC IED</div>
+                            <div>Wind Tunnel</div>
+                            <div>Bolts</div>
+                            <div>Home Depot</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.homedepot.com/p/Everbilt-8-32-x-1-in-Combo-Truss-Head-Zinc-Plated-Machine-Screw-100-Pack-800942/204596465&amp;sa=D&amp;source=editors&amp;ust=1774563553512084&amp;usg=AOvVaw1UBAlLBSTpcGrA4unF1Nwc">Everbilt
+                                    #8-32 x 1 in. Combo Truss Head Zinc Plated Machine Screw (100-Pack) 800942 - The
+                                    Home
+                                    Depot</a></div>
+                            <div>1</div>
+                            <div>$10.32</div>
+                            <div>$10.32</div>
+                            <div><span class="s3"
+                                    style="background-color: #b10202; color: #ffcfc9; width: 196.0px; max-width: 196.0px; margin-left: 6.0px;  padding: 1.0px 5.0px 1.0px 5.0px ; ">In
+                                    Kind / Currently Have</span></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div>Blue 4 - SELC IED</div>
+                            <div>Wind Tunnel</div>
+                            <div>Nuts (using appproximatly 1/4 of them)</div>
+                            <div>Home Depot</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.homedepot.com/p/Everbilt-8-32-Zinc-Plated-Machine-Screw-Nut-100-Pack-800252/204273373&amp;sa=D&amp;source=editors&amp;ust=1774563553512639&amp;usg=AOvVaw3_pSUPjqORTuOg6wWCFOYx">Everbilt
+                                    #8-32 Zinc Plated Machine Screw Nut (100-Pack) 800252 - The Home Depot</a></div>
+                            <div>1</div>
+                            <div>$7.67</div>
+                            <div>$7.67</div>
+                            <div><span class="s3"
+                                    style="background-color: #b10202; color: #ffcfc9; width: 196.0px; max-width: 196.0px; margin-left: 6.0px;  padding: 1.0px 5.0px 1.0px 5.0px ; ">In
+                                    Kind / Currently Have</span></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div>Blue 4 - SELC IED</div>
+                            <div>Wind Tunnel</div>
+                            <div>Acrylic sheets for viewing section</div>
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/Duco-Clear-Acrylic-Sheets-Thick/dp/B0BBQ8BZB9?source%3Dps-sl-shoppingads-lpcontext%26ref_%3Dfplfs%26psc%3D1%26smid%3DA37FRF5AURRF9M%26gQT%3D1&amp;sa=D&amp;source=editors&amp;ust=1774563553513156&amp;usg=AOvVaw0KyE-q9Yw_ee0ltbZUrMH8">Clear
+                                    Acrylic Sheets</a></div>
+                            <div>1</div>
+                            <div>$8.25</div>
+                            <div>$8.25</div>
+                            <div><span class="s3"
+                                    style="background-color: #b10202; color: #ffcfc9; width: 196.0px; max-width: 196.0px; margin-left: 6.0px;  padding: 1.0px 5.0px 1.0px 5.0px ; ">In
+                                    Kind / Currently Have</span></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div>Blue 4 - SELC IED</div>
+                            <div>Wind Tunnel</div>
+                            <div>PLA filament</div>
+                            <div>Amazon</div>
+                            <div><a target="_blank" rel="noreferrer"
+                                    href="https://www.google.com/url?q=https://www.amazon.com/OVERTURE-Filament-Consumables-Dimensional-Accuracy/dp/B07PGY2JP1/ref%3Dsr_1_1_sspa?dib%3DeyJ2IjoiMSJ9.JHLRGsWtkusz3QRbDKwgE4L88kwlwuQ_FQWLKcDvLMwwV36bnm0IU51xZztsgvogaawWeQu6Eomfc6RhaF9Dr9y7JiFRYZb5uemQjLwxcRACa0iCOHp4B7Y3xxn4mgJldjdeYXWstnNgom1jXH6-v3u-H0Bhne_ojXirV7dgD2DQdCaJSptjuJvFj21TmxToiIAdUjpGEc2H0viTVoogBI89UyUhi7h7Fk3d10IfTt4.IQ6eAwg2eEK347ubV9xUUPorBAuHumbyIZ-jCLQWG8U%26dib_tag%3Dse%26keywords%3Dpla%26qid%3D1740584049%26sr%3D8-1-spons%26sp_csd%3Dd2lkZ2V0TmFtZT1zcF9hdGY%26psc%3D1&amp;sa=D&amp;source=editors&amp;ust=1774563553513638&amp;usg=AOvVaw0cth4UWcBD2alc_w97vfgT">Amazon.com:
+                                    OVERTURE PLA Filament 1.75mm PLA 3D Printer Filament, 1kg Cardboard Spool (2.2lbs),
+                                    Dimensional Accuracy +/- 0.02mm, Fit Most FDM Printer (Black 1-Pack)</a></div>
+                            <div>1</div>
+                            <div>$14.99</div>
+                            <div>$14.99</div>
+                            <div><span class="s3"
+                                    style="background-color: #b10202; color: #ffcfc9; width: 196.0px; max-width: 196.0px; margin-left: 6.0px;  padding: 1.0px 5.0px 1.0px 5.0px ; ">In
+                                    Kind / Currently Have</span></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div>Grand Total:</div>
+                            <div>$181.69</div>
+                            <div></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div>Total Request:</div>
+                            <div>$117.94</div>
+                            <div></div>
+                        </div>
+                        <div class="row wind-tunnel">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div>In Kind:</div>
+                            <div>$63.75</div>
+                            <div></div>
+                        </div>
+                    </div-->
+                </section>
+
+                <section class="project-section">
                     <h2>Results & Testing</h2>
-                    <p>Initial calibration tests showed excellent flow uniformity with velocity variation under 3% across the test section. The tunnel has been successfully used to test airfoil models and measure lift/drag coefficients.</p>
+                    <p>Initial calibration tests showed excellent flow uniformity with velocity variation under 3%
+                        across the test section. The tunnel has been successfully used to test airfoil models and
+                        measure lift/drag coefficients.</p>
                 </section>
 
                 <section class="project-section">
                     <h2>Challenges & Lessons</h2>
                     <ul class="bullet-list">
-                        <li><strong>Flow separation:</strong> Required multiple iterations of diffuser angle to prevent separation</li>
+                        <li><strong>Flow separation:</strong> Required multiple iterations of diffuser angle to prevent
+                            separation</li>
                         <li><strong>Vibration:</strong> Added rubber isolation mounts to reduce motor vibration</li>
                         <li><strong>Sealing:</strong> Used weatherstripping and silicone to eliminate air leaks</li>
                     </ul>
+                </section>
+
+                <section class="project-section">
+                    <!--h2 class="collapsible-header collapsed" data-target="daily-log">                        
+                        <span class="chevron">▼</span> Daily Log
+                    </h2-->
+                    <div class="iframe-container">
+                        <iframe
+                            src="https://docs.google.com/document/d/e/2PACX-1vSGw2yi7sChjvjG2loJxZCY8sUeYMAXFgMUzfUqK-Z9sTLhJNcg4Zj-k8Y-8c9jMAMgP_qzP8eu917h/pub?embedded=true"
+                            frameborder="0" width="100%" height="560" marginheight="0" marginwidth="0"
+                            allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+                    </div>
+
+                    <!--div class="table-container daily-log collapsed" id="daily-log">
+                        <div class="row">
+                            <h4>3/10/2025: Day 1</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend
+                                    to accomplish today?</span></p>
+                            <p><span class="c0">We want to continue working on our 3d model and do
+                                    some research on the setup used to measure aerodynamic forces</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We finished modelling the tunnel shape and we started
+                                    some of the research on the setup.</span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 528.00px; height: 342.00px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXea0TKvIkJLb_-4x_hW4cQTd7S28KpOCPCzeUNM1jiLGkhU7cOvzqtVKrfsyJAtTUCSUK4sV1_q7zczSq5y0i82VaANYvr_H4w1XfYTBgvCfTY5145ipTP8OCgxtqQP20ng9Y_91Q?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 528.00px; height: 342.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c0"></span></p>
+                            <p><span class="c0"></span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Finish the research</span></p>
+                            <p><span class="c0">Finish the entire model of it</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>3/12/2025: Day 2</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend
+                                    to accomplish today?</span></p>
+                            <p><span class="c0">We want to finish modelling</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We tested the parts we received and troubleshooted an
+                                    issue with the smoke machine and finished 3-D modeling the shell of the wind
+                                    tunnel. </span></p>
+                            <p><span class="c0"></span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 541.00px; height: 380.00px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXdi-J_20yWQNaE9NMICFNJ3Wsv4TD6_We5dycv3R34y4Ogzw_KutIbNoRA-diu0sCQ5UnuL7bI4UJFeEDVNCU5ecR6_h5bc0RGkZS55Ag2l72YuLzcCtbMSfgjQmKlkm0nWIldosg?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 541.00px; height: 380.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c0"></span></p>
+                            <p><span class="c12">What are the next steps?</span></p>
+                            <p><span class="c0">Since we now have the parts, we can accurately
+                                    dimension our 3d model, so we will be finishing the model.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>3/14/2025: Day 3</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Finish modeling the fan </span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We finished modeling the fan</span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 411.00px; height: 369.00px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXfJKLclgQ8tBhwqOOplytuF7O6bjnDB2FYBa6ivYLSKkPJpy9SrC92YYUGXInd1DfuJv7gLqFF5F9pnlAgcgNk00Am9byTCjVH3X_UD0AGi1soLZyUc9yOdBxJgz6zbZKNTg_mVpQ?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 411.00px; height: 369.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c3"></span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Start 3-D printing the shell and start
+                                    building.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>3/18/2025: Day 4</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">We needed to finish the 3D model of our smoke
+                                    generator.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We took a test and finished the model for our smoke
+                                    generator.</span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 458.00px; height: 370.00px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXf6dWlaWUvq6JEtnY62VhhxSMzHjt5udwI8h8yXvsO9HgpzUSHFJh6-zLXyxjHQ_qm_RFzie2tAxgc0WtxpOPuwyJsRYIoGrtYXiNP-vpHq46q5xm4vgHG_PernPuhbl3BNRZQDPg?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 458.00px; height: 370.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c3"></span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">To create the shell and start constructing.</span>
+                            </p>
+                        </div>
+                        <div class="row">
+                            <h4>3/20/2025: Day 5</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">To start constructing our Wind Tunnel.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We went back to Fusion 360 in order to recreate our
+                                    3D Model. Instead of using a circular shape for our shell, we went with a
+                                    square shape. We also changed our material from plastic to a foam board for
+                                    our shell.</span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 627.00px; height: 383.00px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXfYtcfsKVQHvZk2zDNOTVtOJd4TIIWsVbyZfkzr4A4YT0UDc9urrNzwJtSfu4w-jFwD3hV8xixzL56qRP4PmuTW87TfggwERw0lhkRceBPToIGQG3a_BB-hqYpQQ427hqf3ANsB?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 627.00px; height: 383.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c3"></span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Start constructing our project and test.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>3/31/2025: Day 6</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Start constructing our project.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We finished cutting our shell out and cut out windows
+                                    and plexiglass.</span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Find ways to keep the glass stable and to start
+                                    connecting our parts.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>4/2/2025: Day 7</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Construct our project.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We hot glued the plexi-glass to the shell of the Wind
+                                    Tunnel. We also created a little cover for the little opening between the
+                                    edges of the shell which covers the bare part of the foam board.</span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Re-invent our edge cover and start cutting the hole
+                                    that is needed for the smoke machine and the Servo motor.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>4/4/2025: Day 8</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c8">Laser cut out holes for our supports for our object
+                                    that we are testing, </span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We laser cut holes for our smoke generator and our
+                                    support for the object being tested.</span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 372.14px; height: 496.19px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXdj_rD60p8-aJP2rBd1Plex04KD_-HyfIAVaZ4MKezFfYFI818rivVXgyuxOagMhVJJkKbvv3-9ziSG-m2VtIaKoxMDeeHtAvdxSOky1HJJ0-9qE4YPhk7FD-zp3BA-wrIAQae0fA?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 372.14px; height: 496.19px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Construct the holder that will hold our object for
+                                    testing.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>4/7/2025: Day 9</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Cut straws that will be used to stabilize the smoke
+                                    coming through the tunnel.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We added the straws to our wind tunnel.</span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 364.50px; height: 483.92px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXdkD4TAQ2GV1BalCjxJX26s7ASByxBmXok1YjvMJ3fVLsQEEG_xjmaAEPdHiNM1xVhDU-3eTo0PrA6Wn1TiAd5zK2v_9rI-pcUvP8oakNWwdoXWWxnQTV6LSxzobI3rtp8RFy2FeA?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 364.50px; height: 483.92px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c0">We also cut a piece of 1x6 wood (1 meter long) for
+                                    our base.</span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Create a stand to hold our wind tunnel and make a
+                                    connector that will connect our fan.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>4/11/2025: Day 10</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Create a connector to connect the wind tunnel to the
+                                    fan.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We made a connector.</span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 460.50px; height: 460.50px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXchiIf_iBWu0ZU1c9iekpwOZ5z2ExVMPCh-Vq19przMUZUVriqOdXcnEqZtLS4_AAOBwHLF4N3sonUCAhNVMzkK0unBr8E1yHsbpSPzTfiRk5jM_vt7JQp90vr_4N_OVprn_mx4Hw?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 460.50px; height: 460.50px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Create a stand to hold our wind tunnel up.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>4/14/2025: Day 11</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Construct a structure to hold the wind tunnel.</span>
+                            </p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We printed the stand and drilled it to the wooden
+                                    board (Base).</span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 357.84px; height: 357.84px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXd_LJY_A6Xsx_U6blms1_mY82FuTzkKlYucozEucCrvbggk_ZHYzK4yt-nPVg4kKYZbBwPUErO0FiIQdBPn3PZUqeRXFCl1BCyZgPz9QWjXPARNyAWNSJRRtCiN7TmoJJkjjUNEbw?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 357.84px; height: 357.84px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Finish our prototype and start to test it.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>4/16/2025: Day 12</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Finish and test our prototype.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">Glue our straws to the base to stabilize them.
+                                </span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 227.00px; height: 232.00px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXc0hLoFJNIG87LuL9k3QE_-XTUygeOYrDVCj7gYJBzyEw_Gx9_m6lXHmsezCxVxm-DGgLdMX91RfAntEADMpvazvbFMBrcJ2Q31UqcK7gnsoKUqcRoFqvBv9aNn-z7u19RpY1mgSg?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 227.00px; height: 232.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Finish glueing the straws.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>4/21/2025: Day 13</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Glue our straws.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We finished glueing some of our straws but we are not
+                                    finished.</span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Finish glueing our straws.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>4/29/2025: Day 14</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Finish glueing our straws and test our
+                                    product.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We finished gluing our straws and we calibrated /
+                                    setup / coded our Load Cells and Servo Motor.</span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">3D print a new smoke filter and test our
+                                    product.</span></p>
+                        </div>
+                        <div class="row">
+                            <h4>5/1/2025: Day 15</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Finish connecting our load cell to our base and get
+                                    it to function.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We connected our load cell to the wood and got it to
+                                    measure pressure.</span></p>
+                            <p><span
+                                    style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 296.50px; height: 394.83px;"><img
+                                        alt=""
+                                        src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXfgp_i97-tJYuEYUIYvQychcl8dFh-2JAgDEOuD1sS7RBbw-ldPIN1zBQP-IO9-l715CDgiNgcCvI0NEPDhBXomBO11qg3xZHzgPD09T8Lpe_-6p_5f5t0ynoLL9w_J3a2OApeH2w?key=5UQKNTs4mYkG4pu85HXfQdLG"
+                                        style="width: 296.50px; height: 394.83px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                                        title=""></span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Set up our Servo motor and test.</span></p>
+                        </div>
+                        <div class="row">
+                            <p><span class="c3"></span></p>
+                            <p><span class="c3"></span></p>
+                            <h4>5/2/2025: Day 16 (Gold
+                                Day)</h4>
+                            <p><span class="c3">What is your goal for the day / what do you intend to
+                                    accomplish today?</span></p>
+                            <p><span class="c0">Test our project and see if it works.</span></p>
+                            <p><span class="c3">What did you accomplish today?</span></p>
+                            <p><span class="c0">We tested the Wind Tunnel which worked.</span></p>
+                            <p><span class="c3">What are the next steps?</span></p>
+                            <p><span class="c0">Get ready for the MakerFaire</span></p>
+                        </div>
+                    </div-->
                 </section>
             </div>
 
@@ -125,4 +640,5 @@
 
     <script src="../js/main.js"></script>
 </body>
+
 </html>

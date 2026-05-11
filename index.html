@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <title>Roland Hu | Engineering Portfolio</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <nav id="navbar">
         <div class="nav-container">
@@ -40,7 +42,8 @@
         <div class="section-header">
             <div>
                 <h2>Featured Projects</h2>
-                <p class="section-subtitle">Selected builds focused on airflow, fabrication, and experimental setups.</p>
+                <p class="section-subtitle">Selected builds focused on airflow, fabrication, and experimental setups.
+                </p>
             </div>
             <a class="text-link" href="projects.html">View All Projects</a>
         </div>
@@ -68,8 +71,11 @@
             </div>
 
             <div class="project-card">
-                <div class="card-media placeholder">
-                    <div class="placeholder-label">Project Image</div>
+                <div class="card-media">
+                    <video class="project-video" autoplay loop muted playsinline>
+                        <source src="images/pennyHockey.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
                 </div>
                 <div class="project-content">
                     <div>
@@ -107,6 +113,30 @@
         </div>
     </section>
 
+    <section id="ship-model" class="section">
+        <div class="section-header">
+            <div>
+                <h2>Ship Model</h2>
+                <p>Building small-scale ship models since childhood, developing hands-on engineering skills.</p>
+            </div>
+        </div>
+        <div class="ship-grid">
+            <div class="card-media">
+                <img src="images/ModelShip.jpg" alt="Ship Model Icon" class="project-video">
+            </div>
+            <div class="panel">
+                <div class="panel-title">Participating in model ship building competitions.</div>
+                <div class="chip-grid">
+                    <span class="chip">USS Missouri BB-63</span>
+                    <span class="chip">USS Atlanta CL-51</span>
+                </div>
+                <div class="project-links">
+                    <a href="projects/ship-model.html">View Details</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
     <section id="about" class="section">
         <div class="section-header">
             <div>
@@ -116,7 +146,8 @@
         </div>
         <div class="about-grid">
             <div>
-                <p>I'm a high school student with a passion for engineering and physics. I enjoy building hardware that connects theory to real-world performance.</p>
+                <p>I'm a high school student with a passion for engineering and physics. I enjoy building hardware that
+                    connects theory to real-world performance.</p>
                 <div class="about-actions">
                     <a class="text-link" href="projects.html">Browse Projects</a>
                 </div>
@@ -161,4 +192,5 @@
 
     <script src="js/main.js"></script>
 </body>
+
 </html>
