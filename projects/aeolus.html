@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aeolus - Roland Hu">
+    <title>Aeolus | Roland Hu</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Fraunces', 'Georgia', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { background: #020817; }
+        html.light { background: #f5f3ef; }
+
+        *, *::before, *::after {
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        a, button, img { transition: none; }
+        a { transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease; }
+        button { transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
+
+        #nav-links.open { display: flex; }
+
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.625rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid;
+        }
+    </style>
+</head>
+
+<body class="bg-[#f5f3ef] dark:bg-[#020817] text-slate-700 dark:text-slate-300 antialiased font-sans min-h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 w-full border-b bg-[#f5f3ef]/90 dark:bg-[#020817]/90 border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3">
+            <nav class="flex justify-between items-center">
+                <a href="../index.html" class="font-mono text-sm font-bold text-slate-900 dark:text-white tracking-tight hover:text-blue-600 dark:hover:text-blue-400 no-underline">
+                    Roland Hu
+                </a>
+                <div class="flex items-center gap-4">
+                    <ul class="hidden sm:flex items-center gap-6 font-mono text-xs list-none m-0 p-0">
+                        <li><a href="../index.html#about" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">About</a></li>
+                        <li><a href="../projects.html" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Projects</a></li>
+                        <li><a href="../index.html#contact" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Contact</a></li>
+                    </ul>
+                    <button id="theme-toggle" aria-label="Toggle theme"
+                        class="flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-500 dark:hover:border-slate-500 bg-white/60 dark:bg-slate-900/60">
+                        <span id="theme-icon">☀</span>
+                        <span id="theme-label">Light</span>
+                    </button>
+                    <button class="nav-toggle sm:hidden p-1.5 border border-slate-300 dark:border-slate-700 rounded" aria-label="Toggle navigation" aria-controls="nav-links" aria-expanded="false">
+                        <span class="block w-4 h-px bg-slate-600 dark:bg-slate-300 mb-1"></span>
+                        <span class="block w-4 h-px bg-slate-600 dark:bg-slate-300 mb-1"></span>
+                        <span class="block w-4 h-px bg-slate-600 dark:bg-slate-300"></span>
+                    </button>
+                </div>
+            </nav>
+            <ul id="nav-links" class="hidden flex-col gap-3 font-mono text-xs list-none m-0 p-0 border-t border-slate-200 dark:border-slate-800 mt-3 pt-3 pb-1">
+                <li><a href="../index.html#about" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">About</a></li>
+                <li><a href="../projects.html" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Projects</a></li>
+                <li><a href="../index.html#contact" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Contact</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- PROJECT HERO -->
+    <section class="relative w-full h-[35vh] min-h-[320px] flex items-center overflow-hidden border-b border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/30">
+        <div class="absolute inset-0 bg-gradient-to-r from-[#f5f3ef] via-[#f5f3ef]/95 to-transparent dark:from-[#020817] dark:via-[#020817]/95 z-10"></div>
+        
+        <div class="relative z-20 max-w-5xl w-full mx-auto px-4 py-12 flex flex-col justify-end h-full">
+            <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline mb-6 inline-block" href="../projects.html">← Back to Projects</a>
+            <p class="font-mono text-xs text-slate-500 tracking-widest uppercase mb-2">Project Documentation</p>
+            <h1 class="text-4xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tight leading-none mb-3">Aeolus</h1>
+            <p class="text-base text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed mb-6 font-light">
+                EDF-powered hybrid TVC/fin active control rocket
+            </p>
+            <div class="flex flex-wrap gap-1.5">
+                <span class="tag bg-white/60 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700">CAD</span>
+                <span class="tag bg-white/60 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700">Fabrication</span>
+                <span class="tag bg-white/60 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700">Arduino</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN BODY LAYOUT -->
+    <main class="max-w-5xl w-full mx-auto px-4 py-16 flex-grow">
+ 
+
+        <!-- BOTTOM NAVIGATION -->
+        <div class="mt-16 pt-6 border-t border-slate-200 dark:border-slate-800">
+            <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline" href="../projects.html">← Return to Project Ledger</a>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="max-w-5xl w-full mx-auto px-4 py-6 border-t border-slate-200 dark:border-slate-800 text-center font-mono text-xs text-slate-400 dark:text-slate-600">
+        Designed & Built by Roland Hu | © 2026
+    </footer>
+
+    <script src="../js/main.js"></script>
+
+    <script>
