@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <meta name="description" content="Wind Tunnel Project - Roland Hu">
     <title>Wind Tunnel | Roland Hu</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
@@ -16,12 +16,23 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Fraunces', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     }
                 }
             }
         }
+
+        try {
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.style.background = '#f5f3ef';
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.style.background = '#020817';
+            }
+        } catch (_) {}
+        
     </script>
 
     <style>
@@ -82,11 +93,12 @@
         </div>
     </header>
 
-    <!-- PROJECT HERO -->
+    <!-- HERO SECTION -->
     <section class="relative w-full h-[50vh] min-h-[400px] flex items-center overflow-hidden border-b border-slate-200 dark:border-slate-800">
         <video class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline>
             <source src="../images/windtunnelEAD.mp4" type="video/mp4">
         </video>
+
         <div class="absolute inset-0 bg-[#f5f3ef]/85 dark:bg-[#020817]/85 z-10"></div>
         
         <div class="relative z-20 max-w-5xl w-full mx-auto px-4 py-12 flex flex-col justify-end h-full">
@@ -113,30 +125,30 @@
                 
                 <section class="space-y-4">
                     <h2 class="text-sm font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2 uppercase tracking-wider">Abstract</h2>
-                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">
                         Many aspiring STEM students who may be interested in aerodynamics do not have a way to learn and study it, especially aerodynamic forces and airflow around objects. Therefore, our goal was to design and develop a tool that can be used to understand aerodynamics in an intuitive and engaging way. It should be constructed to be affordable and accessible, and its operation should not be extremely complicated.
                     </p>
                 </section>
 
                 <section class="space-y-4">
                     <h2 class="text-sm font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2 uppercase tracking-wider">Design</h2>
-                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">
                         Our wind tunnel uses foam board and acrylic windows for the main tunnel section with a 3D printed adapter to connect the fan. Straws were used to straighten the airflow, which ensures the incoming air flows straight through the tunnel with minimal turbulence. For the test stand, we used two load cells to measure force and a servo motor to control the angle of the test object. These were connected to an Arduino, allowing us to control and visualize the forces on the object. 
                     </p>
-                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">
                         Also, to visualize the airflow, a smoke generator was used. However, a challenge was that the airflow was too fast even on the lowest fan setting, resulting in unavoidable turbulence in the airstream, which caused the smoke to disperse and be faint. Another challenge was attaching all the straws, which took a significant amount of time. 
                     </p>
-                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">
                         Overall, I learned many things throughout this project. I learned how to use load cells to measure forces and then plot the data using an Arduino, creating a real time graph of the forces. Also, I learned how to use the laser cutter to cut materials. Finally, my 3D modelling and 3D printing skills have significantly improved as a result of this project since it uses a variety of 3D printed parts. If I were to do anything differently, I would use a fine honeycomb mesh instead of individual straws, and I would use a larger smoke generator with a higher smoke output.
                     </p>
                 </section>
 
                 <section class="space-y-4">
                     <h2 class="text-sm font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2 uppercase tracking-wider">Build & Fabrication</h2>
-                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">
                         The tunnel was constructed using 3/4" plywood for the outer shell and acrylic panels for the test section viewing windows. Honeycomb flow straighteners and screens were installed upstream of the contraction to reduce turbulence.
                     </p>
-                    <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300 list-none p-0 m-0">
+                    <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300 list-none p-0 m-0 font-normal">
                         <li class="flex items-start gap-2"><span class="font-mono text-blue-600 dark:text-blue-500 text-xs mt-0.5">▪</span> Laser-cut plywood components for precise geometry</li>
                         <li class="flex items-start gap-2"><span class="font-mono text-blue-600 dark:text-blue-500 text-xs mt-0.5">▪</span> Custom-designed 3D-printed corners and mounting brackets</li>
                         <li class="flex items-start gap-2"><span class="font-mono text-blue-600 dark:text-blue-500 text-xs mt-0.5">▪</span> Pressure-tapped test section for aerodynamic measurements</li>
@@ -155,7 +167,7 @@
 
                 <section class="space-y-4">
                     <h2 class="text-sm font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2 uppercase tracking-wider">Results & Testing</h2>
-                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">
                         Initial calibration tests showed excellent flow uniformity with velocity variation under 3% across the test section. The tunnel has been successfully used to test airfoil models and measure lift/drag coefficients.
                     </p>
                 </section>
@@ -173,7 +185,7 @@
             <!-- RIGHT: TECHNICAL SPECIFICATIONS PANEL -->
             <aside class="space-y-6 lg:sticky lg:top-20">
                 
-                <!-- KEY SPECS -->
+                <!-- SUBSECTION: KEY SPECS -->
                 <div class="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 p-5 rounded-lg space-y-4">
                     <h3 class="font-mono text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-2">Key Specs</h3>
                     <div class="space-y-3.5">
@@ -242,49 +254,6 @@
     </footer>
 
     <script src="../js/main.js"></script>
-
-    <script>
-        // ── Theme toggle ──────────────────────────────────────────────
-        const html = document.documentElement;
-        const toggleBtn = document.getElementById('theme-toggle');
-        const icon = document.getElementById('theme-icon');
-        const label = document.getElementById('theme-label');
-
-        function setTheme(dark) {
-            if (dark) {
-                html.classList.add('dark');
-                html.style.background = '#020817';
-                icon.textContent = '☀';
-                label.textContent = 'Light';
-            } else {
-                html.classList.remove('dark');
-                html.style.background = '#f5f3ef';
-                icon.textContent = '☾';
-                label.textContent = 'Dark';
-            }
-            localStorage.setItem('theme', dark ? 'dark' : 'light');
-        }
-
-        const saved = localStorage.getItem('theme');
-        setTheme(saved !== 'light');
-
-        toggleBtn.addEventListener('click', () => {
-            setTheme(!html.classList.contains('dark'));
-        });
-
-        // ── Mobile nav ────────────────────────────────────────────────
-        const navToggle = document.querySelector('.nav-toggle');
-        const navLinks = document.getElementById('nav-links');
-
-        navToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
-            navToggle.setAttribute('aria-expanded', navLinks.classList.contains('open'));
-        });
-
-        navLinks.querySelectorAll('a').forEach(a => {
-            a.addEventListener('click', () => navLinks.classList.remove('open'));
-        });
-    </script>
 
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <meta name="description" content="Aeolus - Roland Hu">
     <title>Aeolus | Roland Hu</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
@@ -16,12 +16,23 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Fraunces', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     }
                 }
             }
         }
+
+        try {
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.style.background = '#f5f3ef';
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.style.background = '#020817';
+            }
+        } catch (_) {}
+        
     </script>
 
     <style>
@@ -118,4 +129,6 @@
 
     <script src="../js/main.js"></script>
 
-    <script>
+   
+</body>
+</html>
