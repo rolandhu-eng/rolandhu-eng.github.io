@@ -1,120 +1,40 @@
-const navbar = document.getElementById('navbar');
-const navToggle = document.querySelector('.nav-toggle');
-const navLinks = document.getElementById('nav-links');
+ // ── Theme toggle ──────────────────────────────────────────────
+        const html = document.documentElement;
+        const toggleBtn = document.getElementById('theme-toggle');
+        const icon = document.getElementById('theme-icon');
+        const label = document.getElementById('theme-label');
 
-if (navToggle && navbar && navLinks) {
-    navToggle.addEventListener('click', () => {
-        const isOpen = navbar.classList.toggle('open');
-        navToggle.setAttribute('aria-expanded', String(isOpen));
-    });
-
-    navLinks.addEventListener('click', (event) => {
-        if (event.target && event.target.tagName === 'A') {
-            navbar.classList.remove('open');
-            navToggle.setAttribute('aria-expanded', 'false');
-        }
-    });
-}
-
-// Smooth scrolling
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            const navHeight = document.getElementById('navbar').offsetHeight;
-            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
-            
-            window.scrollTo({
-                top: targetPosition,
-                behavior: 'smooth'
-            });
-        }
-    });
-});
-
-// Fade-in animation
-const observerOptions = {
-    threshold: 0.15,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-        }
-    });
-}, observerOptions);
-
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-/*
-// Collapsible Daily Log
-const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
-collapsibleHeaders.forEach(header => {
-    header.addEventListener('click', function() {
-        const targetId = this.getAttribute('data-target');
-        const targetElement = document.getElementById(targetId);
-        
-        if (targetElement) {
-            // Toggle the collapsed class on both header and content
-            this.classList.toggle('collapsed');
-            targetElement.classList.toggle('collapsed');
-            
-            // Save the state in localStorage
-            const isCollapsed = this.classList.contains('collapsed');
-            localStorage.setItem(`collapsible-${targetId}`, isCollapsed);
-        }
-    });
-});
-
-// Restore collapsed state from localStorage
-document.addEventListener('DOMContentLoaded', function() {
-    collapsibleHeaders.forEach(header => {
-        const targetId = header.getAttribute('data-target');
-        const isCollapsed = localStorage.getItem(`collapsible-${targetId}`) === 'true';
-        
-        if (isCollapsed) {
-            const targetElement = document.getElementById(targetId);
-            if (targetElement) {
-                header.classList.add('collapsed');
-                targetElement.classList.add('collapsed');
+        function setTheme(dark) {
+            if (dark) {
+                html.classList.add('dark');
+                html.style.background = '#020817';
+                icon.textContent = '☀';
+                label.textContent = 'Light';
+            } else {
+                html.classList.remove('dark');
+                html.style.background = '#f5f3ef';
+                icon.textContent = '☾';
+                label.textContent = 'Dark';
             }
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
         }
-    });
-});*/
 
-const hero = document.querySelector('.hero');
+        const saved = localStorage.getItem('theme');
+        setTheme(saved !== 'light');
 
-// Scroll effects: navbar + hero parallax
-let lastKnownScrollY = 0;
-let ticking = false;
-
-const onScroll = () => {
-    lastKnownScrollY = window.scrollY || window.pageYOffset;
-    if (!ticking) {
-        window.requestAnimationFrame(() => {
-            document.documentElement.style.setProperty('--scrollY', `${lastKnownScrollY}`);
-
-            if (navbar) {
-                if (lastKnownScrollY > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-            }
-
-            document.documentElement.style.setProperty('--heroShift', `${Math.min(lastKnownScrollY, 220)}`);
-
-            if (hero) {
-                hero.style.backgroundPositionY = `${-(lastKnownScrollY * 0.6)}px`;
-            }
-            ticking = false;
+        toggleBtn.addEventListener('click', () => {
+            setTheme(!html.classList.contains('dark'));
         });
-        ticking = true;
-    }
-};
 
-window.addEventListener('scroll', onScroll, { passive: true });
-onScroll();
+        // ── Mobile nav ────────────────────────────────────────────────
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.getElementById('nav-links');
+
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+            navToggle.setAttribute('aria-expanded', navLinks.classList.contains('open'));
+        });
+
+        navLinks.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => navLinks.classList.remove('open'));
+        });

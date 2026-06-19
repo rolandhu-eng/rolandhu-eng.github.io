@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <meta name="description" content="Roland Hu - Engineering Portfolio">
     <title>Roland Hu | Engineering Portfolio</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
@@ -16,12 +16,25 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Fraunces', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     }
                 }
             }
         }
+
+    
+        // Stop the theme flash: Check storage BEFORE rendering the body
+        try {
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.style.background = '#f5f3ef';
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.style.background = '#020817';
+            }
+        } catch (_) {}
+
     </script>
 
     <style>
@@ -91,16 +104,16 @@
 
     <!-- HERO -->
     <section id="hero" class="relative w-full min-h-[100vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-slate-800">
-        <div class="absolute inset-0 bg-[#f5f3ef]/70 dark:bg-[#020817]/70 z-10"></div>
+        <div class="absolute inset-0 bg-[#f5f3ef]/60 dark:bg-[#020817]/50 z-10"></div>
         <div class="relative z-20 max-w-5xl w-full mx-auto px-4 py-16">
             <p class="font-mono text-xs text-slate-500 tracking-widest uppercase mb-4">Engineering Portfolio</p>
             <h1 class="text-5xl md:text-7xl font-light text-slate-900 dark:text-white tracking-tight leading-none">Roland<br><em class="not-italic font-semibold">Hu</em></h1>
-            <p class="mt-6 text-base text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
+            <p class="mt-6 text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed font-normal">
                 High school engineer. Building hardware at the intersection of aerodynamics, embedded systems, and experimental physics.
             </p>
             <div class="mt-8 flex gap-4">
-                <a href="#projects" class="font-mono text-xs px-4 py-2 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-80 no-underline">View Projects</a>
-                <a href="#contact" class="font-mono text-xs px-4 py-2 rounded border border-slate-400 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-700 dark:hover:border-slate-300 no-underline">Contact</a>
+                <a href="index.html#projects" class="font-mono text-xs px-4 py-2 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-80 no-underline">View Projects</a>
+                <a href="index.html#contact" class="font-mono text-xs px-4 py-2 rounded border border-slate-400 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-700 dark:hover:border-slate-300 no-underline">Contact</a>
             </div>
         </div>
     </section>
@@ -118,20 +131,20 @@
                 <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline whitespace-nowrap" href="projects.html">View All →</a>
             </div>
 
-            <!-- Featured card (big project)) -->
+            <!-- Featured card (big project) -->
             <a href="projects/aeolus.html"
                class="flex flex-col rounded-lg overflow-hidden border no-underline
                       bg-white dark:bg-slate-900/60
                       border-slate-200 dark:border-slate-800
                       hover:border-slate-400 dark:hover:border-slate-600
                       hover:shadow-md">
-                <div class="w-256 h-64 bg-slate-100 dark:bg-slate-950 overflow-hidden border-b border-slate-200 dark:border-slate-800">
-                    <img class="w-full h-full object-cover transform translate-x-1/8" src="images/aeolustemp.png" alt="Aeolus">
+                <div class="w-full h-64 bg-slate-100 dark:bg-slate-950 overflow-hidden border-b border-slate-200 dark:border-slate-800">
+                    <img class="w-full h-full object-cover" src="images/aeolustemp.png" alt="Aeolus">
                 </div>
                 <div class="p-4 flex flex-col gap-3">
                     <div>
                         <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Aeolus</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">EDF-powered hybrid TVC/fin active control rocket</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-normal">EDF-powered hybrid TVC/fin active control rocket</p>
                     </div>
                     <div class="flex flex-wrap gap-1.5">
                         <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700">Aerodynamics</span>
@@ -157,7 +170,7 @@
                     <div class="p-4 flex-1 flex flex-col justify-between gap-4">
                         <div>
                             <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Wind Tunnel</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Designed and built a subsonic wind tunnel for research.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-normal">Designed and built a subsonic wind tunnel for research.</p>
                         </div>
                         <div class="flex flex-wrap gap-1.5">
                             <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700">Aerodynamics</span>
@@ -178,7 +191,7 @@
                     <div class="p-4 flex-1 flex flex-col justify-between gap-4">
                         <div>
                             <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Penny Hockey</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Penny hockey game board.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-normal">Penny hockey game board.</p>
                         </div>
                         <div class="flex flex-wrap gap-1.5">
                             <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700">CAD</span>
@@ -199,7 +212,7 @@
                     <div class="p-4 flex-1 flex flex-col justify-between gap-4">
                         <div>
                             <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Schlieren Imaging</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Visualizing fluid flow using schlieren techniques.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-normal">Visualizing fluid flow using schlieren techniques.</p>
                         </div>
                         <div class="flex flex-wrap gap-1.5">
                             <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700">Optics</span>
@@ -223,7 +236,7 @@
                     <img src="images/ModelShip.jpg" alt="Ship Model" class="w-full h-full object-cover">
                 </div>
                 <div class="md:col-span-2 space-y-3">
-                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">
                         Building small-scale ship models since childhood, developing hands-on engineering skills and participating in model ship building competitions.
                     </p>
                     <div class="flex flex-wrap gap-1.5">
@@ -239,7 +252,7 @@
             <h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3 tracking-tight">About</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                 <div class="md:col-span-2 space-y-4">
-                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                         I'm a high school student with a passion for engineering and physics. I enjoy building hardware that connects theoretical concepts directly to physical performance logs.
                     </p>
                     <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline" href="projects.html">Browse All Projects →</a>
@@ -291,49 +304,6 @@
     </footer>
 
     <script src="js/main.js"></script>
-
-    <script>
-        // ── Theme toggle ──────────────────────────────────────────────
-        const html = document.documentElement;
-        const toggleBtn = document.getElementById('theme-toggle');
-        const icon = document.getElementById('theme-icon');
-        const label = document.getElementById('theme-label');
-
-        function setTheme(dark) {
-            if (dark) {
-                html.classList.add('dark');
-                html.style.background = '#020817';
-                icon.textContent = '☀';
-                label.textContent = 'Light';
-            } else {
-                html.classList.remove('dark');
-                html.style.background = '#f5f3ef';
-                icon.textContent = '☾';
-                label.textContent = 'Dark';
-            }
-            localStorage.setItem('theme', dark ? 'dark' : 'light');
-        }
-
-        const saved = localStorage.getItem('theme');
-        setTheme(saved !== 'light');
-
-        toggleBtn.addEventListener('click', () => {
-            setTheme(!html.classList.contains('dark'));
-        });
-
-        // ── Mobile nav ────────────────────────────────────────────────
-        const navToggle = document.querySelector('.nav-toggle');
-        const navLinks = document.getElementById('nav-links');
-
-        navToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
-            navToggle.setAttribute('aria-expanded', navLinks.classList.contains('open'));
-        });
-
-        navLinks.querySelectorAll('a').forEach(a => {
-            a.addEventListener('click', () => navLinks.classList.remove('open'));
-        });
-    </script>
 
 </body>
 </html>
