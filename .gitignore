@@ -5,3 +5,4 @@ id_*
 *.key
 *.env
 secrets.txt
+.code-workspace
