@@ -22,6 +22,9 @@ jobs:
       - name: Install dependencies, build, and upload site
         uses: withastro/action@v3
         # withastro/action automatically detects npm, yarn, pnpm, or bun!
+        with:
+          # Tell GitHub Actions to use Node 22 to satisfy Astro 7's requirements
+          node-version: 22
 
   deploy:
     needs: build
