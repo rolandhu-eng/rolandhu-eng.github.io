@@ -1,0 +1,35 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Automatically run this action whenever you push to the main branch
+  push:
+    branches: [ main ]
+  # Allows you to trigger a build manually from the GitHub dashboard
+  workflow_dispatch:
+
+# Grant GitHub Actions the necessary permissions to publish your site
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies, build, and upload site
+        uses: withastro/action@v3
+        # withastro/action automatically detects npm, yarn, pnpm, or bun!
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,46 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+.katex,
+.katex-display,
+.katex * {
+  color: inherit !important;
+  fill: currentColor !important;
+  transition: none !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.katex svg,
+.katex svg * {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.katex .mord,
+.katex .mop,
+.katex .mbin,
+.katex .mopen,
+.katex .mclose,
+.katex .mpunct,
+.katex .mord.text,
+.katex .mord.mathnormal,
+.katex .mord.mathit,
+.katex .mord.mathsf,
+.katex .mord.mathtt,
+.katex .mord.mathbb,
+.katex .mord.mathcal,
+.katex .mord.mathfrak,
+.katex .mop > span,
+.katex .mord > span,
+.katex .mord > .mord,
+.katex .mord > .mop,
+.katex .mord > .mbin,
+.katex .mord > .mopen,
+.katex .mord > .mclose,
+.katex .mord > .mpunct {
+  color: inherit !important;
+  fill: currentColor !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+@variant dark (&:where(.dark, .dark *));

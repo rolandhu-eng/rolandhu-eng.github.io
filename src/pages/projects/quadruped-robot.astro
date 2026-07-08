@@ -1,0 +1,71 @@
+---
+import { getProject } from '../../data/projects';
+import ProjectLayout from '../../layouts/ProjectLayout.astro';
+
+const project = getProject('quadruped-robot');
+
+const tocItems = [
+  { id: 'overview', label: '01. Overview' },
+  { id: 'model', label: '02. 3D Model' },
+  { id: 'testing', label: '03. Testing' }
+];
+---
+
+<ProjectLayout
+  title={project.title}
+  description={project.description}
+  dateRange={project.dateRange}
+  tags={project.tags}
+  heroMedia={project.cover}
+  toc={tocItems}
+>
+  <section id="overview" class="scroll-mt-28 space-y-4">
+    <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-4">01. Overview</h2>
+    <p class="leading-relaxed text-slate-600 dark:text-slate-300 font-light">
+      This was my first real integrated engineering project, combining mechanical design, electronics, and programming into a walking quadruped platform.
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950">
+        <img src="/assets/robot-dog/dog.webp" alt="Quadruped robot" class="w-full h-full object-cover" />
+      </div>
+      <div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950">
+        <img src="/assets/robot-dog/cad.webp" alt="Quadruped robot CAD model" class="w-full h-full object-cover" />
+      </div>
+    </div>
+  </section>
+
+  <hr class="border-slate-200 dark:border-slate-800" />
+
+  <section id="model" class="scroll-mt-28 space-y-4">
+    <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-4">02. 3D Model</h2>
+    <div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+      <model-viewer
+        src="/assets/robot-dog/quadruped-robot.glb"
+        camera-controls
+        environment-image="https://modelviewer.dev/shared-assets/environments/lightroom_14b.hdr"
+        exposure="0.7"
+        shadow-intensity="1"
+        shadow-softness="0.5"
+        auto-rotate
+        style="width: 100%; height: min(70vh, 720px); min-height: 420px;"
+      >
+      </model-viewer>
+    </div>
+  </section>
+
+  <hr class="border-slate-200 dark:border-slate-800" />
+
+  <section id="testing" class="scroll-mt-28 space-y-5">
+    <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-4">03. Testing</h2>
+    {['IMG_7653.webm', 'IMG_7781.webm'].map((fileName) => (
+      <div class="relative w-full aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-900 shadow-sm">
+        <video class="w-full h-full object-cover" controls preload="metadata">
+          <source src={`/assets/robot-dog/${fileName}#t=0.1`} type="video/webm" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    ))}
+  </section>
+
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+</ProjectLayout>

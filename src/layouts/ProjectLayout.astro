@@ -1,0 +1,302 @@
+---
+import Layout from './Layout.astro';
+
+interface TocItem {
+  id: string;
+  label: string;
+}
+
+interface SubpageItem {
+  id: string;
+  label: string;
+  href: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  dateRange: string;
+  tags: string[];
+  heroMedia: string;
+  isVideo?: boolean;
+  toc: TocItem[];
+  /** If provided, renders multi-page navigation with nested TOC under the active page */
+  subpages?: SubpageItem[];
+  /** Required when subpages are provided — identifies the current page */
+  activePageId?: string;
+  /** Set to false to hide the hero banner (used for non-overview subpages) */
+  showHero?: boolean;
+  /** Label shown above navigation sidebar (defaults to "On This Page") */
+  sidebarTitle?: string;
+  /** Project name shown in subpage header breadcrumb when hero is hidden */
+  projectName?: string;
+  /** Custom label above the hero title (defaults to "Project Documentation") */
+  statusLabel?: string;
+  /** If true, shows an animated green dot next to the status label */
+  statusDot?: boolean;
+}
+
+const { 
+  title, 
+  description, 
+  dateRange, 
+  tags, 
+  heroMedia, 
+  isVideo = false, 
+  toc,
+  subpages,
+  activePageId,
+  showHero = true,
+  sidebarTitle = "On This Page",
+  projectName,
+  statusLabel = "Project Documentation",
+  statusDot = false
+} = Astro.props;
+
+const hasSubpages = subpages && subpages.length > 0;
+
+const currentIndex = subpages ? subpages.findIndex(p => p.id === activePageId) : -1;
+const prevPage = currentIndex > 0 ? subpages![currentIndex - 1] : undefined;
+const nextPage = (currentIndex !== -1 && currentIndex < (subpages?.length || 0) - 1) ? subpages![currentIndex + 1] : undefined;
+---
+
+<Layout title={`${title} | Roland Hu`} description={`${title} Project - Roland Hu`}>
+  <!-- HERO -->
+  {showHero && (
+    <section class="relative w-full h-[50vh] min-h-[400px] flex items-center overflow-hidden border-b border-slate-200 dark:border-slate-800">
+      {isVideo ? (
+        <video class="absolute inset-0 w-full h-full object-cover object-top" autoplay loop muted playsinline>
+          <source src={heroMedia} type="video/mp4" />
+        </video>
+      ) : (
+        <img src={heroMedia} alt={`${title} project`} class="absolute inset-0 w-full h-full object-cover object-center" />
+      )}
+
+      <div class="absolute inset-0 bg-slate-950/50 dark:bg-slate-950/60 z-10"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/50 to-transparent z-10"></div>
+
+      <div class="relative z-20 max-w-5xl w-full mx-auto px-4 py-12 flex flex-col justify-end h-full">
+        <a class="font-mono text-xs text-blue-200 hover:text-white dark:text-blue-300 dark:hover:text-white no-underline mb-6 inline-block" href="/projects">
+          ← Back to Projects
+        </a>
+        <p class="flex items-center gap-2 font-mono text-xs text-slate-100 dark:text-slate-200 tracking-widest uppercase mb-2">
+          {statusDot && (
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+          )}
+          {statusLabel}
+        </p>
+        <h1 class="text-4xl md:text-5xl font-semibold text-white dark:text-white tracking-tight leading-none mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
+          {title}
+        </h1>
+        <p class="text-base text-slate-100 dark:text-slate-200 max-w-xl leading-relaxed mb-6 font-light drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
+          {description}
+        </p>
+        <div class="flex flex-wrap gap-1.5 font-mono text-[10px]">
+          <span class="px-2 py-0.5 rounded border border-white/20 bg-slate-900/80 text-white shadow-sm backdrop-blur-sm">
+            {dateRange}
+          </span>
+          {tags.map((tag) => (
+            <span class="px-2 py-0.5 rounded border border-white/20 bg-white/15 text-slate-100 shadow-sm backdrop-blur-sm">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- MAIN SECTION -->
+  <main class={`max-w-screen-2xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow lg:grid lg:grid-cols-[200px_minmax(0,1fr)_200px] lg:gap-12 items-start ${!showHero ? 'mt-6' : ''}`}>
+    
+    <!-- Left Sidebar -->
+    <aside class="hidden lg:block sticky top-28 p-2">
+      {!showHero && (
+        <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline mb-6 block" href="/projects">
+          ← Back to Projects
+        </a>
+      )}
+      <div class="border-l border-slate-200 dark:border-slate-800 pl-4">
+        <h2 class="font-mono text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white mb-3">
+          {sidebarTitle}
+        </h2>
+
+        {hasSubpages ? (
+          /* Multi-page mode: subpage links with nested TOC under active page */
+          <nav class="flex flex-col gap-2 font-mono text-xs">
+            {subpages!.map((page) => (
+              <div class="flex flex-col gap-1">
+                <a
+                  href={page.href}
+                  class={`block py-1.5 transition-colors border-l-2 pl-3 -ml-[18px] ${
+                    activePageId === page.id
+                      ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400 font-medium'
+                      : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-950 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {page.label}
+                </a>
+                
+                {activePageId === page.id && toc && toc.length > 0 && (
+                  <div class="flex flex-col gap-1.5 pl-6 border-l border-slate-200 dark:border-slate-800/60 ml-3 my-1">
+                    {toc.map((item) => (
+                      <a
+                        href={`#${item.id}`}
+                        class="block py-0.5 text-[11px] text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 border-l border-transparent pl-2.5 -ml-[1px] transition-colors toc-link"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
+        ) : (
+          /* Single-page mode: flat TOC list */
+          <nav id="toc-nav" class="flex flex-col gap-2.5 font-mono text-xs">
+            {toc.map((item) => (
+              <a href={`#${item.id}`} class="block text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent pl-3 -ml-[18px] transition-colors toc-link">
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        )}
+      </div>
+    </aside>
+
+    <!-- Center Column: Content -->
+    <div class="min-w-0 max-w-5xl mx-auto w-full flex flex-col gap-14">
+      {/* Subpage header when hero is hidden */}
+      {!showHero && projectName && (
+        <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
+          <p class="font-mono text-[10px] text-blue-600 dark:text-blue-500 uppercase tracking-widest mb-1">{projectName}</p>
+          <h1 class="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">
+            {title}
+          </h1>
+        </div>
+      )}
+
+      <slot />
+
+      <div class="pt-8 border-t border-slate-200 dark:border-slate-800 space-y-6">
+        {hasSubpages && (prevPage || nextPage) && (
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {prevPage ? (
+              <a 
+                href={prevPage.href} 
+                class="flex flex-col p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 bg-white dark:bg-slate-900/40 transition-colors no-underline group"
+              >
+                <span class="font-mono text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  ← Previous
+                </span>
+                <span class="text-sm font-medium text-slate-900 dark:text-white">
+                  {prevPage.label}
+                </span>
+              </a>
+            ) : <div class="hidden sm:block"></div>}
+
+            {nextPage && (
+              <a 
+                href={nextPage.href} 
+                class="flex flex-col p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 bg-white dark:bg-slate-900/40 transition-colors no-underline text-right group sm:col-start-2"
+              >
+                <span class="font-mono text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  Next →
+                </span>
+                <span class="text-sm font-medium text-slate-900 dark:text-white">
+                  {nextPage.label}
+                </span>
+              </a>
+            )}
+          </div>
+        )}
+
+        <div>
+          <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline inline-block" href="/projects">
+            ← Return to Projects
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hidden lg:block"></div>
+  </main>
+  
+  <script>
+    // Unified TOC scrollspy — works for both single-page and multi-page modes
+    document.addEventListener('DOMContentLoaded', () => {
+      const sections = document.querySelectorAll('main section[id]');
+      const tocLinks = document.querySelectorAll('.toc-link');
+
+      if (!tocLinks.length) return;
+
+      // Detect which style classes to use based on nesting depth
+      const firstLink = tocLinks[0];
+      const isNested = firstLink.classList.contains('text-slate-400');
+
+      const activeClasses = [
+        'text-blue-600', 
+        'dark:text-blue-400', 
+        'border-blue-600', 
+        'dark:border-blue-400', 
+        'font-medium'
+      ];
+      const inactiveClasses = isNested
+        ? ['text-slate-400', 'dark:text-slate-500', 'border-transparent', 'hover:text-slate-800', 'dark:hover:text-slate-300']
+        : ['text-slate-500', 'dark:text-slate-400', 'border-transparent', 'hover:text-slate-900', 'dark:hover:text-slate-200'];
+
+      let isClickScrolling = false;
+      let clickScrollTimeout: any;
+
+      const setActiveLink = (targetId: string) => {
+        tocLinks.forEach(link => {
+          const linkHref = link.getAttribute('href');
+          if (linkHref === `#${targetId}`) {
+            link.classList.remove(...inactiveClasses);
+            link.classList.add(...activeClasses);
+          } else {
+            link.classList.remove(...activeClasses);
+            link.classList.add(...inactiveClasses);
+          }
+        });
+      };
+
+      tocLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          const href = link.getAttribute('href');
+          if (!href) return;
+          setActiveLink(href.substring(1));
+          isClickScrolling = true;
+          clearTimeout(clickScrollTimeout);
+          clickScrollTimeout = setTimeout(() => { isClickScrolling = false; }, 800);
+        });
+      });
+
+      const observer = new IntersectionObserver((entries) => {
+        if (isClickScrolling) return;
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            if (id) setActiveLink(id);
+          }
+        });
+      }, { root: null, rootMargin: '-10% 0px -50% 0px', threshold: 0 });
+
+      sections.forEach(s => observer.observe(s));
+
+      window.addEventListener('scroll', () => {
+        if (isClickScrolling) return;
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 5) {
+          const last = sections[sections.length - 1];
+          if (last) {
+            const id = last.getAttribute('id');
+            if (id) setActiveLink(id);
+          }
+        }
+      }, { passive: true });
+    });
+  </script>
+</Layout>

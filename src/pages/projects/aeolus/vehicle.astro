@@ -1,0 +1,52 @@
+---
+import ProjectLayout from '../../../layouts/ProjectLayout.astro';
+import { aeolusNav, getProject } from '../../../data/projects';
+
+const project = getProject('aeolus');
+
+const tocItems = [
+  { id: "structure", label: "Structural Frame" },
+  { id: "aerodynamics", label: "Aerodynamics" },
+  { id: "tvc", label: "Thrust Vector Control" }
+];
+---
+
+<ProjectLayout
+  title="Vehicle Design"
+  description={project.description}
+  dateRange={project.dateRange}
+  tags={project.tags}
+  heroMedia={project.cover}
+  isVideo={project.isVideo}
+  toc={tocItems}
+  subpages={aeolusNav}
+  activePageId="vehicle"
+  showHero={false}
+  sidebarTitle="Aeolus Documentation"
+  projectName="Aeolus"
+>
+  <section id="structure" class="scroll-mt-28">
+    <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-4">01. Structural Frame</h2>
+    <p class="leading-relaxed text-slate-600 dark:text-slate-300 font-light">
+      The airframe is built around a lightweight 3D-printed carbon-fiber-reinforced PETG structure. Ribbed bulkheads provide high torsional stiffness to withstand the forces of the EDF and the rapid movements of the TVC servos.
+    </p>
+  </section>
+
+  <hr class="border-slate-200 dark:border-slate-800" />
+
+  <section id="aerodynamics" class="scroll-mt-28">
+    <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-4">02. Aerodynamics</h2>
+    <p class="leading-relaxed text-slate-600 dark:text-slate-300 font-light">
+      At high speeds, the passive fins on the exterior of the airframe stabilize the flight trajectory. At low speeds and during hover, stability transitions to the internal thrust vectoring vanes.
+    </p>
+  </section>
+
+  <hr class="border-slate-200 dark:border-slate-800" />
+
+  <section id="tvc" class="scroll-mt-28">
+    <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-4">03. Thrust Vector Control</h2>
+    <p class="leading-relaxed text-slate-600 dark:text-slate-300 font-light">
+      Four independent high-speed sub-micro servos control the exhaust vanes directly inside the EDF jet stream. This active control loop executes at 400Hz, ensuring instantaneous attitude correction during hovering phases.
+    </p>
+  </section>
+</ProjectLayout>
