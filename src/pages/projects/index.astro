@@ -1,0 +1,34 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { projectIndexProjects } from '../../data/projects';
+
+const [primaryProject, ...secondaryProjects] = projectIndexProjects;
+---
+
+<Layout title="Projects | Roland Hu" description="Roland Hu - Project Archive">
+  <section class="w-full border-b border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/20">
+    <div class="max-w-5xl mx-auto px-4 py-12">
+      <p class="font-mono text-xs text-slate-500 tracking-widest uppercase mb-3">Archive</p>
+      <h1 class="text-4xl md:text-5xl font-light text-slate-900 dark:text-white tracking-tight leading-none">All <em class="not-italic font-semibold">Projects</em></h1>
+      <p class="mt-4 text-sm text-slate-500 dark:text-slate-400 max-w-md leading-relaxed font-normal">Collection of engineering builds, experiments, and prototypes.</p>
+    </div>
+  </section>
+
+  <main class="max-w-5xl w-full mx-auto px-4 py-16 flex-grow space-y-10">
+    <div class="flex items-end justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+      <div>
+        <h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white tracking-tight">Project Archive</h2>
+        <p class="text-xs text-slate-500 mt-1">Full list of builds focused on design, fabrication, and testing.</p>
+      </div>
+    </div>
+
+    {primaryProject && <ProjectCard project={primaryProject} size="large" />}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {secondaryProjects.map((project) => (
+        <ProjectCard project={project} />
+      ))}
+    </div>
+  </main>
+</Layout>

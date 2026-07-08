@@ -1,0 +1,148 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { 
+  title = "Roland Hu | Engineering Portfolio", 
+  description = "Roland Hu - Engineering Portfolio" 
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <script is:inline>
+      // Stop the theme flash: Check storage BEFORE rendering the body
+      try {
+        if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.background = '#f5f3ef';
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.background = '#020817';
+        }
+      } catch (_) {}
+    </script>
+
+    <style is:global>
+      html { background: #020817; }
+      html.light { background: #f5f3ef; }
+
+      *, *::before, *::after {
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      }
+      a, button, video, img { transition: none; }
+      a { transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease; }
+      button { transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
+
+      #nav-links.open { display: flex; }
+
+      .tag {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.625rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid;
+      }
+    </style>
+  </head>
+
+  <body class="bg-[#f5f3ef] dark:bg-[#020817] text-slate-700 dark:text-slate-300 antialiased font-sans min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 w-full border-b bg-[#f5f3ef]/90 dark:bg-[#020817]/90 border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+      <div class="max-w-5xl mx-auto px-4 py-3">
+        <nav class="flex justify-between items-center">
+          <a href="/" class="font-mono text-sm font-bold text-slate-900 dark:text-white tracking-tight hover:text-blue-600 dark:hover:text-blue-400 no-underline">
+            Roland Hu
+          </a>
+          <div class="flex items-center gap-4">
+            <ul class="hidden sm:flex items-center gap-6 font-mono text-xs list-none m-0 p-0">
+              <li><a href="/#about" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">About</a></li>
+              <li><a href="/projects" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Projects</a></li>
+              <li><a href="/#contact" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Contact</a></li>
+            </ul>
+            <button id="theme-toggle" aria-label="Toggle theme" class="flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-500 dark:hover:border-slate-500 bg-white/60 dark:bg-slate-900/60">
+              <span id="theme-icon">☀</span>
+              <span id="theme-label">Light</span>
+            </button>
+            <button class="nav-toggle sm:hidden p-1.5 border border-slate-300 dark:border-slate-700 rounded" aria-label="Toggle navigation" aria-controls="nav-links" aria-expanded="false">
+              <span class="block w-4 h-px bg-slate-600 dark:bg-slate-300 mb-1"></span>
+              <span class="block w-4 h-px bg-slate-600 dark:bg-slate-300 mb-1"></span>
+              <span class="block w-4 h-px bg-slate-600 dark:bg-slate-300"></span>
+            </button>
+          </div>
+        </nav>
+        <ul id="nav-links" class="hidden flex-col gap-3 font-mono text-xs list-none m-0 p-0 border-t border-slate-200 dark:border-slate-800 mt-3 pt-3 pb-1">
+          <li><a href="/#about" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">About</a></li>
+          <li><a href="/projects" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Projects</a></li>
+          <li><a href="/#contact" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Contact</a></li>
+        </ul>
+      </div>
+    </header>
+
+    <slot />
+
+    <!-- FOOTER -->
+    <footer class="max-w-5xl w-full mx-auto px-4 py-6 border-t border-slate-200 dark:border-slate-800 text-center font-mono text-xs text-slate-400 dark:text-slate-600">
+      Designed & Built by Roland Hu | © 2026
+    </footer>
+
+    <script>
+      // Theme Toggle Logic
+      const html = document.documentElement;
+      const toggleBtn = document.getElementById('theme-toggle');
+      const icon = document.getElementById('theme-icon');
+      const label = document.getElementById('theme-label');
+
+      function setTheme(dark: boolean) {
+        if (dark) {
+          html.classList.add('dark');
+          html.style.background = '#020817';
+          if (icon) icon.textContent = '☀';
+          if (label) label.textContent = 'Light';
+        } else {
+          html.classList.remove('dark');
+          html.style.background = '#f5f3ef';
+          if (icon) icon.textContent = '☾';
+          if (label) label.textContent = 'Dark';
+        }
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+      }
+
+      const saved = localStorage.getItem('theme');
+      setTheme(saved !== 'light');
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          setTheme(!html.classList.contains('dark'));
+        });
+      }
+
+      // Mobile Navigation Logic
+      const navToggle = document.querySelector('.nav-toggle');
+      const navLinks = document.getElementById('nav-links');
+
+      if (navToggle && navLinks) {
+        navToggle.addEventListener('click', () => {
+          navLinks.classList.toggle('open');
+          navToggle.setAttribute('aria-expanded', navLinks.classList.contains('open').toString());
+        });
+
+        navLinks.querySelectorAll('a').forEach(a => {
+          a.addEventListener('click', () => navLinks.classList.remove('open'));
+        });
+      }
+    </script>
+  </body>
+</html>

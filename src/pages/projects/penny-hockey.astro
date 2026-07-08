@@ -1,0 +1,58 @@
+---
+import { getProject } from '../../data/projects';
+import ProjectLayout from '../../layouts/ProjectLayout.astro';
+
+const project = getProject('penny-hockey');
+
+const tocItems = [
+  { id: 'overview', label: '01. Overview' },
+  { id: 'build', label: '02. Build Details' },
+  { id: 'electronics', label: '03. Electronics' }
+];
+---
+
+<ProjectLayout
+  title={project.title}
+  description={project.description}
+  dateRange={project.dateRange}
+  tags={project.tags}
+  heroMedia={project.cover}
+  toc={tocItems}
+>
+  <section id="overview" class="scroll-mt-28 space-y-4">
+    <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-4">01. Overview</h2>
+    <p class="leading-relaxed text-slate-600 dark:text-slate-300 font-light">
+      The Penny Hockey project was a tabletop game board that combined woodworking, laser cutting, 3D printing, soldering, and Arduino programming. The board features a NASA logo laser engraved into clear plexiglass, surrounded by a wooden frame supported by dado cuts and assembled with miter joints.
+    </p>
+    <div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950">
+      <img src="/assets/penny-hockey/pennyHockey.jpg" alt="Penny Hockey game board" class="w-full h-auto object-cover" />
+    </div>
+  </section>
+
+  <hr class="border-slate-200 dark:border-slate-800" />
+
+  <section id="build" class="scroll-mt-28 space-y-4">
+    <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-4">02. Build Details</h2>
+    <p class="leading-relaxed text-slate-600 dark:text-slate-300 font-light">
+      The goals for the penny were made by drilling large corner holes, cutting the openings with a jigsaw, and inserting custom 3D-printed parts so the penny could slide smoothly. Additional printed parts were used for the feet and for holding the electronic components in a compact form factor.
+    </p>
+    <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300 list-none p-0 m-0 font-normal">
+      <li class="flex items-start gap-2"><span class="font-mono text-blue-600 dark:text-blue-500 text-xs mt-0.5">-</span> Laser engraved plexiglass playing surface</li>
+      <li class="flex items-start gap-2"><span class="font-mono text-blue-600 dark:text-blue-500 text-xs mt-0.5">-</span> Wooden frame with dado cuts and miter joints</li>
+      <li class="flex items-start gap-2"><span class="font-mono text-blue-600 dark:text-blue-500 text-xs mt-0.5">-</span> 3D-printed goal inserts, feet, and electronics holder</li>
+      <li class="flex items-start gap-2"><span class="font-mono text-blue-600 dark:text-blue-500 text-xs mt-0.5">-</span> Snap fitting, gluing, nailing, and screw-based assembly</li>
+    </ul>
+  </section>
+
+  <hr class="border-slate-200 dark:border-slate-800" />
+
+  <section id="electronics" class="scroll-mt-28 space-y-4">
+    <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-4">03. Electronics</h2>
+    <p class="leading-relaxed text-slate-600 dark:text-slate-300 font-light">
+      LEDs and electronic components were soldered and wired together using solid-core wire so the wiring could hold its shape. The project also pushed the Arduino code beyond simple single-action behavior, requiring control of LEDs, LCDs, a piezo, and pushbuttons in a way that felt simultaneous to the player.
+    </p>
+    <p class="leading-relaxed text-slate-600 dark:text-slate-300 font-light">
+      The project improved 3D modeling, soldering, wiring, and embedded programming skills, especially around packaging several physical and electronic systems into one small playable object.
+    </p>
+  </section>
+</ProjectLayout>

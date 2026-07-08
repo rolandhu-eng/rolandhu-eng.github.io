@@ -1,0 +1,121 @@
+---
+import ProjectCard from '../components/ProjectCard.astro';
+import { getProject } from '../data/projects';
+import Layout from '../layouts/Layout.astro';
+
+const primaryProject = getProject('aeolus');
+const featuredGrid = [
+  getProject('wind-tunnel'),
+  getProject('quadruped-robot'),
+  getProject('penny-hockey')
+];
+const shipModel = getProject('ship-model');
+---
+
+<Layout title="Roland Hu | Engineering Portfolio" description="Roland Hu - Engineering Portfolio">
+  <section id="hero" class="relative w-full min-h-[100vh] flex items-center overflow-hidden border-b border-slate-200 dark:border-slate-800">
+    <div class="absolute inset-0 bg-[#f5f3ef]/35 dark:bg-[#020817]/50 z-10"></div>
+    <div class="relative z-20 max-w-5xl w-full mx-auto px-4 py-16">
+      <p class="font-mono text-xs text-slate-900 dark:text-slate-500 tracking-widest uppercase mb-4">Engineering Portfolio</p>
+      <h1 class="text-5xl md:text-7xl font-light text-slate-900 dark:text-white tracking-tight leading-none">Roland<br><em class="not-italic font-semibold">Hu</em></h1>
+      <p class="mt-6 text-sm md:text-base text-slate-100 dark:text-slate-400 max-w-sm leading-relaxed font-normal">
+        High school engineer. Building hardware at the intersection of aerodynamics, embedded systems, and experimental physics.
+      </p>
+      <div class="mt-8 flex gap-4">
+        <a href="#projects" class="font-mono text-xs px-4 py-2 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-80 no-underline">View Projects</a>
+        <a href="#contact" class="font-mono text-xs px-4 py-2 rounded border border-slate-400 dark:border-slate-600 text-slate-100 dark:text-slate-400 hover:border-slate-700 dark:hover:border-slate-300 no-underline">Contact</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="max-w-5xl w-full mx-auto px-4 py-16 flex-grow space-y-20">
+    <section id="projects" class="space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-2">
+        <div>
+          <h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white tracking-tight">Featured Projects</h2>
+          <p class="text-xs text-slate-500 mt-1">Selected builds focused on airflow, fabrication, robotics, and experimental setups.</p>
+        </div>
+        <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline whitespace-nowrap" href="/projects">View All →</a>
+      </div>
+
+      <ProjectCard project={primaryProject} size="large" />
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {featuredGrid.map((project) => (
+          <ProjectCard project={project} />
+        ))}
+      </div>
+
+      <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline whitespace-nowrap block" href="/projects">View All →</a>
+    </section>
+
+    <section id="ship-model" class="space-y-4">
+      <h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3 tracking-tight">Ship Model Building</h2>
+      <a href={shipModel.href} class="no-underline grid grid-cols-1 md:grid-cols-3 gap-6 p-5 rounded-lg border items-center bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600">
+        <div class="aspect-video md:aspect-square bg-slate-100 dark:bg-slate-950 rounded border border-slate-200 dark:border-slate-800 overflow-hidden md:col-span-1">
+          <img src={shipModel.cover} alt={shipModel.coverAlt} class="w-full h-full object-cover" />
+        </div>
+        <div class="md:col-span-2 space-y-3">
+          <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">
+            Building small-scale ship models since childhood, developing hands-on engineering skills and participating in model ship building competitions.
+          </p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700">USS Missouri BB-63</span>
+            <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700">USS Atlanta CL-51</span>
+          </div>
+        </div>
+      </a>
+    </section>
+
+    <section id="about" class="space-y-4">
+      <h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3 tracking-tight">About</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        <div class="md:col-span-2 space-y-4">
+          <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+            I'm a high school student with a passion for engineering and physics. I enjoy building hardware that connects theoretical concepts directly to physical performance logs.
+          </p>
+          <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline" href="/projects">Browse All Projects -></a>
+        </div>
+        <div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-4 rounded-lg">
+          <span class="font-mono text-[10px] font-bold text-slate-400 tracking-widest uppercase block mb-3">Capabilities</span>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700">CAD/Simulation</span>
+            <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700">CFD</span>
+            <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700">PCB Design</span>
+            <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700">Python / C++</span>
+            <span class="tag bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700">3D Printing</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="space-y-4">
+      <h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3 tracking-tight">Contact</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-5 rounded-lg space-y-3">
+          <h3 class="font-mono text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wide">Reach Out</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Prefer email for project discussions, collaborations, and scheduling.</p>
+          <a href="mailto:rhu2718@gmail.com" class="inline-block font-mono text-xs px-4 py-2 rounded no-underline bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-80">
+            Send Email
+          </a>
+        </div>
+        <div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-5 rounded-lg space-y-3">
+          <h3 class="font-mono text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wide">Networks</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">External references and updates.</p>
+          <a href="https://linkedin.com/in/hu-roland" target="_blank" rel="noopener" class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline block">
+            LinkedIn Profile
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  #hero {
+    background-image: url('/assets/images/sunrise.webp');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+</style>
