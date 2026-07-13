@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
+@plugin "@tailwindcss/typography";
 
 .katex,
 .katex-display,
@@ -16,31 +17,25 @@
   stroke: currentColor !important;
 }
 
-.katex .mord,
-.katex .mop,
-.katex .mbin,
-.katex .mopen,
-.katex .mclose,
-.katex .mpunct,
-.katex .mord.text,
-.katex .mord.mathnormal,
-.katex .mord.mathit,
-.katex .mord.mathsf,
-.katex .mord.mathtt,
-.katex .mord.mathbb,
-.katex .mord.mathcal,
-.katex .mord.mathfrak,
-.katex .mop > span,
-.katex .mord > span,
-.katex .mord > .mord,
-.katex .mord > .mop,
-.katex .mord > .mbin,
-.katex .mord > .mopen,
-.katex .mord > .mclose,
-.katex .mord > .mpunct {
-  color: inherit !important;
-  fill: currentColor !important;
-  -webkit-text-fill-color: currentColor !important;
+@variant dark (&:where(.dark, .dark *));
+
+/* Default to light theme variables */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
 }
 
-@variant dark (&:where(.dark, .dark *));
+/* When .dark is present anywhere above the code block, switch to dark theme variables */
+.dark .astro-code,
+.dark .astro-code span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
+.prose h1 {
+  @apply text-2xl font-semibold text-slate-900 dark:text-white mb-4;
+}
+.prose h2 {
+  @apply text-lg font-semibold text-slate-900 dark:text-white mb-4;
+}

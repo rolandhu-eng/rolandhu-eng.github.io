@@ -1,0 +1,194 @@
+---
+title: "Vehicle"
+showHero: false
+---
+import Dropdown from '../../../components/Dropdown.astro';
+
+# Airframe & Structure
+# CAD & Mechanical Design
+# Recovery System
+
+# Moment of Inertia
+## Inertia Tensor
+
+The moment of inertia is the rotational analog to mass. It determines body dynamics, like how the angular velocity changes under a given moment. Thus, accurately knowing the moment of inertia is important for developing an accurate simulation to tune controller gains. The full moment of inertia is a tensor that is represented as a 3x3 matrix, not a simple scalar like mass. This is because the angular momentum and the angular velocity do not necessarily point in the same direction, unlike the linear analog where linear momentum points along the velocity.
+
+$$
+\begin{bmatrix}
+L_x \\
+L_y \\
+L_z
+\end{bmatrix}
+=
+\begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{yx} & I_{yy} & I_{yz} \\
+I_{zx} & I_{zy} & I_{zz}
+\end{bmatrix}
+\begin{bmatrix}
+\omega_x \\
+\omega_y \\
+\omega_z
+\end{bmatrix}
+$$
+
+However, for the rocket where the axes are along the symmetry lines, each component of angular momentum does point along the corresponding angular velocity component, and the calculations are greatly simplified.
+
+$$
+\begin{bmatrix}
+L_x \\
+L_y \\
+L_z
+\end{bmatrix}
+=
+\begin{bmatrix}
+I_{xx} & 0 & 0 \\
+0 & I_{yy} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix}
+\begin{bmatrix}
+\omega_x \\
+\omega_y \\
+\omega_z
+\end{bmatrix}
+$$
+
+$$
+L_x = I_{xx} \omega_x \\
+L_y = I_{yy} \omega_y \\
+L_z = I_{zz} \omega_z
+$$
+
+Due to the approximate cylindrically symmetric mass distribution, the pitch and yaw moments of inertia are approximately equal, so only 2 measurements need to be taken: the roll moment of inertia, $I_{xx}$, and the pitch/yaw moment of inertia $I_{yy/zz}$.
+
+---
+
+## Bi-filar pendulum
+
+To measure the moments of inertia, a pendulum setup can be used. The standard way to do this is with a bi-filar pendulum setup, as it minimizes the propagated error compared to something like a standard pendulum (like a pendulum clock).
+
+<div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.17_PM.png" 
+      alt="Pitch/Yaw MOI measurement setup" 
+      style={{ maxWidth: '100%', borderRadius: '8px' }}
+    />
+    <p>Pitch/Yaw MOI measurement setup</p>
+  </div>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.28_PM.png" 
+      alt="Roll MOI measurement setup" 
+      style={{ maxWidth: '100%', borderRadius: '8px' }}
+    />
+    <p>>Roll MOI measurement setup</p>
+  </div>
+</div>
+
+The rocket is suspended on two strings (length $l$) equidistant from the center of mass (distance $d$). The period of small rotational oscillations can be measured and used to calculate the MOI according to the formula given below.
+
+$$
+I = \frac{T^2 m g d^2}{4 \pi^2 L}
+$$
+
+<Dropdown title="Newtonian Derivation">
+![Newtonian Derivation](/assets/aeolus/moi/Screenshot_2026-06-10_at_4.08.59_PM.png)
+</Dropdown>
+
+<Dropdown title="Lagrangian Derivation">
+![Lagrangian Derivation](/assets/aeolus/moi/Screenshot_2026-06-10_at_4.11.40_PM.png)
+</Dropdown>
+
+The measurement uncertainty in this setup $\delta I$ can be simply calculated by summing the relative uncertainties in $T, d, L$ in quadrature since they are gaussian.
+
+$$
+\delta I = I \sqrt{(2 \delta d / d)^2 + (2 \delta T / T)^2 + (\delta L / L)^2}
+$$
+
+Compared to the standard pendulum method below, the propagated uncertainties in the variables are significantly smaller.
+
+### Standard Pendulum (bad)
+
+<img src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.19.02_PM.png" alt="diagram" width="40%" class="mx-auto"/>
+
+For a standard pendulum setup, the MOI about the CM is given below (from $T=2\pi\sqrt{I/mgd}$ and the parallel axis theorem).
+
+$$
+I = \frac{T^2 m g d}{4\pi^2} - m d^2
+$$
+
+The uncertainty can be calculated by taking partial derivatives w.r.t. to $T$ and $d$ and summing in quadrature.
+
+![Partials](/assets/aeolus/moi/Screenshot_2026-06-10_at_4.39.55_PM.png)
+
+$$
+\delta I_{sp} = \sqrt{(I + m d^2)^2 \left( \frac{2 \delta T}{T} \right)^2 + (I - m d^2)^2 \left( \frac{\delta d}{d} \right)^2}
+$$
+
+Since $m d^2 \gg I$ this is usually not a viable method to measure the MOI since propagated errors are huge. If instead $d$ was reduced, $T$ would decrease and $\delta T/T$ would increase; in short $\delta I$ cannot be made arbitrarily small.
+
+---
+
+## $I_{xx}, I_{yy/zz}$
+
+Since the first flight test will be done with a bare rocket just for control verification, the MOI were measured in this configuration. $T$ was measured by analyzing video of multiple periods and averaging. $d$ and $L$ were measured with a caliper and a ruler respectively.
+
+**Videos:**
+
+<div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ flex: '1', minWidth: '300px' }}>
+    <h4>Roll (Ixx)</h4>
+    <video controls width="100%">
+      <source src="/assets/aeolus/moi/ixx-2.mov" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  <div style={{ flex: '1', minWidth: '300px' }}>
+    <h4>Pitch/Yaw (Iyy/Izz)</h4>
+    <video controls width="100%">
+      <source src="/assets/aeolus/moi/iyy-zz_2-2.mov" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</div>
+
+| mass kg = 1.434 | bi filar pendulum | bi filar pendulum |
+|-----------------|-------------------|-------------------|
+|                 | Ixx (roll)        | Iyy/Izz (pitch/yaw) |
+| **L = string length (m)** | 0.82 | 1.335 |
+| **d = dist. from CM (m)** | 0.046 | 0.155 |
+| **T = period (s)** | 1.34 | 3.19 |
+| **I (kg m²)** | 0.001651 | 0.065256 |
+| **uncertainty** | 0.000077 | 0.001189 |
+| **I (kg m²)** | **Ixx = 0.00165 ± 0.00008** | **Iyy≈Izz = 0.065±0.001** |
+|                 | (1.65±0.08)e-3    | (6.5±0.1)e-2      |
+
+### Standard Pendulum Comparison
+<Dropdown title = "Standard Pendulum Comparison">
+**Videos:**
+<div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ flex: '1', minWidth: '300px' }}>
+    <h4>Single Pendulum - Pitch/Yaw</h4>
+    <video controls width="100%">
+      <source src="/assets/aeolus/moi/pitch-yaw_single_pendulum.mov" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  <div style={{ flex: '1', minWidth: '300px' }}>
+    <h4>Single Pendulum - Roll (*very very bad*)</h4>
+    <video controls width="100%">
+      <source src="/assets/aeolus/moi/roll_single_pendulum-2.mov" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</div>
+|                      | single pendulum | single pendulum |
+|----------------------|-----------------|-----------------|
+| **dist from CM (d)** | 1.385           | 1.275           |
+| **T = period (s)**   | 2.38            | 2.30            |
+| **I (kg m²)**        | 0.044782        | 0.072244        |
+| **uncertainty**      | 0.045944        | 0.054775        |
+|                      | **garbage**     | **garbage**     |
+
+</Dropdown>

@@ -1,0 +1,75 @@
+---
+title: "Structure"
+showHero: false
+---
+
+import Dropdown from '../../../../components/Dropdown.astro';
+
+# over
+This documentation covers the development of the discrete attitude control loop designed for the subsonic wind tunnel project. The system utilizes a PID controller architecture to maintain stable pitch angles during high-flow test phases.
+[Read more about the PID logic](#implementation)
+
+[Go to overview page](/projects/aeolus#avionics)
+
+---
+
+# Control Law
+The controller operates on a discrete time-step $\Delta t$, calculating output based on the error $e(t)$ between the target setpoint and current sensor reading:
+
+$$u(t) = K_p e(t) + K_i \int_{0}^{t} e(\tau) d\tau + K_d \frac{de(t)}{dt}$$
+
+lagrangian comes from principle of stationary action:
+
+<Dropdown title="View PID C++ Implementation">
+  ```cpp
+  void calculatePID() {
+    error = setpoint - current_pitch;
+    // ... code ...
+  }
+  ```
+  ![Diagram of the wind tunnel assembly](/assets/aeolus/aeolustemp.png)
+</Dropdown>
+
+<img 
+  src="https://images.unsplash.com/photo-1755456068267-81519c5e2638" 
+  alt="Engineering background" 
+  class="rounded-xl shadow-lg" 
+/>
+
+# model
+---
+  <div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+      <model-viewer
+        src="/assets/robot-dog/quadruped-robot.glb"
+        camera-controls
+        environment-image="https://modelviewer.dev/shared-assets/environments/lightroom_14b.hdr"
+        exposure="0.7"
+        shadow-intensity="1"
+        shadow-softness="0.5"
+        auto-rotate
+        style="width: 100%; height: min(70vh, 720px); min-height: 420px;"
+      >
+      </model-viewer>
+    </div>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+---
+# Implementation
+The attitude logic is implemented within a MATLAB S-Function block to interface directly with Simulink's solver. 
+## code
+```matlab
+function [sys,x0,str,ts,simStateCompliance] = sfun_attitude(t,x,u,flag)
+    % Initialize system sizing parameters
+    switch flag
+      case 0
+        [sys,x0,str,ts,simStateCompliance] = mdlInitializeSizes();
+      case 3
+        % Compute outputs based on current time and state
+        sys = mdlOutputs(t,x,u);
+      case 9
+        % Terminate simulation gracefully
+        sys = mdlTerminate(t,x,u);
+      otherwise
+        DAStudio.error('Simulink:blocks:unhandledFlag', num2str(flag));
+    end
+end
+```
