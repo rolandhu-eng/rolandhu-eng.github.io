@@ -1,0 +1,43 @@
+---
+title: "Control"
+showHero: false
+---
+import Dropdown from '../../../components/Dropdown.astro';
+
+# Vane Moment Testing
+<Dropdown title='show'>
+The thrust vane testing was conducted with the 4-bar load cell cross test stand using the force differential across load cell pairs to calculate the moment and approximate the lateral force on each vane. Aeolus has 4 thrust vanes, each a half-ellipse (optimal shape to minimize induced drag) with span (semi-major axis) of 25 mm and chord (minor axis) of 20 mm. Each is connected to an axle offset but linked to the external fin axles, controlled via a servo.
+
+Due to poor design, force was not spread evenly across each load cell when pure axial thrust load was applied due to rigidity issues and different preloading from uneven geometry. Each load cell was held down with a weight, but the heights were not perfectly even, and nor were the angles perfect level, so some of the wooden planks faces did not perfectly interface with the bricks, causing uneven loading. When load was applied, the forces would distribute unevenly between load cells due the structures bending differently from the different preloads.
+
+A baseline test was run at 70% throttle to get baseline forces at 0 degree fin deflection (which were not spread evenly due to the issues above). A test was also run with 1 Nm pitching moment applied with hand-held force probe, again exhibiting same non-even force and cross talk issues.
+
+<div class="grid grid-cols-2 gap-4">
+  <figure>
+    <img src="/assets/aeolus/vane-moment-testing/Screenshot_2026-06-04_at_11.03.50_PM.png" alt="Forces on load cells" />
+    <figcaption>Forces on each load cell at 70% throttle 0 fin deflection pure axial loading ~1550g thrust. Expected 387.5 g evenly across each load cell.</figcaption>
+  </figure>
+  <figure>
+    <img src="/assets/aeolus/vane-moment-testing/Screenshot_2026-06-04_at_11.07.59_PM.png" alt="1 N-m moment testing" />
+    <figcaption>1 N-m moment. Expected LC 1 & 4 to have same negative force, and LC 2 & 3 to have same positive force.</figcaption>
+  </figure>
+</div>
+
+Thankfully, by calculating the total force differential between load cell pairs and comparing to the differential at the known 1 N-m moment, moments can be estimated using their ratios despite the horrible non-even force distribution.
+
+Surprisingly, the measured moments @ 70% throttle @ alpha = 5, 10, 20º correlated very nicely with flat plate $C_l$ measurements at a comparable Re. The thrust vane cross-section is actually a very thin airfoil, but close enough to a flat plate.
+
+<figure class="w-1/2 mx-auto">
+  <img src="/assets/aeolus/vane-moment-testing/image.png" alt="Measured moment vs alpha"/>
+  <figcaption>Measured moment vs alpha (purple dots) and experimental flat plate data (red line).</figcaption>
+</figure>
+
+The calculated moments about the CM are given below:
+
+| alpha [º] | moment [Nm] |
+| :--- | :--- |
+| 5 | 0.116 |
+| 10 | 0.168 |
+| 20 | 0.197 |
+
+</Dropdown>

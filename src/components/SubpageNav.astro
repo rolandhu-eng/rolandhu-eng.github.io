@@ -1,0 +1,84 @@
+---
+interface TocItem {
+  id: string;
+  label: string;
+}
+
+interface SubpageItem {
+  id: string;
+  label: string;
+  href: string;
+  children?: SubpageItem[];
+}
+
+interface Props {
+  items: SubpageItem[];
+  activePageId?: string;
+  toc?: TocItem[];
+  depth?: number;
+}
+
+const { items, activePageId, toc = [], depth = 0 } = Astro.props;
+
+const isActiveBranch = (page: SubpageItem): boolean => {
+  if (page.id === activePageId) return true;
+  return !!page.children?.some((child) => isActiveBranch(child));
+};
+
+// These must exist as static strings in this file so Tailwind includes them
+// in the bundle. The scrollspy script adds them dynamically at runtime.
+const TOC_ACTIVE_CLASSES   = "text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400 font-semibold tracking-wide";
+const TOC_INACTIVE_CLASSES = "text-slate-500 dark:text-slate-500 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 font-medium";
+---
+
+<nav class="relative flex flex-col">
+  <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-700" />
+
+  {items.map((page) => {
+    const isActive    = page.id === activePageId;
+    const isBranch    = isActiveBranch(page);
+    const isAnyActive = isActive || isBranch;
+
+    const linkActive   = "border-blue-500 dark:border-blue-400 text-slate-900 dark:text-white";
+    const linkInactive = "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600";
+    const linkClass    = `group relative -ml-px pl-3 py-1.5 font-mono text-[14px] leading-snug border-l-2 transition-all duration-150 block ${isAnyActive ? linkActive : linkInactive}`;
+
+    return (
+      <div class="relative flex flex-col">
+
+        <a href={page.href} class={`${linkClass} ${isActive ? 'font-medium' : ''}`}>
+          {page.label}
+        </a>
+
+        {page.children && isBranch && (
+          <div class="relative ml-5 flex flex-col">
+            <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-700" />
+            <Astro.self
+              items={page.children}
+              activePageId={activePageId}
+              toc={toc}
+              depth={depth + 1}
+            />
+          </div>
+        )}
+
+        {isActive && toc.length > 0 && (
+          <div class="relative ml-5 flex flex-col py-1 mb-1">
+            <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-100 dark:bg-slate-800" />
+            {toc.map((item) => (
+              <a
+                href={`#${item.id}`}
+                class={`toc-link relative -ml-px pl-3 py-1 font-mono text-[12px] leading-snug border-l-2 transition-all duration-150 block ${TOC_INACTIVE_CLASSES}`}
+                data-active-classes={TOC_ACTIVE_CLASSES}
+                data-inactive-classes={TOC_INACTIVE_CLASSES}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+        )}
+
+      </div>
+    );
+  })}
+</nav>

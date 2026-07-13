@@ -1,0 +1,14 @@
+---
+interface Props { title: string; }
+const { title } = Astro.props;
+---
+<details class="group inline cursor-pointer">
+  <summary class="list-none inline font-medium text-blue-600 dark:text-blue-400 hover:underline">
+    {title}
+    <span class="inline-block transition-transform group-open:rotate-90 ml-1 text-xs">▶</span>
+  </summary>
+  
+  <div class="mt-2 block border-l-2 border-slate-300 dark:border-slate-700 pl-4 text-sm">
+    <slot />
+  </div>
+</details>

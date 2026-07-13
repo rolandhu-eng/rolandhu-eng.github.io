@@ -1,0 +1,54 @@
+---
+title: "Quadruped Robot"
+showHero: true
+---
+
+# 01. Overview
+
+This was my first real integrated engineering project, combining mechanical design, electronics, and programming into a walking quadruped platform.
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+  <div class="not-prose rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950">
+    <img src="/assets/robot-dog/dog.webp" alt="Quadruped robot" class="w-full h-full object-cover" />
+  </div>
+  <div class="not-prose rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950">
+    <img src="/assets/robot-dog/cad.webp" alt="Quadruped robot CAD model" class="w-full h-full object-cover" />
+  </div>
+</div>
+
+---
+
+# 02. 3D Model
+
+{/* Import the script only once in your ProjectLayout or here if needed */}
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+
+<div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+  <model-viewer
+    src="/assets/robot-dog/quadruped-robot.glb"
+    camera-controls
+    environment-image="https://modelviewer.dev/shared-assets/environments/lightroom_14b.hdr"
+    exposure="0.7"
+    shadow-intensity="1"
+    shadow-softness="0.5"
+    auto-rotate
+    style="width: 100%; height: min(70vh, 720px); min-height: 420px;"
+  >
+  </model-viewer>
+</div>
+
+---
+
+# 03. Testing
+
+<div class="not-prose relative w-full aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-900 shadow-sm">
+  <video class="w-full h-full object-cover" controls preload="metadata">
+    <source src="/assets/robot-dog/IMG_7653.webm#t=0.1" type="video/webm" />
+  </video>
+</div>
+
+<div class="not-prose relative w-full aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-900 shadow-sm mt-5">
+  <video class="w-full h-full object-cover" controls preload="metadata">
+    <source src="/assets/robot-dog/IMG_7781.webm#t=0.1" type="video/webm" />
+  </video>
+</div>

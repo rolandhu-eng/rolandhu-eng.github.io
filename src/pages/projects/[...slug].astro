@@ -1,0 +1,76 @@
+---
+// 1. ADD 'render' to your astro:content imports
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import type { MarkdownHeading } from 'astro'; 
+
+import ProjectLayout from '../../layouts/ProjectLayout.astro';
+import { getProject, getProjectNav, type SubpageItem } from '../../data/projects'; 
+
+export async function getStaticPaths() {
+  const projectEntries = await getCollection('projects');
+  
+  return projectEntries.map((entry: CollectionEntry<'projects'>) => ({
+    // 2. CHANGE entry.slug to entry.id
+    params: { slug: entry.id }, 
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'projects'>;
+}
+
+const { entry } = Astro.props; 
+// 3. CHANGE entry.render() to render(entry)
+const { Content, headings } = await render(entry);
+
+// 4. CHANGE entry.slug to entry.id for your routing logic
+const slugParts = entry.id.split('/');
+const projectId = slugParts[0]; 
+
+const project = getProject(projectId);
+const currentNav = getProjectNav(projectId); 
+
+const tocItems = headings
+  .filter((h: MarkdownHeading) => h.depth === 1)
+  .map((h: MarkdownHeading) => ({ id: h.slug, label: h.text }));
+
+function findActiveId(nav: SubpageItem[], currentSlug: string): string | null {
+  const targetHref = `/projects/${currentSlug}`;
+  for (const item of nav) {
+    if (item.href === targetHref) return item.id;
+    if (item.children) {
+      const childMatch = findActiveId(item.children, currentSlug);
+      if (childMatch) return childMatch;
+    }
+  }
+  return null;
+}
+
+// 5. CHANGE entry.slug to entry.id here as well
+const activePageId = findActiveId(currentNav, entry.id) || slugParts[slugParts.length - 1];
+---
+
+<ProjectLayout
+  title={entry.data.title}
+  description={project.description}
+  dateRange={project.dateRange}
+  tags={project.tags}
+  heroMedia={project.cover}
+  isVideo={project.isVideo}
+  toc={tocItems}
+  subpages={currentNav}
+  activePageId={activePageId} 
+  showHero={entry.data.showHero}
+  heroPosition={project.heroPosition}
+  statusLabel={entry.data.statusLabel}
+  statusDot={entry.data.statusDot}
+  sidebarTitle={project.sidebarTitle}
+  projectName={project.title}
+>
+  <section id="md" class="markdown-wrapper space-y-4">
+    <div class="prose dark:prose-invert max-w-none">
+      <Content />
+    </div>
+  </section>
+</ProjectLayout>
