@@ -1,0 +1,168 @@
+---
+title: "Propulsion"
+showHero: false
+---
+import Dropdown from '../../../components/Dropdown.astro';
+import CompareTable from '../../../components/Table.astro';
+
+Aeolus uses a 70mm electric ducted fan (EDF) rather than a rocket motor — the defining constraint of the whole project. A throttleable EDF makes controlled ascent and hover possible without the field clearance and irreversibility of a rocket motor, but it also means propulsion isn't a fixed impulse curve: thrust has to be actively controlled throughout flight.
+
+The EDF itself was selected by trading thrust against mass, not just picking the highest static thrust available (see [EDF Selection](#edf-selection)). Delivering that thrust reliably meant characterizing the motor's actual behavior on a test stand — thrust and current draw were measured across the throttle range, revealing real limitations like a thrust plateau above 70% throttle from unconfigured ESC timing, and voltage sag under peak load severe enough to motivate a battery chemistry change (see [Thrust Characterization](#thrust-characterization)). And because open-loop throttle doesn't track motor RPM directly — voltage sag, ESC nonlinearity, and load all shift the throttle-to-RPM relationship — closed-loop RPM control was necessary to hold a commanded thrust setpoint consistently (see [RPM Governor](#rpm-governor)).
+
+<div style={{ display: 'flex', gap: '0px', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/propulsion/edfjacket.webp" 
+      alt="Power PCB" 
+      style={{ maxHeight: '400px', borderRadius: '8px' }}
+      class = "mx-auto"
+    />
+    <p>edf</p>
+  </div>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/propulsion/edfshroud.webp" 
+      alt="Servo PCB" 
+      style={{ maxHeight: '400px', borderRadius: '8px' }}
+      class = "mx-auto"
+    />
+    <p>aft shroud for aerodynamics and wire routing</p>
+  </div>
+</div>
+
+
+---
+
+# Component Selection
+
+## EDF Selection
+
+Four 70mm 6S EDF units were compared on thrust, weight, and power draw, ranked by a thrust-to-mass figure of merit $T/(1000+W)$.
+
+<CompareTable
+  columns={[
+    { key: 'name', label: 'EDF' },
+    { key: 'thrust', label: 'Thrust (g)', align: 'right' },
+    { key: 'weight', label: 'Weight (g)', align: 'right' },
+    { key: 'power', label: 'Power (W)', align: 'right' },
+    { key: 'fom', label: 'T/(1000+W)', align: 'right' },
+    { key: 'cost', label: 'Cost', align: 'right' },
+  ]}
+  rows={[
+    { name: 'ApisQueen 70mm', thrust: 2240, weight: 178, power: 1638, fom: '1.90', cost: '$41.98' },
+    { name: 'Powerfun 70mm', thrust: 2240, weight: 178, power: 1638, fom: '1.90', cost: '$39.27' },
+    { name: 'XFLY 2680kV', thrust: 2400, weight: 239, power: 1700, fom: '1.94', cost: '$44.99' },
+    { name: 'XFLY 3060kV', thrust: 2650, weight: 274, power: 1800, fom: '2.08', cost: '$54.99', highlight: true },
+  ]}
+  note="Selected the XFLY 3060kV unit for the highest figure of merit"
+  maxWidth='max-w-2xl'
+/>
+
+## Battery Selection
+
+The propulsion battery needed to sustain the EDF's peak current draw without excessive voltage sag. Standard 6S LiPo options were compared. A 6S LiHV (high-voltage) chemistry cell was considered later after [intial testing](#).
+<CompareTable
+  maxWidth="max-w-xl"
+  columns={[
+    { key: 'name', label: 'Battery' },
+    { key: 'chem', label: 'Chemistry' },
+    { key: 'capacity', label: 'Capacity (mAh)', align: 'left' },
+    { key: 'weight', label: 'Weight (g)', align: 'left' },
+    { key: 'cost', label: 'Cost', align: 'left' },
+  ]}
+  rows={[
+    { name: 'Ovonic LiPo 100C', chem: 'LiPo', capacity: 1150, weight: 175, cost: '$16', highlight: true },
+    { name: 'Ovonic LiPo', chem: 'LiPo', capacity: 1300, weight: 225, cost: '$30.99' },
+    { name: 'Ovonic LiPo 100C', chem: 'LiPo', capacity: 1550, weight: 283, cost: '$36.99' },
+    { name: 'GNB LiHV 160C', chem: 'LiHV', capacity: 1300, weight: 198, cost: '$35', highlight: true },
+  ]}
+  maxWidth='max-w-3xl'
+/>
+
+Initial testing with a standard 6S LiPo showed significant voltage sag under load — 24.6V to 21.5V at 55A draw, delivering only 1800g thrust, only 70% of its rated static thrust. This may be due to the significant voltage sag or poor intake geometry. The LiHV pack was selected for future verions to hopefully reduce this sag for better sustained voltage under load.
+
+The avionics bus is powered independently from a separate 2S LiPo (Ovonic, 800mAh, $22.99), decoupling flight computer and telemetry power from ESC/servo current draw — this preserves telemetry even in the event of an ESC or servo stall event on the main bus.
+
+---
+# Thrust Characterization
+
+See [testing](./testing#test-stand) for the testing setup
+
+import Chart from '../../../components/Chart.astro';
+
+<Chart
+  labels={[20, 30, 40, 50, 60, 70, 80, 90, 100]}
+  xLabel="Throttle (%)"
+  yLabel="Thrust (g)"
+  y1Label="Voltage (V)"
+  ariaLabel="Thrust and voltage versus throttle. Thrust plateaus above 70 percent while voltage sags progressively."
+  series={[
+    { label: 'Thrust (g)', data: [76.4, 352.5, 631.2, 873.5, 1246.0, 1700.5, 1775.2, 1774.0, 1775.9], color: 'amber', fill: true, axis: 'y' },
+    { label: 'Voltage (V)', data: [24.02, 23.80, 23.54, 23.27, 22.75, 21.95, 21.80, 21.82, 21.81], color: 'stone', dashed: true, axis: 'y1' },
+  ]}
+/>
+
+<CompareTable
+  maxWidth="max-w-3xl"
+  columns={[
+    { key: 'throttle', label: 'Throttle (%)', align: 'right' },
+    { key: 'thrust', label: 'Thrust (g)', align: 'right' },
+    { key: 'voltage', label: 'Voltage (V)', align: 'right' },
+    { key: 'vdrop', label: 'Voltage Drop', align: 'right' },
+    { key: 'current', label: 'Current (mA)', align: 'right' },
+    { key: 'rpm', label: 'RPM', align: 'right' },
+  ]}
+  rows={[
+    { throttle: 20, thrust: '76.4', voltage: '24.02', vdrop: '-0.05', current: '896', rpm: '8,493' },
+    { throttle: 30, thrust: '352.5', voltage: '23.80', vdrop: '-0.29', current: '5,606', rpm: '17,653' },
+    { throttle: 40, thrust: '631.2', voltage: '23.54', vdrop: '-0.62', current: '12,189', rpm: '23,502' },
+    { throttle: 50, thrust: '873.5', voltage: '23.27', vdrop: '-0.96', current: '18,816', rpm: '27,436' },
+    { throttle: 60, thrust: '1,246.0', voltage: '22.75', vdrop: '-1.59', current: '31,341', rpm: '32,603' },
+    { throttle: 70, thrust: '1,700.5', voltage: '21.95', vdrop: '-2.49', current: '50,062', rpm: '37,740'},
+    { throttle: 80, thrust: '1,775.2', voltage: '21.80', vdrop: '-2.80', current: '53,426', rpm: '38,597' },
+    { throttle: 90, thrust: '1,774.0', voltage: '21.82', vdrop: '-2.96', current: '53,237', rpm: '38,629' },
+    { throttle: 100, thrust: '1,775.9', voltage: '21.81', vdrop: '-3.16', current: '53,295', rpm: '38,597'},
+  ]}
+  note="thrust, voltage, current, rpm vs throttle"
+/>
+
+---
+
+# RPM Governor
+The simple way to control thrust is by setting throttle; it is what the ESC takes as an input. However, this is inconsistent as it depends heavily on battery voltage among other factors. This is why I decided to control RPM instead of throttle—the same motor RPM will produce the same thrust. To do this, I implemented a feed-forward PI controller that adjusts throttle in real time to match the measured RPM to the target RPM.
+
+First, the [thrust/rpm/throttle data was used](https://www.desmos.com/calculator/udqv0vhbat) to predict RPM based on throttle and voltage.
+> ```cpp
+> predictedThrottle = K_THROTTLE_RPM * EDF_V_REF/clamped_voltage * targetRPM;   //feedforward
+> ```
+The PI controller makes adjustments on top of this initial feedforward value.
+<Dropdown title="RPM governor code">
+```cpp
+  float error = targetRPM - currentRPM;
+
+  float Kp_eff = RPM_KP * EDF_V_REF / clamped_voltage;            //voltage-based gain adjustment
+  float Ki_eff = (fabsf(error) < RPM_I_GATE_RPM) ? RPM_KI : 0.0f; //integral gate
+  changeGains(Kp_eff, Ki_eff, RPM_KD);
+
+  float rawRate = (currentRPM - prevFilteredRPM) / dt; // RPM/s
+  prevFilteredRPM = currentRPM;
+  float alpha_d = 1.0f - expf(-dt / RPM_D_FILTER_TAU_S);
+  filteredRate = alpha_d * rawRate + (1.0f - alpha_d) * filteredRate; //ema filter
+
+  float corr_throttle_pct = rpmGovernor.update(error, dt, filteredRate);
+  predictedThrottle = K_THROTTLE_RPM * EDF_V_REF/clamped_voltage * targetRPM;   //feedforward
+  setThrottle(predictedThrottle + corr_throttle_pct);
+```
+[PID Code](./control#pid-controller)
+</Dropdown>
+
+
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/propulsion/rpm_governor.webp" 
+    alt="Test stand" 
+    style={{ maxWidth: '100%'}}
+    class="mx-auto dark:invert dark:hue-rotate-180"
+  />
+  <p>EDF governor response plotted with Python (matplotlib)</p>
+</div>
