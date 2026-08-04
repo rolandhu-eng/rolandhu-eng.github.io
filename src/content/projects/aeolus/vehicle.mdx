@@ -3,12 +3,71 @@ title: "Vehicle"
 showHero: false
 ---
 import Dropdown from '../../../components/Dropdown.astro';
+import Table from '../../../components/Table.astro';
+
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/vehicle/vehicleFull.webp" 
+    alt="Vehicle" 
+    style={{ maxWidth: '100%'}}
+    class="mx-auto"
+  />
+</div>
+
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/vehicle/Subsystems.drawio.png" 
+    alt="Pitch/Yaw MOI measurement setup" 
+    style={{ maxWidth: '60%'}}
+    class="mx-auto invert dark:invert-0 hue-rotate-0 dark:hue-rotate-180"
+  />
+  <p>Initial systems planning</p>
+</div>
+
+---
 
 # Airframe & Structure
+
+The airframe was divided into two sections: the aft section (aft of the intake) and the forward section (forward of the intake). The aft section needed to accomodate the EDF and control mechanism, and was designed to be supported purely through 3D printed parts due to the rather tight space and complex geometry. The forward section held the batteries, ESC, and avionics, and was designed to have 4 carbon fiber rods acting as the main structural support with a thin 3D printed shell around it. The CF rods give it good strength and minimal weight compared to an entirely 3D printed structure.
+
+Since this was a first prototype, all 3D printed parts were made from regular PLA due to its high stiffness, relatively good strength, and low cost. Future versions will likely use PC for its tensile strength, impact resistance, and stiffness while still being relatively affordable.
+
+
+
+---
 # CAD & Mechanical Design
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/vehicle/gen_design_dash.webp" 
+    alt="generative design" 
+    style={{ maxWidth: '100%'}}
+    class="mx-auto"
+  />
+  <p>Generative design used to create the [fairing hinges](#fairing-vid)</p>
+</div>
+
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/vehicle/nose_struct_sim2.webp" 
+    alt="FEA sim of shock cord attachment" 
+    style={{ maxWidth: '50%'}}
+    class="mx-auto"
+  />
+</div>
+
+---
+
 # Recovery System
 
-# Moment of Inertia
+<div style={{ flex: '1', minWidth: '300px'}} id='fairing-vid'>
+  <video controls width="50%" loop>
+    <source src="/assets/aeolus/vehicle/fairing_deploy.webm" type="video/webm" />
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+---
+# Moment of Inertia Testing
 ## Inertia Tensor
 
 The moment of inertia is the rotational analog to mass. It determines body dynamics, like how the angular velocity changes under a given moment. Thus, accurately knowing the moment of inertia is important for developing an accurate simulation to tune controller gains. The full moment of inertia is a tensor that is represented as a 3x3 matrix, not a simple scalar like mass. This is because the angular momentum and the angular velocity do not necessarily point in the same direction, unlike the linear analog where linear momentum points along the velocity.
@@ -63,9 +122,9 @@ Due to the approximate cylindrically symmetric mass distribution, the pitch and 
 
 ---
 
-## Bi-filar pendulum
+## Bi-filar Pendulum Setup
 
-To measure the moments of inertia, a pendulum setup can be used. The standard way to do this is with a bi-filar pendulum setup, as it minimizes the propagated error compared to something like a standard pendulum (like a pendulum clock).
+To measure the moments of inertia, a pendulum setup can be used. The most common way to do this is with a bi-filar pendulum setup, as it minimizes the propagated error [compared to something like a standard pendulum](#standard-pendulum-comparison).
 
 <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -73,6 +132,7 @@ To measure the moments of inertia, a pendulum setup can be used. The standard wa
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.17_PM.png" 
       alt="Pitch/Yaw MOI measurement setup" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100"
     />
     <p>Pitch/Yaw MOI measurement setup</p>
   </div>
@@ -81,6 +141,7 @@ To measure the moments of inertia, a pendulum setup can be used. The standard wa
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.28_PM.png" 
       alt="Roll MOI measurement setup" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100"
     />
     <p>>Roll MOI measurement setup</p>
   </div>
@@ -93,14 +154,24 @@ I = \frac{T^2 m g d^2}{4 \pi^2 L}
 $$
 
 <Dropdown title="Newtonian Derivation">
-![Newtonian Derivation](/assets/aeolus/moi/Screenshot_2026-06-10_at_4.08.59_PM.png)
+    <img 
+      src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.08.59_PM.png" 
+      alt="Newtonian Derivation" 
+      style={{ maxWidth: '100%', borderRadius: '8px' }}
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100"
+    />
 </Dropdown>
 
 <Dropdown title="Lagrangian Derivation">
-![Lagrangian Derivation](/assets/aeolus/moi/Screenshot_2026-06-10_at_4.11.40_PM.png)
+    <img 
+      src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.11.40_PM.png" 
+      alt="Lagrangian Derivation" 
+      style={{ maxWidth: '100%', borderRadius: '8px' }}
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100"
+    />
 </Dropdown>
 
-The measurement uncertainty in this setup $\delta I$ can be simply calculated by summing the relative uncertainties in $T, d, L$ in quadrature since they are gaussian.
+The measurement uncertainty in this setup $\delta I$ can be simply calculated by summing the relative uncertainties in $T, d, L$ in quadrature, approximating them as gaussian.
 
 $$
 \delta I = I \sqrt{(2 \delta d / d)^2 + (2 \delta T / T)^2 + (\delta L / L)^2}
@@ -108,9 +179,10 @@ $$
 
 Compared to the standard pendulum method below, the propagated uncertainties in the variables are significantly smaller.
 
-### Standard Pendulum (bad)
+<Dropdown title="Standard Pendulum">
+### Standard Pendulum
 
-<img src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.19.02_PM.png" alt="diagram" width="40%" class="mx-auto"/>
+<img src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.19.02_PM.png" alt="diagram" width="40%" class = "mx-auto dark:invert brightness-105 dark:brightness-100"/>
 
 For a standard pendulum setup, the MOI about the CM is given below (from $T=2\pi\sqrt{I/mgd}$ and the parallel axis theorem).
 
@@ -120,17 +192,23 @@ $$
 
 The uncertainty can be calculated by taking partial derivatives w.r.t. to $T$ and $d$ and summing in quadrature.
 
-![Partials](/assets/aeolus/moi/Screenshot_2026-06-10_at_4.39.55_PM.png)
+<img 
+    src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.39.55_PM.png" 
+    alt="Uncertainty Propogation" 
+    style={{ maxWidth: '70%', borderRadius: '8px' }}
+    class = "mx-auto dark:invert brightness-105 dark:brightness-100"
+/>
 
 $$
 \delta I_{sp} = \sqrt{(I + m d^2)^2 \left( \frac{2 \delta T}{T} \right)^2 + (I - m d^2)^2 \left( \frac{\delta d}{d} \right)^2}
 $$
 
 Since $m d^2 \gg I$ this is usually not a viable method to measure the MOI since propagated errors are huge. If instead $d$ was reduced, $T$ would decrease and $\delta T/T$ would increase; in short $\delta I$ cannot be made arbitrarily small.
+</Dropdown>
 
 ---
 
-## $I_{xx}, I_{yy/zz}$
+## Experimental Determination of $I_{xx}$ & $I_{yy/zz}$
 
 Since the first flight test will be done with a bare rocket just for control verification, the MOI were measured in this configuration. $T$ was measured by analyzing video of multiple periods and averaging. $d$ and $L$ were measured with a caliper and a ruler respectively.
 
@@ -153,42 +231,58 @@ Since the first flight test will be done with a bare rocket just for control ver
   </div>
 </div>
 
-| mass kg = 1.434 | bi filar pendulum | bi filar pendulum |
-|-----------------|-------------------|-------------------|
-|                 | Ixx (roll)        | Iyy/Izz (pitch/yaw) |
-| **L = string length (m)** | 0.82 | 1.335 |
-| **d = dist. from CM (m)** | 0.046 | 0.155 |
-| **T = period (s)** | 1.34 | 3.19 |
-| **I (kg m²)** | 0.001651 | 0.065256 |
-| **uncertainty** | 0.000077 | 0.001189 |
-| **I (kg m²)** | **Ixx = 0.00165 ± 0.00008** | **Iyy≈Izz = 0.065±0.001** |
-|                 | (1.65±0.08)e-3    | (6.5±0.1)e-2      |
+<Table 
+  note="System mass = 1.434 kg. Measurements derived using bi-filar pendulum method."
+  columns={[
+    { key: 'param', label: 'Parameter', align: 'left' },
+    { key: 'roll', label: 'Ixx (Roll)', align: 'center' },
+    { key: 'pitch', label: 'Iyy/Izz (Pitch/Yaw)', align: 'center' }
+  ]}
+  rows={[
+    { param: 'L = string length (m)', roll: '0.82', pitch: '1.335' },
+    { param: 'd = dist. from CM (m)', roll: '0.046', pitch: '0.155' },
+    { param: 'T = period (s)', roll: '1.34', pitch: '3.19' },
+    { param: 'I (kg m²)', roll: '0.001651', pitch: '0.065256' },
+    { param: 'Uncertainty', roll: '0.000077', pitch: '0.001189' },
+    { param: 'Final I (kg m²)', roll: '0.00165 ± 0.00008', pitch: '0.065 ± 0.001', highlight: true },
+    { param: 'Scientific', roll: '(1.65±0.08)e-3', pitch: '(6.5±0.1)e-2' }
+  ]}
+/>
 
-### Standard Pendulum Comparison
-<Dropdown title = "Standard Pendulum Comparison">
-**Videos:**
-<div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ flex: '1', minWidth: '300px' }}>
-    <h4>Single Pendulum - Pitch/Yaw</h4>
-    <video controls width="100%">
-      <source src="/assets/aeolus/moi/pitch-yaw_single_pendulum.mov" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
+<Dropdown title="Standard Pendulum Comparison">
+  ### Standard Pendulum Comparison
+  
+  **Videos:**
+  <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+    <div style={{ flex: '1', minWidth: '300px' }}>
+      <h4>Single Pendulum - Pitch/Yaw</h4>
+      <video controls width="100%">
+        <source src="/assets/aeolus/moi/pitch-yaw_single_pendulum.mov" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+    <div style={{ flex: '1', minWidth: '300px' }}>
+      <h4>Single Pendulum - Roll (<em>very very bad</em>)</h4>
+      <video controls width="100%">
+        <source src="/assets/aeolus/moi/roll_single_pendulum-2.mov" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
   </div>
-  <div style={{ flex: '1', minWidth: '300px' }}>
-    <h4>Single Pendulum - Roll (*very very bad*)</h4>
-    <video controls width="100%">
-      <source src="/assets/aeolus/moi/roll_single_pendulum-2.mov" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-  </div>
-</div>
-|                      | single pendulum | single pendulum |
-|----------------------|-----------------|-----------------|
-| **dist from CM (d)** | 1.385           | 1.275           |
-| **T = period (s)**   | 2.38            | 2.30            |
-| **I (kg m²)**        | 0.044782        | 0.072244        |
-| **uncertainty**      | 0.045944        | 0.054775        |
-|                      | **garbage**     | **garbage**     |
 
+  <Table 
+    note="Single pendulum method produced straight trash."
+    columns={[
+      { key: 'param', label: 'Parameter', align: 'left' },
+      { key: 'roll', label: 'Single Pendulum (Roll)', align: 'center' },
+      { key: 'pitch', label: 'Single Pendulum (Pitch/Yaw)', align: 'center' }
+    ]}
+    rows={[
+      { param: 'dist from CM (d)', roll: '1.385', pitch: '1.275' },
+      { param: 'T = period (s)', roll: '2.38', pitch: '2.30' },
+      { param: 'I (kg m²)', roll: '0.044782', pitch: '0.072244', highlight: true },
+      { param: 'Uncertainty', roll: '0.045944', pitch: '0.054775', highlight: true},
+
+    ]}
+  />
 </Dropdown>

@@ -1,0 +1,35 @@
+---
+title: "Communications"
+showHero: false
+---
+import Dropdown from '../../../components/Dropdown.astro';
+
+# Telemetry
+
+To communicate with Aeolus, a data link between the ground and the rocket must be established. RFM95W LoRa radio transceivers were used both on the rocket and on the ground. This allows for receiving and transmitting data (telemetry & commands) with a single piece of hardware.
+
+| Transceiver | Transmitter + Receiver |
+| --- | --- |
+| less mass | more mass |
+| transmit/receive cannot occur at same time | concurrent receive/transmit |
+| slower | faster |
+
+The ground station consisted of an ESP32 for processing, an RFM95W radio, and LEDs and a buzzer for indication. The ESP32 was connected to a computer via USB for communication over serial. A telemetry dashboard was displayed on the computer for monitoring and control.
+
+```markdown
+rocket  <- - - - - radio - - - - - ->  ground station <-USB-> computer dashboard
+```
+
+For the dashboard, two options exist: an HTML/JS-based design running on a browser or a python application.
+
+| **Feature** | **Web Dashboard (HTML/JS)** | **Python Desktop (PyQt/DearPyGui)** |
+| --- | --- | --- |
+| **Development Ease** | High (Edit and refresh) | Medium (Environment setup required) |
+| **Performance** | Good (Browser limitations) | Excellent (Native hardware speed) |
+| **UI Styling** | Easy (CSS/Tailwind) | Complex (Custom GUI frameworks) |
+| **Data Throughput** | Moderate (Web Serial latency) | High (Optimized serial libraries) |
+| **Real-time Logging** | Secondary (Web APIs) | Primary (High-speed file writing) |
+|  |  |  |
+| Use Case | Prototyping, clean UI | performance, integrity |
+
+A web dashboard was chosen for the simplicity. While performance is expected to be lower than a desktop application, the difference is not noticeable for my use case (~10 Hz data rate).

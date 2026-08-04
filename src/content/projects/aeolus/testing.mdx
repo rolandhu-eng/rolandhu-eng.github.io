@@ -1,0 +1,30 @@
+---
+title: "Testing"
+showHero: false
+---
+import Dropdown from '../../../components/Dropdown.astro';
+
+# Test Stand
+It is important to get thrust and control moments for accurate simulation before flight. It serves as a way to validate the function of the propulsion and control system, and see if my expectations and calculations live up to reality. To test thrust and get control moments, I built the test stand v1 with 4 bar load cells in a + pattern connected to the rocket. The sum of the load cell forces would be the net axial force on the rocket, while the force differential between opposite pairs could be used to calculate moments.
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/testing/stand.webp" 
+    alt="Test stand" 
+    style={{ maxWidth: '50%'}}
+    class="mx-auto"
+  />
+  <p>4 bar load cell test stand setup</p>
+</div>
+
+---
+
+# Tethered Flight Testing
+## 19 June
+
+For roll control testing, the rocket was hung from a string, allowing it to rotate freely while safely suspended. The TWR remained just below 1:1. Only roll control was applied to see if the roll gains from Simulink adequately controlled the real model.
+
+Initially, roll, pitch, and yaw control were all enabled; the roll control gains was also accidentally set 10x too high, resulting in oscillatory behavior. This was corrected and pitch and yaw control were also disabled to completely isolate roll.
+
+During the first tethered flight test, Aeolus was commanded to hover at 0.5 meters. However, it quickly lost orientation veering away from the vertical. This behavior may be explained by several factors. The first is an inadequately tuned PID where the gains caused unstable behavior. Another explanation is the non-linear force curve of the control vanes—a roll command on a non-neutral vane would induce a pitch/yaw moment as well due to the uneven force differential. Another possible explanation is control saturation—the roll, pitch, and yaw commands are blended together through addition. If this command exceeds the max fin deflection, the desired roll/pitch/yaw moments would not be correctly applied.
+
+Need to add telemetry logging—recording sensor data, servo deflection, etc—before conducting future tests instead of relying solely on video. Also need to use accelerometer data fused with bars data for altitude. Also need to add position control, not just orientation control. Also RPM control to eliminate inconsistent thrust from throttle control.

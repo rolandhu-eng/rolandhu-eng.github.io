@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import mdx from '@astrojs/mdx';
+import rehypeExternalLinks from 'rehype-external-links'; // 1. Added import
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,7 +16,17 @@ export default defineConfig({
 
   markdown: {
     remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex],
+    // 2. Added plugin with configurations to the rehype array
+    rehypePlugins: [
+      rehypeKatex,
+      [
+        rehypeExternalLinks,
+        {
+          target: '_blank',
+          rel: ['noopener', 'noreferrer']
+        }
+      ]
+    ],
     shikiConfig: {
       themes: {
         light: 'github-light',

@@ -4,8 +4,23 @@ showHero: false
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 
+# Control Hardware
+
+## Servo Selection
+Vane actuation servos were compared on torque, slew speed, deadband, and cost across four units. Deadband was a key criterion since it directly bounds the minimum resolvable vane deflection in the attitude control loop.
+
+| Servo | Torque (kg·cm) | Speed (s/60°) | Deadband | Cost ($\times$4) |
+|---|---|---|---|---|
+| HobbyPark 7.4V | 4.6 | 0.08 | — | $56 |
+| PTK 7462W MG | 4.5 | 0.08 | 2µs | $28 |
+| **PTK 7465** | **5.5** | **0.07** | **3µs** | **$34** |
+
+Selected the PTK 7465 for its combination of the highest torque, fastest slew speed, and lowest cost among the compared units. The PTK 7462W MG's marginally tighter deadband was not enough to offset its lower torque margin and reported quality inconsistency, given actuator torque is the binding constraint for vane authority (see [Vane Design & Aerodynamics](#)).
+
+---
+
+<Dropdown title='Vane Moment Testing'>
 # Vane Moment Testing
-<Dropdown title='show'>
 The thrust vane testing was conducted with the 4-bar load cell cross test stand using the force differential across load cell pairs to calculate the moment and approximate the lateral force on each vane. Aeolus has 4 thrust vanes, each a half-ellipse (optimal shape to minimize induced drag) with span (semi-major axis) of 25 mm and chord (minor axis) of 20 mm. Each is connected to an axle offset but linked to the external fin axles, controlled via a servo.
 
 Due to poor design, force was not spread evenly across each load cell when pure axial thrust load was applied due to rigidity issues and different preloading from uneven geometry. Each load cell was held down with a weight, but the heights were not perfectly even, and nor were the angles perfect level, so some of the wooden planks faces did not perfectly interface with the bricks, causing uneven loading. When load was applied, the forces would distribute unevenly between load cells due the structures bending differently from the different preloads.
@@ -19,7 +34,7 @@ A baseline test was run at 70% throttle to get baseline forces at 0 degree fin d
   </figure>
   <figure>
     <img src="/assets/aeolus/vane-moment-testing/Screenshot_2026-06-04_at_11.07.59_PM.png" alt="1 N-m moment testing" />
-    <figcaption>1 N-m moment. Expected LC 1 & 4 to have same negative force, and LC 2 & 3 to have same positive force.</figcaption>
+    <figcaption>1 N-m moment. Expected LC 1 & 4 to have same negative force, and LC 2 & 3 to have same positive force of same magnitude as 1 & 4.</figcaption>
   </figure>
 </div>
 
@@ -29,7 +44,7 @@ Surprisingly, the measured moments @ 70% throttle @ alpha = 5, 10, 20º correlat
 
 <figure class="w-1/2 mx-auto">
   <img src="/assets/aeolus/vane-moment-testing/image.png" alt="Measured moment vs alpha"/>
-  <figcaption>Measured moment vs alpha (purple dots) and experimental flat plate data (red line).</figcaption>
+  <figcaption>Measured moment vs alpha (purple dots) and experimental flat plate data (red line). Overlaid flat plate data was scaled to fit the dots as I am only comparing the trend, not the numbers. Moment is directly proportional to force and thus Cl, matching the scaled flat plate Cl data nicely. ($C_l$ ≈ 0.5 @ $\alpha = 5\deg$, experimental data gives $C_l$ ≈ 0.6, very close given the vane geometry and thrust tube exit interaction)</figcaption>
 </figure>
 
 The calculated moments about the CM are given below:
@@ -40,4 +55,90 @@ The calculated moments about the CM are given below:
 | 10 | 0.168 |
 | 20 | 0.197 |
 
+</Dropdown>
+
+---
+
+# PID Controller
+<Dropdown title='PID code'>
+## PID.h
+```cpp
+class PID {
+private:
+    float kp, ki, kd;
+    float integralClamp;        // Limits I to ±integralClamp
+    float outputMin, outputMax; // Limits the final output
+    float integral = 0.0f;
+    float prevError = 0.0f;
+
+    float P, I, D;
+
+public:
+    PID(float kp, float ki, float kd, float integralClamp, float outputMin, float outputMax)
+        : kp(kp), ki(ki), kd(kd), 
+          integralClamp(integralClamp), 
+          outputMin(outputMin), outputMax(outputMax), 
+          integral(0.0f), prevError(0.0f) {}
+
+    float update(float error, float dt) {
+        // Proportional
+        P = kp * error;
+        //  Integral
+        integral += error * dt;
+        I = ki * integral;
+        I = constrain(I, -integralClamp, integralClamp);
+        integral = (ki != 0.0f) ? I / ki : 0.0f;
+        // Derivative
+        float derivative = (dt > 0.0f) ? (error - prevError) / dt : 0.0f;
+        D = kd * derivative;
+        prevError = error;
+        // output
+        float out = P + I + D;
+        out = constrain(out, outputMin, outputMax);
+        return out;
+    }
+    //for gyro rate + euler error
+    float update(float error, float dt, float measuredRate) {
+        // Proportional
+        P = kp * error;
+
+        // Integral (unchanged)
+        integral += error * dt;
+        I = ki * integral;
+        I = constrain(I, -integralClamp, integralClamp);
+        integral = (ki != 0.0f) ? I / ki : 0.0f;
+
+        // Derivative
+        D = -kd * measuredRate;
+
+        float out = P + I + D;
+        out = constrain(out, outputMin, outputMax);
+        prevError = error; // kept for reset()/compatibility, unused in derivative now
+        return out;
+    }
+
+    void reset() { 
+        integral = 0.0f; 
+        prevError = 0.0f; 
+    }
+
+    // Dynamic tuning update method 
+    void setGains(float Kp, float Ki, float Kd) {
+        kp = Kp;
+        ki = Ki;
+        kd = Kd;
+    }
+
+    void setGains(float Kp, float Ki, float Kd, float I_clamp) {
+        kp = Kp;
+        ki = Ki;
+        kd = Kd;
+        integralClamp = I_clamp;
+    }
+
+    float getP(){ return P;}
+    float getI(){ return I;}
+    float getD(){ return D;}
+};
+```
 </Dropdown>

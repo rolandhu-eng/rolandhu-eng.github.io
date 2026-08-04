@@ -13,7 +13,7 @@ const {
 ---
 
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth dark">
+<html lang="en" class="scroll-smooth scroll-pt-25 dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -43,9 +43,17 @@ const {
       html { background: #020817; }
       html.light { background: #f5f3ef; }
 
-      *, *::before, *::after {
+      /* Smoothly transition only major layout components */
+      body, header, footer, nav, main, section, table, tr, td, th {
         transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
       }
+      
+      /* Explicitly murder all transitions for KaTeX/Math components */
+      .katex, .katex *, .math, .math * {
+        transition: none !important;
+      }
+
+      /* Keep discrete element overrides snappy */
       a, button, video, img { transition: none; }
       a { transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease; }
       button { transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
@@ -64,7 +72,7 @@ const {
 
   <body class="bg-[#f5f3ef] dark:bg-[#020817] text-slate-700 dark:text-slate-300 antialiased font-sans min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
     <!-- HEADER -->
-    <header class="sticky top-0 z-50 w-full border-b bg-[#f5f3ef]/90 dark:bg-[#020817]/90 border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+    <header id="site-header" class="sticky top-0 z-50 w-full border-b bg-[#f5f3ef]/90 dark:bg-[#020817]/90 border-slate-200 dark:border-slate-800 backdrop-blur-sm">
       <div class="max-w-5xl mx-auto px-4 py-3">
         <nav class="flex justify-between items-center">
           <a href="/" class="font-mono text-sm font-bold text-slate-900 dark:text-white tracking-tight hover:text-blue-600 dark:hover:text-blue-400 no-underline">
@@ -103,6 +111,15 @@ const {
     </footer>
 
     <script>
+      //get header height
+      function setHeaderHeightVar() {
+        const header = document.getElementById('site-header');
+        if (header) {
+          document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+        }
+      }
+      setHeaderHeightVar();
+      window.addEventListener('resize', setHeaderHeightVar);
       // Theme Toggle Logic
       const html = document.documentElement;
       const toggleBtn = document.getElementById('theme-toggle');
@@ -148,5 +165,6 @@ const {
         });
       }
     </script>
+
   </body>
 </html>

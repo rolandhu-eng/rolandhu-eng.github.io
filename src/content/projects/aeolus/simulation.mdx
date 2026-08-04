@@ -1,0 +1,52 @@
+---
+title: "Simulation"
+showHero: false
+---
+import Dropdown from '../../../components/Dropdown.astro';
+
+# Preliminary Sim
+
+# CFD
+
+To obtain an accurate aerodynamic model for use in the full MATLAB/Simulink control simulation, aerodynamic coefficients were calculated in ANSYS Fluent. RAS Aero II was also initially used as a much less computationally expensive tool, but lacks the alpha sweep (0-15º only) and unique characteristics of Aeolus (EDF tube, complex intake geometry and airflow interactions). Missile DATCOM was also considered but it is unobtainable due to ITAR restrictions.
+
+  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/simulation/cfd_parametric.webp" 
+      alt="Power PCB" 
+        style={{maxWidth: '70%'}}
+      class = "mx-auto"
+    />
+    <p>Parametric CFD study</p>
+  </div>
+
+
+<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/simulation/streamlines.webp" 
+      alt="Power PCB" 
+   
+      class = "mx-auto"
+    />
+    <p>Streamlines</p>
+  </div>
+  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/simulation/pres_contour.webp" 
+      alt="Servo PCB" 
+
+      class = "mx-auto"
+    />
+    <p>Pressure contour</p>
+  </div>
+  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/simulation/vane_contour.webp" 
+      alt="Servo PCB" 
+   
+      class = "mx-auto"
+    />
+    <p>Pressour contour and streamlines around deflected vane</p>
+  </div>
+</div>

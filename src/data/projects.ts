@@ -109,7 +109,7 @@ export const aeolusNav = [
   {
     id: 'vehicle',
     label: '1. Vehicle',
-    href: '/projects/aeolus/vehicle'
+    href: '/projects/aeolus/vehicle',
   },
 
   {
@@ -131,9 +131,9 @@ export const aeolusNav = [
   },
 
   {
-    id: 'state-estimation',
-    label: '5. State Estimation',
-    href: '/projects/aeolus/state-estimation',
+    id: 'gnc',
+    label: '5. GNC',
+    href: '/projects/aeolus/gnc',
   },
 
   {

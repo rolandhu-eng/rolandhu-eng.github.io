@@ -1,0 +1,91 @@
+---
+// Table.astro
+interface Column {
+  key: string;
+  label: string;
+  align?: 'left' | 'center' | 'right';
+}
+
+interface Row {
+  [key: string]: string | number | Record<string, string> | Record<string, number> | boolean | undefined;
+  highlight?: boolean;
+  muted?: boolean; // visually de-emphasize this row (e.g. rows excluded from ranking)
+  groupStart?: boolean; // draw a light divider above this row, separating it from the previous group
+  cellClass?: Record<string, string>; // manual override, highest priority
+  cellTier?: Record<string, 1 | 2 | 3 | 4 | 5>; // 1 = best ... 5 = worst
+}
+
+// Reusable 5-tier ranking scale: green (best) through red (worst).
+const TIER_COLORS: Record<number, string> = {
+  1: 'text-emerald-600 dark:text-emerald-400 font-semibold',
+  2: 'text-lime-600 dark:text-lime-400',
+  3: 'text-amber-600 dark:text-amber-400',
+  4: 'text-orange-600 dark:text-orange-400',
+  5: 'text-rose-600 dark:text-rose-400 font-semibold',
+};
+
+interface Props {
+  columns: Column[];
+  rows: Row[];
+  note?: string;
+  maxWidth?: string;
+}
+
+const {
+  columns,
+  rows,
+  note,
+  maxWidth = 'max-w-full',
+} = Astro.props;
+---
+
+<div class={`my-8 not-prose ${maxWidth} mx-auto overflow-x-auto`}>
+  <table class="w-full border-collapse text-[13px] font-serif">
+    <thead>
+      {/* \toprule + \midrule: heavy top rule, thin rule under the header */}
+      <tr class="border-t-2 border-b border-stone-700 dark:border-slate-400">
+        {columns.map((col) => (
+          <th class={`
+            px-4 py-2.5 font-semibold text-stone-800 dark:text-slate-200
+            ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
+          `}>
+            {col.label}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row, i) => (
+        <tr class={`
+          transition-colors
+          ${i === rows.length - 1 ? 'border-b-2 border-stone-700 dark:border-slate-400' : ''}
+          ${row.groupStart && i !== 0 ? 'border-t border-stone-200 dark:border-slate-800' : ''}
+          ${row.highlight ? 'bg-emerald-50/80 dark:bg-emerald-500/10' : 'bg-transparent'}
+        `}>
+          {columns.map((col) => (
+            <td class={`
+              px-4 py-2 tabular-nums
+              ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
+              ${row.cellClass?.[col.key]
+                ? row.cellClass[col.key]
+                : row.cellTier?.[col.key]
+                  ? TIER_COLORS[row.cellTier[col.key] as number]
+                  : row.muted
+                    ? 'text-stone-400 dark:text-slate-600'
+                    : row.highlight
+                      ? 'font-medium text-emerald-900 dark:text-emerald-200'
+                      : 'text-stone-700 dark:text-slate-300'}
+            `}>
+              {row[col.key]}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  {note && (
+    <p class="mt-3 text-[12px] leading-relaxed text-stone-600 dark:text-slate-400">
+      {note}
+    </p>
+  )}
+</div>

@@ -1,0 +1,152 @@
+---
+title: "Avionics"
+showHero: false
+---
+import Dropdown from '../../../components/Dropdown.astro';
+import Table from '../../../components/Table.astro';
+
+The avionics system handles sensing, control, and power distribution for Aeolus—reading orientation and altitude, driving the thrust-vane actuators, and keeping the flight computer isolated from the noise and current draw of the EDF. This page covers the hardware side: the flight computer, sensors, and custom PCBs. Control logic and the software architecture are covered separately.
+
+<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/avionics/Avionics.drawio.png" 
+    alt="Pitch/Yaw MOI measurement setup" 
+    style={{ maxHeight: '500px' }}
+    class="mx-auto dark:invert dark:hue-rotate-0"
+  />
+  <p>Initial avionics planning</p>
+</div>
+
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/avionics/av_bay.webp" 
+    alt="Power PCB" 
+    style={{ maxHeight: '500px', borderRadius: '8px' }}
+    class = "mx-auto"
+  />
+  <p>Flight computer and power distribution board</p>
+</div>
+</div>
+---
+
+# Flight Computer
+A custom flight computer PCB was not used for this prototype as I was still not certain of the exact components and requirements, though I will likely make one for future versions. Instead, I used breakouts soldered to a perfboard for replaceability and developmental simplicity.
+
+My flight computer was built around the Teensy 4.1, chosen for its clock speed, allowing for fast control loops and math, along with soldered-on PSRAM and flash for datalogging. [State estimation](gnc) and [communication](communications) were handled by the IMU, barometer, and LoRa radio (see [table below](#sensor-table)).
+
+In the future, I will likely switch to an LSM6DSOX or ISM330DHCX IMU for lower drift than my current setup. I will also switch to a BMP581 for its ~3 cm altitude precision compared to my current ~50 cm precision.
+
+<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/avionics/fc_front.webp" 
+      alt="FC front" 
+      style={{ maxHeight: '400px', borderRadius: '8px' }}
+      class = "mx-auto"
+    />
+    <p>FC front</p>
+  </div>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/avionics/fc_back.webp" 
+      alt="FC back" 
+      style={{ maxHeight: '400px', borderRadius: '8px' }}
+      class = "mx-auto"
+    />
+    <p>FC back</p>
+  </div>
+</div>
+
+---
+
+# Sensors
+
+In addition to the sensors used above for state estimation, I included an INA260 for avionics power monitoring (see [power distribution board](#power-distribution-board)) and an [INA228 breakout](https://www.mateksys.com/?portfolio=i2c-ina-bm) for monitoring the EDF power. I also had an [RPM sensor](https://www.hobbywingdirect.com/products/rpm-sensor) that works by counting the pulses in the ESC output wires. This allows for [closed-loop RPM control](propulsion#rpm-governor) instead of relying on throttle commands that result inconsistent thrust from voltage sag.
+
+I may also add an NTC thermistor to monitor the temperature of the ESC or wires since this is a potential failure point.
+<div id='sensor-table'>
+<Table
+  columns={[
+    { key: "part", label: "Part" },
+    { key: "function", label: "Function" },
+    { key: "interface", label: "Interface" },
+    { key: "spec", label: "Key Spec" },
+  ]}
+  rows={[
+    { part: "Teensy 4.1", function: "Flight computer MCU", interface: "—", spec: "600 MHz, +8 MB PSRAM, +16 MB flash" },
+    { part: "ICM-20948", function: "9-DOF IMU (accel/gyro/mag)", interface: "SPI", spec: "State estimation" },
+    { part: "BMP388", function: "Barometer", interface: "I2C", spec: "±0.5 m altitude precision" },
+    { part: "RFM95W", function: "LoRa radio", interface: "SPI", spec: "Command uplink / telemetry downlink" },
+    { part: "INA260", function: "Power monitor", interface: "I2C", spec: "Avionics bus voltage/current" },
+    { part: "INA228", function: "Power monitor", interface: "I2C", spec: "EDF motor power" },
+    { part: "RPM sensor", function: "ESC pulse counter", interface: "Hardware interrupts", spec: "EDF RPM" },
+  ]}
+/>
+</div>
+---
+
+# PCB Design
+These were the first PCBs I've designed and my first opportunity to solder SMD components. I decided to make the PCBs out of the necessity for compact and reliable electronics as well as for the fun challenge and new skills. I made a power distribution board and a servo distribution board.
+
+Both PCBs were designed in EasyEDA for its interface with JLCPCB for manufacturing. 5 boards of each were ordered for a total of just $6. The 0805 metric was chosen for components as it is compact but large enough to be comfortably hand-soldered with a soldering iron. I used screw terminals and JST connectors for easy connection and disconnection of components.
+
+## Power Distribution Board
+The avionics run on a dedicated 2S LiPo, entirely separate from the 6S LiPo powering the EDF. This split exists because the EDF motor draws high current under load, which would sag or inject noise onto a shared rail—putting the flight computer, IMU, and radio on their own isolated battery keeps sensor and logic power clean regardless of what the motor is doing.
+
+The power distribution board was designed to distribute and convert power from the 2S LiPo, serving as the common ground for all sensors, servos, and the flight computer. It included two LM2940 low dropout regulators to convert the 2S LiPo voltage to 5V and 3.3V for the flight computer and sensors. Two toggle switches were used since they are satisfying, one for all power and one for just the servos. An INA260 chip was used to monitor power consumption and battery voltage. 
+
+<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/avionics/pwrpcb.webp" 
+      alt="Power PCB" 
+      style={{ maxHeight: '350px', borderRadius: '8px' }}
+      class = "mx-auto rotate-90"
+    />
+    <p>Power distribution board layout</p>
+  </div>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/avionics/pwr_front.webp" 
+      alt="PCB front" 
+      style={{ maxHeight: '350px', borderRadius: '8px' }}
+      class = "mx-auto"
+    />
+    <p>Front</p>
+  </div>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/avionics/pwr_back.webp" 
+      alt="PCB back" 
+      style={{ maxHeight: '350px', borderRadius: '8px' }}
+      class = "mx-auto"
+    />
+    <p>Back</p>
+  </div>
+</div>
+
+## Servo Distribution Board
+The servo distribution board was simple as it just needed to distribute power and signals to each servo. The board was designed to be as compact as possible while still being hand-solderable with an iron. It included ground and power planes for better current handling (up to 5A worst case) and noise reduction, with a 470 $\mathrm{\mu F}$ low ESR capacitor to smooth the power delivery. I also included 10 $\mathrm{\mu F}$ capacitors on each servo's power line to reduce noise and 330 $\Omega$ resistors on each signal line for protection and to reduce ringing.
+
+<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/avionics/svrpcb.webp" 
+      alt="Servo PCB" 
+      style={{ maxHeight: '500px', borderRadius: '8px' }}
+      class = "mx-auto"
+    />
+    <p>Servo distribution board layout</p>
+  </div>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/avionics/svr_board.jpeg" 
+      alt="Servo PCB" 
+      style={{ maxHeight: '500px', borderRadius: '8px' }}
+      class = "mx-auto"
+    />
+    <p>Servo distribution board mounted</p>
+  </div>
+</div>
+

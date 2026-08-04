@@ -1,0 +1,203 @@
+---
+// Chart.astro
+interface Series {
+  label: string;
+  data: number[] | { x: number; y: number }[];
+  type?: 'line' | 'bar' | 'scatter';
+  color?: 'emerald' | 'stone' | 'blue' | 'amber' | 'rose';
+  dashed?: boolean;
+  axis?: 'y' | 'y1';
+  fill?: boolean;
+  pointOnly?: boolean;
+  hidePoints?: boolean;
+}
+
+interface Props {
+  labels: (string | number)[];
+  series: Series[];
+  xLabel?: string;
+  yLabel?: string;
+  y1Label?: string;
+  height?: number;
+  ariaLabel: string;
+}
+
+const {
+  labels,
+  series,
+  xLabel = '',
+  yLabel = '',
+  y1Label = '',
+  height = 320,
+  ariaLabel,
+} = Astro.props;
+
+const chartId = `chart-${Math.random().toString(36).slice(2, 9)}`;
+const hasY1 = series.some((s) => s.axis === 'y1');
+
+const COLOR_MAP: Record<string, { light: string; dark: string }> = {
+  emerald: { light: '#10b981', dark: '#34d399' },
+  blue:    { light: '#3b82f6', dark: '#60a5fa' },
+  amber:   { light: '#d97706', dark: '#fbbf24' },
+  rose:    { light: '#e11d48', dark: '#fb7185' },
+  stone:   { light: '#a8a29e', dark: '#64748b' },
+};
+---
+
+<div class="my-8 not-prose max-w-3xl mx-auto">
+  {series.length > 1 && (
+    <div class="flex justify-end mb-1.5">
+      <div
+        class="legend-box inline-flex flex-col gap-1 border border-black/70 dark:border-white/60 bg-white/90 dark:bg-slate-950/90 px-2.5 py-1.5 text-[11px] font-serif leading-tight text-black dark:text-white"
+      >
+        {series.map((s, i) => (
+          <span class="flex items-center gap-1.5">
+            <span
+              class="legend-swatch w-3 h-[2px] shrink-0"
+              data-chart={chartId}
+              data-series-index={i}
+              style={`background: ${COLOR_MAP[s.color ?? 'stone'].light}`}
+            ></span>
+            {s.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  )}
+  <div class="relative w-full" style={`height: ${height}px`}>
+    <canvas id={chartId} role="img" aria-label={ariaLabel}></canvas>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<script define:vars={{ chartId, labels, series, xLabel, yLabel, y1Label, hasY1, COLOR_MAP }}>
+  const FONT = '"Computer Modern", "Times New Roman", Times, serif';
+
+  function buildConfig(isDark) {
+    const fg = isDark ? '#ffffff' : '#000000';
+    const bg = isDark ? '#000000' : '#ffffff';
+    const gridColor = isDark ? '#3f4a5a' : '#d4d4d4';
+
+    const tickFont = { family: FONT, size: 11 };
+    const border = { display: true, color: fg, width: 1 };
+    const grid = { color: gridColor, lineWidth: 1, tickLength: 4, tickColor: fg };
+    const axisTitle = (text) => ({ display: !!text, text, color: fg, font: { family: FONT, size: 13, style: 'italic' } });
+
+    const hasXYData = series.some((s) => s.data.length > 0 && typeof s.data[0] === 'object' && 'x' in s.data[0]);
+
+    const datasets = series.map((s) => {
+      const c = COLOR_MAP[s.color ?? 'stone'];
+      const color = isDark ? c.dark : c.light;
+      const isScatter = s.type === 'scatter';
+      const isPointOnlyLine = s.type !== 'bar' && s.pointOnly;
+
+      return {
+        type: isScatter ? 'scatter' : (s.type ?? 'line'),
+        label: s.label,
+        data: s.data,
+        borderColor: color,
+        backgroundColor: s.fill ? color + '1a' : color,
+        borderWidth: 1.25,
+        borderDash: s.dashed ? [4, 3] : undefined,
+        pointRadius: s.hidePoints ? 0 : (s.type === 'bar' ? 0 : (isScatter || isPointOnlyLine ? 2.5 : 0)),
+        pointHoverRadius: s.hidePoints ? 0 : (isScatter || isPointOnlyLine ? 4 : 3),
+        pointBackgroundColor: color,
+        showLine: !isPointOnlyLine,
+        fill: !!s.fill,
+        tension: 0,
+        yAxisID: s.axis === 'y1' ? 'y1' : 'y',
+      };
+    });
+
+    // Full box (all four spines) with gridlines on both axes — standard matplotlib/pgfplots frame.
+    const scales = {
+      x: {
+        type: hasXYData ? 'linear' : 'category',
+        border,
+        grid,
+        ticks: { color: fg, font: tickFont },
+        title: axisTitle(xLabel),
+      },
+      y: {
+        border,
+        grid,
+        ticks: { color: fg, font: tickFont },
+        title: axisTitle(yLabel),
+      },
+    };
+
+    // Right spine: either the real y1 axis, or an invisible axis just to close the box.
+    scales[hasY1 ? 'y1' : 'yRight'] = {
+      position: 'right',
+      border,
+      grid: { display: false },
+      ticks: hasY1 ? { color: fg, font: tickFont } : { display: false },
+      title: hasY1 ? axisTitle(y1Label) : undefined,
+    };
+
+    return {
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false }, // handled by the HTML legend box
+          tooltip: {
+            backgroundColor: bg,
+            titleColor: fg,
+            bodyColor: fg,
+            borderColor: fg,
+            borderWidth: 1,
+            padding: 8,
+            cornerRadius: 0,
+            titleFont: tickFont,
+            bodyFont: tickFont,
+          },
+        },
+        scales,
+      },
+    };
+  }
+
+  function applyLegendColors(isDark) {
+    document
+      .querySelectorAll(`.legend-swatch[data-chart="${chartId}"]`)
+      .forEach((el) => {
+        const i = parseInt(el.getAttribute('data-series-index'), 10);
+        const s = series[i];
+        if (!s) return;
+        const c = COLOR_MAP[s.color ?? 'stone'];
+        el.style.background = isDark ? c.dark : c.light;
+      });
+  }
+
+  function renderChart() {
+    const canvas = document.getElementById(chartId);
+    if (!canvas) return console.warn(`[Chart] canvas #${chartId} not found`);
+    if (!window.Chart) return console.warn('[Chart] Chart.js not loaded');
+    if (!Array.isArray(labels) || labels.length === 0) return console.warn('[Chart] no labels provided');
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const chartInstance = new window.Chart(canvas, buildConfig(isDark));
+    applyLegendColors(isDark);
+
+    const observer = new MutationObserver(() => {
+      const nowDark = document.documentElement.classList.contains('dark');
+      const config = buildConfig(nowDark);
+      chartInstance.data = config.data;
+      chartInstance.options = config.options;
+      chartInstance.update('none');
+      applyLegendColors(nowDark);
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  }
+
+  if (document.readyState === 'complete') renderChart();
+  else window.addEventListener('load', renderChart);
+</script>
