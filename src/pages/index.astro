@@ -66,15 +66,20 @@ const shipModel = getProject('ship-model');
       </div>
     </div>
   </section>
-
 <script>
-  const WORDS = ['build', 'design', 'test', 'fly', 'tinker'];
+  const WORDS = ['build', 'design', 'test', 'engineer', 'make', 'wonder', 'learn'];
   const el = document.getElementById('rotating-word');
 
   if (el) {
-    let wordIndex = 0;
-    let charIndex = WORDS[0].length;
+    // 1. Pick a random starting index between 0 and the length of your array
+    let wordIndex = Math.floor(Math.random() * WORDS.length);
+    
+    // 2. Set the character index to the length of that specific random word
+    let charIndex = WORDS[wordIndex].length;
     let deleting = false;
+
+    // 3. Update the element text immediately so it displays the correct random word right away
+    el.textContent = WORDS[wordIndex];
 
     function tick() {
       const current = WORDS[wordIndex];
@@ -103,6 +108,7 @@ const shipModel = getProject('ship-model');
     setTimeout(tick, 1400); 
   }
 </script>
+
 
   <main class="max-w-6xl w-full mx-auto px-4 py-16 flex-grow space-y-20">
     <section id="projects" class="space-y-6">
