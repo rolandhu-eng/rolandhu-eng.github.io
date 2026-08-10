@@ -6,3 +6,19 @@ import Dropdown from '../../../components/Dropdown.astro';
 
 # Overview
 The flight computer has three main jobs: it must determine its current orientation and location (navigation), determine how to get to its desired orientation and position (guidance), and control its hardware to get there (control).
+
+---
+
+# State Estimation
+
+To control itself, the rocket must first know where it is and how it is currently moving. To do this, it has an IMU that measures the linear acceleration and the angular rates. The velocity, position, and orientation are obtained by integrating the acceleration and angular rate. However, there are some complications. These measurements are relative to the rocket itself (body frame), so they must be rotated to get measurements in the Earth frame. Furthermore, an accelerometer cannot distinguish between gravity and uniform acceleration (equivalence principle in General Relativity), so the gravity vector must be first subtracted from accelerometer readings. Both of these operations require accurate orientation; any small error in the measured orientation will cause the gravity vector to "leak" into the true acceleration, causing huge drift. An small angular error $\theta$ will cause roughly $g\theta$ of acceleration error; over time, this results in $\frac{1}{2}g\theta t^2$ of position error. A $1^\circ$ error over $10~\text{s}$ results in $8.6~\text{m}$ of position drift and $1.7~\text{m/s}$ of velocity drift. Thus, accurate orientation is of paramount concern.
+
+## Madgwick Filter
+The simplest way to get orientation is to directly integrate the gyro rate:
+
+https://x-io.co.uk/downloads/madgwick-phd-thesis.pdf
+
+https://doi.org/10.1109/ICORR.2011.5975346
+
+https://github.com/arduino-libraries/MadgwickAHRS
+

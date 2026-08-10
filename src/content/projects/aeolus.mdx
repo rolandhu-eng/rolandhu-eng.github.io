@@ -14,43 +14,239 @@ Aeolus is a hybrid thrust vector control (TVC) & aerodynamic fin controlled elec
 # Contents
 
 ```
-/projects/aeolus                               Overview
-/projects/aeolus/vehicle                       1 — Vehicle
-    1.1  Airframe & Structure
-    1.2  CAD & Mechanical Design
-    1.3  Recovery System
-    1.4  Moment of Inertia
-/projects/aeolus/propulsion                    2 — Propulsion
-    2.1  EDF & Motor Selection
-    2.2  Battery Selection
-    2.3  Thrust Characterization
-    2.4  RPM Governor
-/projects/aeolus/avionics                      3 — Avionics
-    3.1  Power Architecture
-    3.2  PCB Design
-    3.3  Sensor Suite
-/projects/aeolus/state-estimation              4 — State Estimation
-    4.1  Frame Convention
-    4.2  Sensor Pipeline
-    4.3  Accelerometer Calibration
-    4.4  Madgwick Filter (X-Up Rederivation)
-    4.5  Vertical Channel — Complementary Filter
-/projects/aeolus/control                       5 — Control
-    5.1  Vane Design & Aerodynamics
-    5.2  Vane Moment Testing
-    5.3  Servo Calibration
-    5.4  PID Attitude Controller
-/projects/aeolus/simulation                    6 — Simulation
-    6.1  Why Simulation
-    6.2  CFD — ANSYS Fluent
-    6.3  6DOF — MATLAB/Simulink
-/projects/aeolus/communications                7 — Communications
-    7.1  Radio Protocol
-    7.2  Ground Station Dashboard
-/projects/aeolus/testing                       8 — Testing
-    8.1  Ground Testing
-    8.2  Tethered Flight Test — June 2026
-    8.3  Next Steps
+# Project Aeolus — Full Page & Heading Outline
+
+
+## /projects/aeolus — Overview
+
+H1: Project Aeolus
+Sub: Active-control thrust-vectored EDF rocket — flight software,
+     sensor fusion, and control theory built from first principles
+
+H2: The Problem
+  - Zero-airspeed instability on the pad; no passive aerodynamic
+    stability until the vehicle has forward velocity
+
+H2: System Overview
+  - One diagram: vehicle → propulsion → avionics → state estimation
+    → control → simulation → comms → testing, as a data/signal flow,
+    not just a page list
+
+H2: Current Status
+  - Honest one-paragraph status. This is the paragraph that ages
+    fastest — update it every time project state changes
+
+Section nav cards → 1–8 below
+
+
+## /projects/aeolus/vehicle — 1. Vehicle
+
+H1: Vehicle
+
+H2: 1.1 Airframe & Structure
+  H3: Material Selection — PC-CF, PET-CF
+      - why these over standard PLA/ABS: thermal + structural rigidity
+        under EDF vibration and exhaust heat
+  H3: Load Paths & Failure Modes
+
+H2: 1.2 CAD & Mechanical Design
+  H3: Design Iteration History
+      - brief: what changed between revisions and why
+  [Accordion] Full CAD Screenshots & Dimensioned Drawings
+
+H2: 1.3 Recovery System
+  H3: Recovery Method & Trigger Logic
+  H3: Design Constraints (mass, deployment force, packing volume)
+
+H2: 1.4 Moment of Inertia
+  H3: Why MOI Matters for Control Authority
+      I = Σ m_i r_i²
+  H3: Bifilar Pendulum Method
+      - oscillation period → I derivation
+  [Accordion] Raw MOI Data — measured vs. CAD estimate, per-axis
+
+
+## /projects/aeolus/propulsion — 2. Propulsion
+
+H1: Propulsion
+
+H2: 2.1 EDF & Motor Selection
+  H3: Selection Criteria — thrust-to-weight, RPM range, size constraints
+  H3: Tradeoffs Against Alternatives Considered
+
+H2: 2.2 Battery Selection
+  H3: Power Budget & Discharge Requirements
+  H3: Dual-Battery Isolation Rationale
+
+H2: 2.3 Thrust Characterization
+  H3: Bench Test Setup
+  H3: Thrust vs. Throttle Curve
+  [Accordion] Raw Bench Data — thrust, current, vibration spectrum
+              across throttle range
+
+H2: 2.4 RPM Governor
+  H3: Feedforward + PID Structure
+  H3: Feedforward Model Bias — 1/V vs. 1/V²
+      - state the gap plainly; this is a real, unresolved finding
+  [Accordion] Governor Tuning Logs — Ki bisection history,
+              Kp/Kd bench sweeps
+
+
+## /projects/aeolus/avionics — 3. Avionics
+
+H1: Avionics
+
+H2: 3.1 Power Architecture
+  H3: Distribution & Isolation Strategy
+  H3: Noise Isolation Near High-Current ESC Lines
+
+H2: 3.2 PCB Design
+  H3: Three-Board Architecture (PDB, FC, Sensor Interface)
+      - why split across three boards rather than one
+  [Accordion] Schematics & Ground Plane Topology
+
+H2: 3.3 Sensor Suite
+  H3: Sensor Table — IMU, barometer, GPS, current/power monitors
+      - include the NEO-M9N GPS explicitly; it was missing before
+  H3: IMU/Barometer Complementarity
+      - why both are needed, what each corrects for
+
+
+## /projects/aeolus/state-estimation — 4. State Estimation
+
+H1: State Estimation
+
+H2: 4.1 Frame Convention
+  H3: X-Up Body Frame — Why It Was Chosen
+      - and what it required re-deriving downstream (Madgwick, below)
+
+H2: 4.2 Sensor Pipeline
+  H3: Data Flow — IMU → filter → fusion → control loop
+  H3: EDF Vibration & Digital LPF
+      - current DLPF cutoffs (111 Hz accel / 119 Hz gyro) sit near
+        Nyquist of 225 Hz ODR — state this limitation directly,
+        it shows you understand the margin problem
+
+H2: 4.3 Accelerometer Calibration
+  H3: Ellipsoid-Fit Calibration Method
+  [Accordion] Calibration Matrices & Raw Noise Spectrum
+
+H2: 4.4 Madgwick Filter (X-Up Rederivation)
+  H3: Why the Standard Derivation Didn't Apply
+  H3: The Rederivation
+      - this is one of your strongest "I didn't just import a library"
+        pieces of evidence — do not bury it in an accordion
+
+H2: 4.5 Vertical Channel — Complementary Filter
+  H3: Barometer/Accelerometer Fusion for Altitude
+
+H2: 4.6 GPS/IMU Fusion  [consider adding — currently has no home]
+  H3: Velocity-Primary Architecture
+      - GPS Doppler velocity as primary correction, not raw position
+  H3: Why Roll Is the Dominant Threat
+      - no gravity reference for roll; magnetometer degrades under
+        motor current
+  H3: Current-Gated Magnetometer Trust
+      - current sensor (not throttle %) as the physically correct
+        compensation variable
+
+
+## /projects/aeolus/control — 5. Control
+
+H1: Control
+
+H2: 5.1 Vane Design & Aerodynamics
+  H3: Semi-Ellipse Vane Geometry
+  H3: Stall Behavior at Current Geometry
+      - state plainly: fully stalled across full deflection range
+        (Re ≈ 58,500); nonlinear force curve is a consequence of
+        stall, not a geometry error — this is a root-cause finding,
+        keep it visible, not in an accordion
+
+H2: 5.2 Vane Moment Testing
+  H3: Thrust-Stand Setup for dM/dδ
+  [Accordion] Raw Torque-vs-Deflection Data
+
+H2: 5.3 Servo Calibration
+  H3: Slew Rate Under Loaded Exhaust Airflow
+  [Accordion] Bench Calibration Logs
+
+H2: 5.4 PID Attitude Controller
+  H3: Cascaded Quaternion-Based Structure
+      u(t) = Kp·e(t) + Ki∫e(τ)dτ + Kd·de/dt
+  H3: Quaternion Error Formulation
+      - 2·sin(θ/2) approximation vs. atan2 form for roll
+      - antipodal sign discontinuity near 180°, hysteresis fix
+  H3: Steady-State Trim / Feedforward
+  H3: Anti-Windup Logic
+  [Accordion] C++ Controller Code Extracts
+
+
+## /projects/aeolus/simulation — 6. Simulation
+
+H1: Simulation
+
+H2: 6.1 Why Simulation
+  - what simulation de-risked before hardware — brief, states purpose
+
+H2: 6.2 CFD — ANSYS Fluent
+  H3: Vane Deflection vs. Lateral Force (Fy)
+  H3: Choking & Flow Loss Limits
+      - max deflection angle before backpressure reduces axial thrust
+  [Figure] Pressure distribution, velocity vector meshes
+
+H2: 6.3 6DOF — MATLAB/Simulink
+  H3: Model Architecture
+      - explicit: built using Simulink's Aerospace Blockset 6DOF
+        Quaternion block; state clearly what you derived and fed
+        into it (vane aero curve, mass/MOI, control law) vs. what
+        the block itself provides — do not imply the integrator
+        was self-derived
+  H3: Simulated Step Response Under Disturbance
+
+
+## /projects/aeolus/communications — 7. Communications
+
+H1: Communications
+
+H2: 7.1 Radio Protocol
+  H3: LoRa Link Architecture (RFM95W)
+  H3: Packet Structure & Failsafe Logic
+      - if isGroundLost() failsafe isn't wired into main loop yet,
+        this is an honest place to say so — "identified, not yet
+        integrated" is a legitimate engineering status
+
+H2: 7.2 Ground Station Dashboard
+  H3: Web Serial Architecture (Browser-Based, No Install)
+  H3: LIVE/FULL Toggle & Staleness Watchdog
+  [Accordion] Binary Log Format — packed-struct spec, PSRAM buffering
+              → LittleFS bulk transfer on stopLog()
+
+
+## /projects/aeolus/testing — 8. Testing
+
+H1: Testing
+
+H2: 8.1 Ground Testing
+  H3: Static Thrust & Vibration Characterization
+  H3: Single-Axis Gimbal Rig — Closed-Loop PID Tuning
+
+H2: 8.2 Tethered Flight — Status & Blockers
+  [Write only once status is current. If still blocked, name the
+   blockers directly: arm-transient behavior during disarmed state,
+   idle-gate discontinuity at spool-up, failsafe not yet called in
+   main.cpp. This reads as engineering maturity, not failure.]
+  H3: Telemetry Comparison (once available)
+      - Plot A: early/oscillating response
+      - Plot B: tuned/damped response
+
+H2: 8.3 Next Steps
+  H3: Vane Resizing (target: +45% lateral force)
+  H3: Mass Relocation (target: -30% moment of inertia)
+  H3: Control Authority Ceiling
+      α_max = (Fy,max · d_vane) / I_yy
+      - label as hand-calc/CFD-derived until thrust-stand verified
+  [Accordion] Full Raw Telemetry Logs & Python Parsing Scripts
 ```
 ---
 
