@@ -78,3 +78,9 @@
 .prose a[href^="#"] {
   @apply font-normal text-inherit border-dotted border-current/40 hover:border-current;
 }
+
+/* Fix for Tailwind v4 Typography backticks */
+.prose code::before,
+.prose code::after {
+  content: "" !important;
+}

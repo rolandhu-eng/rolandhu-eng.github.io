@@ -153,7 +153,7 @@ The PI controller makes adjustments on top of this initial feedforward value.
   predictedThrottle = K_THROTTLE_RPM * EDF_V_REF/clamped_voltage * targetRPM;   //feedforward
   setThrottle(predictedThrottle + corr_throttle_pct);
 ```
-[PID Code](./control#pid-controller)
+(Uses the PID implmentation I made—covered [here](./control#pid-controller))
 </Dropdown>
 
 

@@ -60,32 +60,6 @@ In the future, I will likely switch to an LSM6DSOX or ISM330DHCX IMU for lower d
 
 ---
 
-# Sensors
-
-In addition to the sensors used above for state estimation, I included an INA260 for avionics power monitoring (see [power distribution board](#power-distribution-board)) and an [INA228 breakout](https://www.mateksys.com/?portfolio=i2c-ina-bm) for monitoring the EDF power. I also had an [RPM sensor](https://www.hobbywingdirect.com/products/rpm-sensor) that works by counting the pulses in the ESC output wires. This allows for [closed-loop RPM control](propulsion#rpm-governor) instead of relying on throttle commands that result inconsistent thrust from voltage sag.
-
-I may also add an NTC thermistor to monitor the temperature of the ESC or wires since this is a potential failure point.
-<div id='sensor-table'>
-<Table
-  columns={[
-    { key: "part", label: "Part" },
-    { key: "function", label: "Function" },
-    { key: "interface", label: "Interface" },
-    { key: "spec", label: "Key Spec" },
-  ]}
-  rows={[
-    { part: "Teensy 4.1", function: "Flight computer MCU", interface: "—", spec: "600 MHz, +8 MB PSRAM, +16 MB flash" },
-    { part: "ICM-20948", function: "9-DOF IMU (accel/gyro/mag)", interface: "SPI", spec: "State estimation" },
-    { part: "BMP388", function: "Barometer", interface: "I2C", spec: "±0.5 m altitude precision" },
-    { part: "RFM95W", function: "LoRa radio", interface: "SPI", spec: "Command uplink / telemetry downlink" },
-    { part: "INA260", function: "Power monitor", interface: "I2C", spec: "Avionics bus voltage/current" },
-    { part: "INA228", function: "Power monitor", interface: "I2C", spec: "EDF motor power" },
-    { part: "RPM sensor", function: "ESC pulse counter", interface: "Hardware interrupts", spec: "EDF RPM" },
-  ]}
-/>
-</div>
----
-
 # PCB Design
 These were the first PCBs I've designed and my first opportunity to solder SMD components. I decided to make the PCBs out of the necessity for compact and reliable electronics as well as for the fun challenge and new skills. I made a power distribution board and a servo distribution board.
 
@@ -149,4 +123,95 @@ The servo distribution board was simple as it just needed to distribute power an
     <p>Servo distribution board mounted</p>
   </div>
 </div>
+
+---
+
+# Sensors
+
+In addition to the sensors used above for state estimation, I included an INA260 for avionics power monitoring (see [power distribution board](#power-distribution-board)) and an [INA228 breakout](https://www.mateksys.com/?portfolio=i2c-ina-bm) for monitoring the EDF power. I also had an [RPM sensor](https://www.hobbywingdirect.com/products/rpm-sensor) that works by counting the pulses in the ESC output wires. This allows for [closed-loop RPM control](propulsion#rpm-governor) instead of relying on pure throttle commands that will result in inconsistent thrust from voltage sag.
+
+I may also add an NTC thermistor to monitor the temperature of the ESC or wires since this is a potential failure point.
+<div id='sensor-table'>
+<Table
+  columns={[
+    { key: "part", label: "Part" },
+    { key: "function", label: "Function" },
+    { key: "interface", label: "Interface" },
+    { key: "spec", label: "Key Spec" },
+  ]}
+  rows={[
+    { part: "Teensy 4.1", function: "Flight computer MCU", interface: "—", spec: "600 MHz, +8 MB PSRAM, +16 MB flash" },
+    { part: "ICM-20948", function: "9-DOF IMU (accel/gyro/mag)", interface: "SPI", spec: "State estimation" },
+    { part: "BMP388", function: "Barometer", interface: "I2C", spec: "±0.5 m altitude precision" },
+    { part: "RFM95W", function: "LoRa radio", interface: "SPI", spec: "Command uplink / telemetry downlink" },
+    { part: "INA260", function: "Power monitor", interface: "I2C", spec: "Avionics bus voltage/current" },
+    { part: "INA228", function: "Power monitor", interface: "I2C", spec: "EDF motor power" },
+    { part: "RPM sensor", function: "ESC pulse counter", interface: "Hardware interrupts", spec: "EDF RPM" },
+  ]}
+/>
+</div>
+
+
+# Accel/Mag calibration
+Plotting accelerometer and magnetometer readings in 3D as the sensor is rotated through all orientations should trace a sphere: radius 1 g for the accelerometer, ~50 µT (Earth's field at this location) for the magnetometer. In practice, sensor errors distort this sphere into an offset ellipsoid.
+
+Accelerometers require correction for scale (a constant multiplier), bias (a constant offset), and cross-axis sensitivity (each axis not being truly independent from the others). Magnetometers require correction for hard iron offsets (fixed fields from nearby magnetized materials) and soft iron distortions (caused by induced fields in nearby ferromagnetic materials). Because both error models for the accelerometer and magnetometer distort a sphere into an ellipsoid, both sensors can be corrected with the same equation:
+$$\mathbf{M'=A(M-b)}$$
+where $\mathbf{M'}$ and $\mathbf{M}$ are the corrected and raw measurement vectors, and $\mathbf{A}$ and $\mathbf{b}$ are the correction matrix and bias vector, transforming the offset ellipsoid into a centered sphere.
+
+**Procedure:** The IMU was held stationary in several orientations spanning the full range of attitudes. Recorded data was filtered and downsampled to help mitigate orientation clustering from biasing the least-squares ellipsoid fit. MATLAB's `magcal` function then computed the best-fit ellipsoid and returned $\mathbf{A}$, $\mathbf{b}$, and the radius of the corrected sphere for both sensors.
+
+<Dropdown title='Results'>
+### Results stored in flight code
+```cpp
+// [ax ay az] = [A]([ax' ay' az'] - [b])      corrects for accel calibration and mag distortion 
+const float A_acc[3][3] =   {{1.0055f, 0.0f, -0.0005f}, 
+							{0.0f, 1.0038f, -0.00075f}, 
+							{-0.0005f, -0.00075f, 0.9907f}};
+							
+const float A_mag[3][3] =   {{0.95125f,	0.0063396f,	0.002690f},
+							{0.006339f,	1.01557f,	0.04195f},
+							{0.00269f,	0.04195f,	1.0369f}};
+
+const float b_acc[3] = {-2.241559f, 15.39148f, 16.4980f};
+const float b_mag[3] = {-39.7325f,	26.5556f,	19.8010f};
+
+const float mg_avg = 1006.7418f;        //norm mg after calibration
+const float uT_avg = 50.17f;            //norm uT after correction
+```
+
+The diagonal elements in $\mathbf{A}$ are the scale factors for each axis. The off-diagonal elements correct for cross-axis sensitivity and mag distortion. 
+
+### Sensor point clouds pre-/post-calibration
+The centroid measures the center of mass of all points to visualize the extent of the non-uniform sampling density. The centroid matches the geometric center of the point cloud well, so sampling density was approximately uniform.
+
+<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/accel-mag-cal/mag-raw.webp" 
+      style={{ maxWidth: '100%', borderRadius: '8px' }}
+      class = "mx-auto dark:invert dark:hue-rotate-180"
+    />
+    <p>Magnetometer points before calibration</p>
+  </div>
+  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/accel-mag-cal/mag-corrected.webp" 
+      style={{ maxWidth: '100%', borderRadius: '8px' }}
+      class = "mx-auto dark:invert dark:hue-rotate-180"
+    />
+    <p>Magnetometer points after calibration</p>
+  </div>
+</div>
+
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/accel-mag-cal/accel.webp" 
+    style={{ maxWidth: '50%', borderRadius: '8px' }}
+    class = "mx-auto dark:invert dark:hue-rotate-180"
+  />
+  <p>Accelerometer points (no visible difference pre/post calibration)</p>
+</div>
+
+</Dropdown>
 

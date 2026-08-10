@@ -1,0 +1,250 @@
+---
+title: "Design Narrative"
+showHero: false
+---
+
+# /projects/aeolus/design-narrative — Outline
+
+H1: Design Narrative
+Sub-line: one sentence framing this as the reasoning layer, not the
+          reference layer — explicitly point to the subsystem pages
+          for depth
+
+---
+
+H2: 1. The Physics Problem
+  - Frame: EDF rocket = inverted pendulum at zero forward velocity,
+    no passive aerodynamic restoring moment
+  - One equation: τ_control = Iα + τ_disturbance
+  - One line connecting the equation to what follows: I and
+    τ_disturbance are outputs of every mechanical decision on the
+    Vehicle page; τ_control is bounded by what the vanes can deliver
+  - Purpose of section: establish that the control problem predates
+    the code — this is the thesis statement for the whole page
+
+---
+
+H2: 2. Why the Obvious Approaches Don't Work
+  Sub-structure: 3 short case studies, same internal shape each time
+  (naive approach → why it failed → what was physically actually
+  going on → link to subsystem page with the data)
+
+  H3: Vane Sizing
+    - naive: size by eye, tune gains around it
+    - failure: nonlinear force curve
+    - root cause: fully stalled across entire deflection range
+      (Re ≈ 58,500) — not a tuning problem, an aero problem
+    - link → Control page
+
+  H3: Sensor Fusion
+    - naive: fuse raw GPS position directly
+    - failure: random-walk position noise
+    - fix: GPS Doppler velocity as primary correction (~30x
+      improvement over 30s)
+    - deeper problem exposed: roll has no gravity reference;
+      magnetometer degrades under motor current
+    - fix: current-gated magnetometer trust (current, not throttle%,
+      is the physically correct variable)
+    - link → State Estimation page
+
+  H3: Quaternion Error
+    - naive: 2·sin(θ/2) small-angle approximation
+    - failure: compresses badly at large error, garbage output near
+      180° roll error
+    - fix: atan2 form + hysteresis around antipodal discontinuity
+    - note: discontinuity is a structural SO(3) property, corrupts
+      all 3 axes simultaneously, not just roll
+    - link → Control page
+
+  - Purpose of section: this is your strongest "I understand root
+    cause, not just symptoms" material — each case should be short
+    (3-5 sentences), not a full derivation; the subsystem page is
+    where the derivation lives
+
+---
+
+H2: 3. The Coupled Tradeoff
+  - The one example: vane size → structural load → mass → moment of
+    inertia → required control authority → back to vane size
+  - One equation: α_max = (Fy,max · d_vane) / I_yy
+  - Explicit statement: this is why Rev 2 proposals address vane
+    resizing AND mass relocation together, not separately
+  - Purpose of section: this is your "systems thinking" proof point —
+    the thing that separates "did several hard subsystems" from
+    "understands they're not independent"
+
+---
+
+H2: 4. What's Still Unresolved
+  - [DECISION POINT: write this only once you know the real status]
+  - If blocked: name the specific blockers plainly (whatever they
+    currently are), frame as identified-and-being-worked, not vague
+  - If flown: state what was learned from the flight data, link to
+    Testing page for the telemetry comparison
+  - Also state clearly: control authority ceiling is currently a
+    hand-calc/CFD prediction, not thrust-stand verified
+  - Purpose of section: shows the project is real and ongoing, not a
+    polished-and-abandoned demo — this section should read as the
+    most current, most frequently-updated part of the whole page
+
+---
+
+H2: 5. Why Aerospace
+  - One paragraph, not a list
+  - The throughline: no subsystem here was solvable in isolation;
+    that coupling is what confirmed the discipline choice, not any
+    single result
+  - Purpose of section: closes the page on the "why" without
+    repeating the RSI essay verbatim — this can be shorter and more
+    personal than the essay, since it's read in a different context
+
+---
+
+Formatting notes:
+  - Each H2 gets a 1-line "purpose"
+
+
+
+
+  ---
+title: "Project Aeolus — Design Narrative"
+description: "The physics problem, the failures, and the coupled tradeoffs behind an active-control EDF rocket"
+---
+
+import Callout from '../components/Callout.astro'
+
+<!--
+  NOTE TO SELF BEFORE PUBLISHING:
+  - Section 4 ("What's Still Unresolved") is written status-agnostic on
+    purpose. Fill in the actual tethered-flight status before this goes
+    live — either "flown, here's what we learned" or "blocked on X/Y/Z."
+    Do not publish a vague middle ground; pick the true one.
+  - Every subsystem link below assumes those pages exist at the paths
+    used in the sitemap (vehicle, propulsion, avionics, state-estimation,
+    control, simulation, communications, testing). Update paths if they
+    change.
+-->
+
+# Design Narrative
+
+Most of what's below lives in more detail on the subsystem pages linked
+throughout — this page is the argument, not the evidence. It's the
+reasoning chain that connects one physics problem to every decision that
+followed from it.
+
+## 1. The Physics Problem
+
+An EDF rocket has no wings, no fins doing meaningful work at zero forward
+velocity, and no aerodynamic restoring moment until the vehicle is already
+moving fast enough for its surfaces to bite into the air. On the pad, and
+for the first fraction of a second off it, the vehicle is not a rocket in
+the aerodynamically stable sense — it's an inverted pendulum balanced on a
+thrust vector, and every disturbance torque has to be cancelled by active
+control, because nothing else is going to cancel it.
+
+$$
+\tau_{control} = I\alpha + \tau_{disturbance}
+$$
+
+That equation looks trivial. It isn't, because $I$ and $\tau_{disturbance}$
+aren't constants you get to assume — they're the outputs of every
+mechanical decision made on [the vehicle page](/projects/aeolus/vehicle),
+and $\tau_{control}$ is bounded by whatever the [thrust vanes](/projects/aeolus/control)
+can actually deliver. The control problem doesn't start in the flight
+code. It starts here, and the code exists to solve what this equation
+demands.
+
+## 2. Why the Obvious Approaches Don't Work
+
+Three places where the straightforward version of a solution failed, and
+what that failure taught me:
+
+**Vane sizing.** The intuitive move is to size thrust vanes by eye,
+tune gains until the response looks reasonable, and move on. I did size
+them that way first. Bench testing showed the resulting force curve was
+badly nonlinear across the deflection range — not because the geometry
+was wrong in some subtle way, but because the vanes are fully stalled
+across their entire operating range at the Reynolds numbers involved
+(Re ≈ 58,500). The nonlinearity wasn't a control problem to tune around.
+It was an aerodynamics problem that tuning couldn't fix. Full derivation
+and bench data on [the control page](/projects/aeolus/control).
+
+**Sensor fusion.** The obvious way to estimate position is to fuse GPS
+position directly with IMU-integrated position. I built that first, too.
+The problem is that direct position fusion lets GPS noise show up
+directly in the state estimate — over a 30-second flight, that's
+meaningful positional uncertainty. Fusing GPS *Doppler velocity* instead,
+and integrating that, reduces the random-walk growth by roughly 30x over
+the same window, because velocity noise integrates far more gracefully
+than position noise propagates. The harder problem this exposed: roll has
+no equivalent correction source. Gravity gives you pitch and roll... no,
+gravity gives you no roll reference at all around the vehicle's vertical
+axis, and the magnetometer — the obvious fallback — degrades exactly when
+you need it most, under EDF motor current. The fix uses the current
+sensor itself as the trust signal for the magnetometer, gating it down
+dynamically as current rises, since current (not throttle percentage) is
+the physically correct proxy for the field distortion. Full architecture
+on [the state estimation page](/projects/aeolus/state-estimation).
+
+**Quaternion error.** The standard small-angle approximation for
+quaternion attitude error, $2\sin(\theta/2)$, works fine near zero error
+and compresses badly as error grows — which is exactly the regime a
+disturbed vehicle is in. Roll errors near 180° produced control outputs
+that made no physical sense until I switched to an $\text{atan2}$-based
+error formulation and added explicit hysteresis around the antipodal
+sign discontinuity in the quaternion representation. That discontinuity
+isn't a magnitude problem — it's a structural property of $SO(3)$, and it
+corrupts all three axes simultaneously when it triggers, not just roll.
+Detail on [the control page](/projects/aeolus/control).
+
+## 3. The Coupled Tradeoff
+
+None of the subsystems on this project are independent, and treating them
+as independent is the mistake that costs the most time. The clearest
+example: vane geometry, structural load, vehicle mass, and control gains
+form a closed loop.
+
+Larger vanes generate more control authority — but they also see higher
+aerodynamic loads, which demands more structural material to survive
+those loads without failing, which adds mass, which raises the moment of
+inertia the control system has to fight, which increases how much control
+authority is actually needed to hit a given angular acceleration target.
+Sizing the vanes without accounting for the mass and inertia consequences
+of that sizing decision produces a vehicle that's *harder* to control than
+a smaller-vane design, not easier — because the authority gain gets eaten
+by the inertia increase.
+
+$$
+\alpha_{max} = \frac{F_{y,max} \cdot d_{vane}}{I_{yy}}
+$$
+
+This is why [the Rev 2 proposals](/projects/aeolus/testing#next-steps)
+touch mass relocation and vane resizing together rather than either one
+alone — changing one side of that equation without the other doesn't move
+the number that actually matters.
+
+## 4. What's Still Unresolved
+
+<!-- Replace this section with the true current status before publishing -->
+
+The control authority ceiling above is currently a hand-calculated /
+CFD-derived prediction, not a measured, flight-verified number — the
+vanes haven't yet been characterized on a thrust stand to get real
+$dM/d\delta$ data, and until that happens the number stays labeled as a
+prediction rather than a spec.
+
+Testing status and next steps are documented in full on
+[the testing page](/projects/aeolus/testing), including what's blocking
+progression to the next test phase and what the plan is to clear it.
+
+## 5. Why This, and Why Aerospace
+
+The part of this project that's kept me in it isn't any single subsystem
+— it's that none of them can be solved in isolation. A control theory
+problem turns into a structural mass problem turns into an aerodynamics
+problem turns back into a control theory problem. That's the actual shape
+of aerospace engineering as a discipline, and it's a different kind of
+problem than the single-variable optimization you get in most physics
+coursework. Working through it here — with hardware that actually breaks
+when the math is wrong — is what confirmed aerospace over a narrower,
+single-discipline path.
