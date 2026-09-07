@@ -1,30 +1,158 @@
 ---
 title: "Testing"
+order: 8
+navLabel: "Testing"
 showHero: false
 ---
 import Dropdown from '../../../components/Dropdown.astro';
+import Table from '../../../components/Table.astro';
 
-# Test Stand
-It is important to get thrust and control moments for accurate simulation before flight. It serves as a way to validate the function of the propulsion and control system, and see if my expectations and calculations live up to reality. To test thrust and get control moments, I built the test stand v1 with 4 bar load cells in a + pattern connected to the rocket. The sum of the load cell forces would be the net axial force on the rocket, while the force differential between opposite pairs could be used to calculate moments.
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/testing/stand.webp" 
-    alt="Test stand" 
-    style={{ maxWidth: '50%'}}
-    class="mx-auto"
-  />
-  <p>4 bar load cell test stand setup</p>
-</div>
+# Test Campaign
+
+Nearly every number quoted elsewhere on this site came from one of these. The right-hand column is the one that matters — a test that does not change a decision was not worth running.
+
+<Table
+  note="Chronological. Each row links to where the result is used."
+  columns={[
+    { key: 'when', label: 'When', align: 'left' },
+    { key: 'test', label: 'Test', align: 'left' },
+    { key: 'meas', label: 'Measured', align: 'left' },
+    { key: 'out', label: 'What it changed', align: 'left' }
+  ]}
+  rows={[
+    { when: 'Jun', test: 'Static thrust sweep', meas: 'Thrust, current, RPM vs throttle', out: 'Found the 80% ESC plateau; motivated LiHV pack' },
+    { when: 'Jun', test: 'Vane moment, thrust stand', meas: 'dM/dδ at 5, 10, 20°', out: 'First control authority figure' },
+    { when: 'Jun', test: 'Bifilar pendulum', meas: 'Ixx, Iyy/zz to <5%', out: 'Made analytical gain derivation possible' },
+    { when: '19 Jun', test: 'First tethered hover', meas: 'Nothing — video only', out: 'Forced onboard telemetry logging', groupStart: true },
+    { when: '22–24 Jul', test: 'Roll, then pitch/yaw, isolated', meas: 'Authority and trim from flight data', out: 'Validated the second-order model' },
+    { when: '8–17 Aug', test: 'Accel/mag calibration ×3', meas: 'Correction matrices, 0.9% residual', out: 'Found location sensitivity; exposed a frame bug' },
+    { when: '8–12 Aug', test: 'GPS bench characterization', meas: 'Velocity noise, DOP under RF', out: 'Switched to airborne dynamic model' },
+    { when: '10 Aug', test: 'Vane resize re-characterization', meas: 'New authority, both axes', out: 'Final flight gains' },
+    { when: '21–27 Aug', test: 'Free flight', meas: 'Full closed-loop behaviour', out: 'Confirmed the Simulink model; found a 3 Hz limit cycle', groupStart: true }
+  ]}
+/>
 
 ---
 
-# Tethered Flight Testing
-## 19 June
+# Test Stand
 
-For roll control testing, the rocket was hung from a string, allowing it to rotate freely while safely suspended. The TWR remained just below 1:1. Only roll control was applied to see if the roll gains from Simulink adequately controlled the real model.
+It is important to get thrust and control moments for accurate simulation before flight. It serves as a way to validate the function of the propulsion and control system, and see if my expectations and calculations live up to reality. To test thrust and get control moments, I built the test stand v1 with 4 bar load cells in a + pattern connected to the rocket. The sum of the load cell forces would be the net axial force on the rocket, while the force differential between opposite pairs could be used to calculate moments.
 
-Initially, roll, pitch, and yaw control were all enabled; the roll control gains was also accidentally set 10x too high, resulting in oscillatory behavior. This was corrected and pitch and yaw control were also disabled to completely isolate roll.
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <img 
+    src="/assets/aeolus/testing/stand.webp" 
+    alt="Four-bar load cell test stand" 
+    style={{ maxWidth: '50%'}}
+    class="mx-auto" loading="lazy" decoding="async" />
+  <p class="fig-caption">4 bar load cell test stand setup</p>
+</div>
 
-During the first tethered flight test, Aeolus was commanded to hover at 0.5 meters. However, it quickly lost orientation veering away from the vertical. This behavior may be explained by several factors. The first is an inadequately tuned PID where the gains caused unstable behavior. Another explanation is the non-linear force curve of the control vanes—a roll command on a non-neutral vane would induce a pitch/yaw moment as well due to the uneven force differential. Another possible explanation is control saturation—the roll, pitch, and yaw commands are blended together through addition. If this command exceeds the max fin deflection, the desired roll/pitch/yaw moments would not be correctly applied.
+The stand is a build in its own right, with its own firmware — load cell conditioning, a radio link, and a dashboard of its own, so that thrust runs could be commanded and logged without anyone standing next to a 53 A motor.
 
-Need to add telemetry logging—recording sensor data, servo deflection, etc—before conducting future tests instead of relying solely on video. Also need to use accelerometer data fused with bars data for altitude. Also need to add position control, not just orientation control. Also RPM control to eliminate inconsistent thrust from throttle control.
+<div class="not-prose grid grid-cols-3 gap-3 my-6">
+  <figure class="m-0"><img src="/assets/aeolus/testing/stand-1.webp" alt="Four-bar load cell test stand, assembled" class="w-full rounded-lg" loading="lazy" decoding="async" /></figure>
+  <figure class="m-0"><img src="/assets/aeolus/testing/stand-2.webp" alt="Load cell mounting detail on the test stand" class="w-full rounded-lg" loading="lazy" decoding="async" /></figure>
+  <figure class="m-0"><img src="/assets/aeolus/testing/stand-3.webp" alt="Test stand with the vehicle mounted" class="w-full rounded-lg" loading="lazy" decoding="async" /></figure>
+</div>
+<p class="text-[11px] text-slate-500 dark:text-slate-400 text-center">The four-bar load cell stand.</p>
+
+
+It also has [documented problems](/projects/aeolus/control#static--thrust-stand). Uneven preload meant pure axial load did not distribute evenly across the cells, and they cross-talked. The measurement was recovered by referencing everything against a known applied moment, which is why the vane numbers survived a rig that was not good enough to trust in absolute terms.
+
+---
+
+# Tethered Testing
+
+## 19 June — First Hover Attempt
+
+**Setup.** The vehicle was suspended on a string so it could rotate freely while staying captive, with thrust-to-weight held just under 1:1.
+
+**What happened.** Roll, pitch, and yaw control were all enabled, and the roll gain was accidentally set ten times too high, which produced immediate oscillation. With that corrected and pitch and yaw disabled to isolate roll, the vehicle was commanded to hover at 0.5 m. It quickly lost orientation and veered away from vertical.
+
+**Three candidate causes**, none of which could be separated at the time:
+
+1. Gains not adequately tuned, producing unstable behaviour.
+2. The nonlinear vane force curve — a roll command applied to an already-deflected vane induces a pitch or yaw moment as well, because the force differential is uneven.
+3. Control saturation. Roll, pitch, and yaw commands are blended additively, so if the sum exceeds maximum deflection none of the three requested moments is delivered faithfully.
+
+**Why it could not be resolved.** There was no onboard log. The only record was video, which shows that the vehicle departed but nothing about what the controller was asking for while it did. That is the actual finding from 19 June, and it is the one that changed the project.
+
+**What changed.** Four things came directly out of this flight, and all four were built:
+
+- Onboard [telemetry logging](/projects/aeolus/communications#datalogging) — sensor data, servo deflection, and controller internals, at full rate rather than at video frame rate
+- Accelerometer/barometer fusion for altitude instead of raw barometer
+- Position control, not just attitude control
+- [Closed-loop RPM](/projects/aeolus/propulsion#rpm-governor) to remove inconsistent thrust from throttle commands
+
+The first of those is why every subsequent entry on this page has numbers attached.
+
+## 22–24 July — One Axis at a Time
+
+The next round tested roll alone, with pitch and yaw outputs forced to zero. Three controllers interacting is not a system you can characterize; one is.
+
+That constraint is what made the flight data usable as *measurement*. With only roll active, commanded deflection and measured angular acceleration relate through a single unknown, so fitting one against the other [returns the control authority](/projects/aeolus/control#dynamic--from-flight-data) — and the fit's intercept returns the trim angle for free. It also surfaced the [180° quaternion sign flip](/projects/aeolus/control#quaternion-error-and-the-180-problem), which was fixed the following day.
+
+Pitch and yaw followed the same way, disturbed by hand and left to recover. They recovered too slowly and could not reject small taps, which pointed at authority rather than tuning — and led directly to the [vane resize](/projects/aeolus/control#what-doubling-the-area-actually-bought) in August.
+
+---
+
+# Free Flight
+
+**21 August.** The horizontal velocity loop flew for the first time, commanding tilt from velocity error.
+
+**22 August — first untethered flight.** No string, no captive rig.
+
+**27 August.** Position hold tested. The first flight of the day suffered RPM sensor interference that produced an oscillating throttle. A later attempt ended in the vehicle's first crash, from hitting a disturbance harder than the loop could reject. Inspection afterwards found no damage.
+
+The most useful result was not the flight itself but a comparison: measured thrust in free flight matched the [Simulink prediction](/projects/aeolus/simulation#validated-again-in-free-flight) almost exactly, which validates a model chain running all the way back to the static thrust sweep in June.
+
+<div class="not-prose my-6 mx-auto max-w-sm">
+  <video controls loop muted playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800">
+    <source src="/assets/aeolus/free-flight.mp4" type="video/mp4" />
+  </video>
+  <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Untethered flight, August 2026.</p>
+</div>
+
+
+---
+
+# Open Problems
+
+## A 3 Hz Roll Oscillation That Only Appears Untethered
+
+Free flight showed a small, persistent roll oscillation at about 3.0 Hz, visible both in the video and in an FFT of the flight log. It does not appear in any tethered test.
+
+That distinction is the most informative thing about it. A tether adds damping and constrains motion, so something the tether was suppressing is now free to run. Three candidates:
+
+- **Servo backlash combined with vortex shedding.** Free play in the linkage means small commands do nothing until the slack takes up, and shed vortices off the vanes provide a periodic excitation to lock onto.
+- **Stiction and hunting.** The servo does not move until commanded past its static friction, then overshoots, then has to come back — a classic limit cycle around the setpoint.
+- **A lag-driven limit cycle.** Total loop delay — sensing, filtering, servo response — reaching the point where the correction arrives late enough to sustain the oscillation rather than damp it.
+
+Distinguishing them is tractable: backlash and stiction would show as a phase relationship between command and response that changes with amplitude, while a lag limit cycle would shift frequency with loop rate. Unresolved.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+  <figure class="m-0"><img src="/assets/aeolus/testing/roll-oscillation.webp" alt="Roll angle in free flight — the oscillation is small but persistent." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll angle in free flight — the oscillation is small but persistent.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/testing/roll-fft-3hz.webp" alt="FFT of the same segment, peak at 3.0 Hz." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">FFT of the same segment, peak at 3.0 Hz.</figcaption></figure>
+</div>
+
+
+## RPM Sensor Interference
+
+The 27 August throttle oscillation came from interference on the RPM pickup. The [governor's filtering](/projects/aeolus/propulsion#cleaning-up-the-rpm-signal) is built to reject noise on a signal that is fundamentally sound; it cannot help when the measurement itself is being corrupted. This is wiring and shielding, not software.
+
+## Roll Authority Did Not Scale With Vane Area
+
+Doubling vane area doubled pitch and yaw authority as predicted but produced only a 1.32× improvement in roll. [Still unexplained](/projects/aeolus/control#what-doubling-the-area-actually-bought).
+
+## Heading Initialization
+
+The vehicle flies without the magnetometer. Roll about the vertical axis has no gravity reference, so heading has to come from somewhere else, and initialising it reliably is unsolved.
+
+---
+
+# Next Steps
+
+- **A proper launchpad.** Every flight so far has started from whatever surface was available.
+- **A more aggressive vertical PID.** The altitude loop is conservatively tuned, which costs response.
+- **Integral gain on the attitude axes** to remove the residual steady-state error that trim compensation does not fully absorb.
+- **Full position hold**, which is the point the vehicle has been building toward and the last piece before the flight envelope can grow.

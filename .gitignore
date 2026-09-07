@@ -34,4 +34,8 @@ id_*
 secrets.txt
 
 
+# unpublished folder
+unpublished/
+
+
 .code-workspace

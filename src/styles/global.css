@@ -8,6 +8,14 @@
   contain-intrinsic-size: auto 80px; /* Tells the browser to skip math layout math when off-screen */
   transition: none !important;
 }
+
+/* Wide equations (e.g. the 3x3 inertia tensors) scroll inside the column
+   instead of pushing the whole page sideways on narrow screens. */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block-end: 0.5rem;
+}
 .katex * {
   color: inherit !important;
   fill: currentColor !important;
@@ -47,16 +55,40 @@
 .prose h2 {
   @apply text-lg font-semibold text-blue-800 dark:text-blue-300 mb-4;
 }
+.prose h4 {
+  @apply text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2;
+}
 .prose h3 {
   @apply text-base font-semibold text-slate-700 dark:text-slate-300 mb-3;
 }
 .prose p {
-  @apply text-sm/6 font-light text-slate-900 dark:text-slate-200 mb-4;
+  @apply text-sm/6 font-normal text-slate-900 dark:text-slate-200 mb-4;
 }
 
-/* default: internal/nav links — lighter weight, subtle always-visible underline */
+/* Paragraphs were overridden to 14px but lists never were, so bullets rendered
+   at the plugin's 16px base. `:not([class])` targets only markdown-generated
+   elements, leaving hand-written lists (e.g. the timeline) alone. */
+.prose ul:not([class]),
+.prose ol:not([class]) {
+  @apply text-sm/6 font-normal text-slate-900 dark:text-slate-200 mb-4 ps-5;
+}
+.prose ul:not([class]) { @apply list-disc; }
+.prose ol:not([class]) { @apply list-decimal; }
+.prose li:not([class]) { @apply mb-1; }
+
+.prose blockquote:not([class]) {
+  @apply border-l-2 border-slate-300 dark:border-slate-700 ps-4 my-5
+         text-sm/6 text-slate-600 dark:text-slate-400;
+}
+
+.prose hr:not([class]) {
+  @apply my-10 border-0 border-t border-slate-200 dark:border-slate-800;
+}
+
+/* default: internal/nav links — subtle always-visible underline. font-medium
+   keeps them distinct from body copy, which is now font-normal rather than light. */
 .prose a {
-  @apply font-normal text-blue-900 dark:text-blue-200 no-underline
+  @apply font-medium text-blue-900 dark:text-blue-200 no-underline
          border-b border-slate-400/40 dark:border-slate-500/40
          hover:text-blue-700 dark:hover:text-blue-300
          hover:border-blue-700 dark:hover:border-blue-300
@@ -65,7 +97,7 @@
 
 /* external links: distinct color, visible dotted underline, arrow */
 .prose a[href^="http"] {
-  @apply font-normal text-amber-800 dark:text-amber-200
+  @apply font-medium text-amber-800 dark:text-amber-200
          border-dotted border-amber-700/50 dark:border-amber-400/50
          hover:border-amber-700 dark:hover:border-amber-400;
 }
@@ -83,4 +115,19 @@
 .prose code::before,
 .prose code::after {
   content: "" !important;
+}
+/* Pipe-syntax markdown tables have no wrapper element to scroll, so make the
+   table itself the scroll container. The <Table> component handles its own. */
+.prose table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* One caption style for every figure, whether the markup uses <figcaption>
+   or a <p class="fig-caption"> inside a hand-written wrapper div. */
+.prose figcaption,
+.prose p.fig-caption {
+  @apply mt-2 mb-0 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 text-center;
 }

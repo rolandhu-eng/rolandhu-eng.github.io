@@ -1,8 +1,11 @@
 ---
 title: "Communications"
+order: 7
+navLabel: "Communications"
 showHero: false
 ---
 import Dropdown from '../../../components/Dropdown.astro';
+import Table from '../../../components/Table.astro';
 
 # Telemetry
 
@@ -20,16 +23,96 @@ The ground station consisted of an ESP32 for processing, an RFM95W radio, and LE
 rocket  <- - - - - radio - - - - - ->  ground station <-USB-> computer dashboard
 ```
 
+---
+
+# Protocol Design
+
+Choosing a transceiver saved mass but imposed a constraint: the link is **half duplex**. The radio cannot transmit and receive at the same time, so both ends talking whenever they have something to say would produce collisions — and the packets lost to a collision would be lost at random, which is unacceptable when one of them might be `ABORT`.
+
+The protocol falls out of that constraint rather than being designed around it. The ground station **polls**: it sends a command packet every 200 ms, the vehicle receives it, executes any command it carries, and only then replies with a telemetry packet.
+
+Because the vehicle only ever transmits in response to a poll, and only after the poll has been fully received, the two ends can never be transmitting simultaneously. Critical uplink commands are structurally protected: telemetry — the non-critical direction — always yields, and can never step on a command. There is no arbitration logic because the timing makes contention impossible.
+
+## Command Set
+
+Each command is one byte, with a payload and an XOR checksum:
+
+```cpp
+struct CommandPacket {
+    uint8_t  cmdType;   // Command enum cast to uint8_t
+    float    value;     // payload
+    uint8_t  checksum;  // XOR
+};
+```
+
+| **Hex** | **Command** | **Description** | **Valid state** |
+| --- | --- | --- | :--- |
+| `0x00` | `NONE` | Ping for telemetry | Any |
+| `0x0A` | `LAUNCH` | Triggers the automated launch sequence | Pre-flight |
+| `0xAA` | `ARM` | Arms flight controller systems | Pre-flight |
+| `0xAD` | `DISARM` | Safely disarms flight systems | Always |
+| `0xA1`–`0xA4` | `SET_SVR1`–`4` | Servo target angle (−40° to +40°) | In-flight |
+| `0xA5` | `SET_SVRN` | Nose servo angle (−40° to +40°) | In-flight |
+| `0xA6` | `SET_RPM` | Sets target motor RPM (0–30,000) | Test / in-flight |
+| `0xA7` | `SET_THR` | Sets raw throttle percentage (0–100) | Test / in-flight |
+| `0xB0` | `LOG_START` | Enables QSPI logging | Pre-flight |
+| `0xB1` | `LOG_STOP` | Disables QSPI logging | Any |
+| `0xB2` | `LS_FILES` | Requests flash file system index | Post-flight |
+| `0xB3` | `ERASE_ALL` | Wipes QSPI flash | Pre-flight |
+| `0xB4` | `GET_FILE` | Sends file data through serial | Post-flight |
+| `0xFF` | `ABORT` | Emergency kill; bypasses all logic | Always |
+
+The right-hand column is the part that matters. It is not documentation — it is an interlock. A command arriving in the wrong flight state is rejected, so a stale packet, a mis-click, or a corrupted byte that happens to survive the checksum cannot arm the vehicle mid-flight or erase the flash while it is being written to.
+
+`ABORT` and `DISARM` are the deliberate exceptions, valid in every state. `ABORT` bypasses the state machine entirely. A safety command that could be refused because the vehicle disagreed about what state it was in would not be a safety command.
+
+---
+
+# Datalogging
+
+Telemetry is lossy and rate-limited — 10 Hz over a radio link is enough to watch a flight, nowhere near enough to analyse one. The full record is written on board and retrieved afterwards.
+
+Records buffer into PSRAM during flight and are flushed to QSPI flash, rather than being written straight to flash as they arrive. Flash writes block for unpredictable stretches while the device performs its own housekeeping, and a control loop that must not miss a 5 ms deadline cannot afford to wait on one. RAM absorbs the jitter.
+
+Every log opens with an [initialisation record](/projects/aeolus/gnc#self-describing-logs) capturing the startup calibration state, so a file remains interpretable long after the session that produced it.
+
+## A Struct That Grew and Crashed the Flight Computer
+
+Adding horizontal velocity fields to the log record made the flight computer hard fault on every single write. The fields themselves were fine. The problem was the two words by which the struct had grown.
+
+`LogRecord` was declared `__attribute__((packed))` and began with a `uint8_t`. Packing removes the compiler's inserted padding, so that leading byte pushes nearly every subsequent multi-byte member onto an address that is not naturally aligned — a four-byte float starting at offset 1, 5, 9, and so on.
+
+The Cortex-M7 tolerates that, up to a point. Ordinary single-word loads and stores handle unaligned addresses in hardware. **Double-word and multiple-register transfers do not**: `LDRD`, `STRD`, and the load/store-multiple family fault on unaligned access, by design.
+
+Below a certain size the compiler copied the struct with ordinary word-sized instructions and everything worked. Past it, the optimiser decided a wider transfer was the better way to move that much data and emitted exactly the instructions that cannot tolerate misalignment. The bug had been latent since the struct was first declared, and adding two fields is what crossed the threshold.
+
+The fix was to drop `packed` and let members sit at natural alignment. Which promptly caused a second bug.
+
+Natural alignment reintroduces padding, including trailing padding at the end of the struct — and the checksum routine computed its XOR over every byte up to the last one, on the assumption that the checksum field *was* the last byte. With padding after it, the routine was folding uninitialised bytes into the comparison and reporting perfectly good records as `[CORRUPT]`. Correcting it to XOR only up to `offsetof(T, checksum)` fixed it.
+
+The cost was accounted for rather than waved away: **+14 bytes per record**, about 250 KB across a full 7.5 MB buffer, and older logs written under the packed layout are no longer readable, since both the record size and the checksum convention changed.
+
+---
+
+# Ground Station
+
 For the dashboard, two options exist: an HTML/JS-based design running on a browser or a python application.
 
 | **Feature** | **Web Dashboard (HTML/JS)** | **Python Desktop (PyQt/DearPyGui)** |
 | --- | --- | --- |
-| **Development Ease** | High (Edit and refresh) | Medium (Environment setup required) |
-| **Performance** | Good (Browser limitations) | Excellent (Native hardware speed) |
-| **UI Styling** | Easy (CSS/Tailwind) | Complex (Custom GUI frameworks) |
-| **Data Throughput** | Moderate (Web Serial latency) | High (Optimized serial libraries) |
-| **Real-time Logging** | Secondary (Web APIs) | Primary (High-speed file writing) |
-|  |  |  |
+| **Development Ease** | High (Edit and refresh) | Medium (Environment setup required) |
+| **Performance** | Good (Browser limitations) | Excellent (Native hardware speed) |
+| **UI Styling** | Easy (CSS/Tailwind) | Complex (Custom GUI frameworks) |
+| **Data Throughput** | Moderate (Web Serial latency) | High (Optimized serial libraries) |
+| **Real-time Logging** | Secondary (Web APIs) | Primary (High-speed file writing) |
 | Use Case | Prototyping, clean UI | performance, integrity |
 
 A web dashboard was chosen for the simplicity. While performance is expected to be lower than a desktop application, the difference is not noticeable for my use case (~10 Hz data rate).
+
+The dashboard talks to the ESP32 through the browser's Web Serial API, which means there is nothing to install and nothing to keep in sync — the ground station is a page, and the machine at the field only needs a browser. At 10 Hz the throughput ceiling that would normally argue against this never comes into play.
+
+<figure class="not-prose my-6 mx-auto max-w-3xl">
+  <img src="/assets/aeolus/communications/dashboard.webp" alt="The ground station dashboard, running in a browser over Web Serial." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The ground station dashboard, running in a browser over Web Serial.</figcaption>
+</figure>
+

@@ -1,11 +1,16 @@
 ---
 title: "Guidance, Navigation, Control"
+order: 5
+navLabel: "GNC"
 showHero: false
 ---
 import Dropdown from '../../../components/Dropdown.astro';
+import Table from '../../../components/Table.astro';
 
 # Overview
 The flight computer has three main jobs: it must determine its current orientation and location (navigation), determine how to get to its desired orientation and position (guidance), and control its hardware to get there (control).
+
+This page covers the first two. The [control](/projects/aeolus/control) page covers the third.
 
 ---
 
@@ -13,12 +18,148 @@ The flight computer has three main jobs: it must determine its current orientati
 
 To control itself, the rocket must first know where it is and how it is currently moving. To do this, it has an IMU that measures the linear acceleration and the angular rates. The velocity, position, and orientation are obtained by integrating the acceleration and angular rate. However, there are some complications. These measurements are relative to the rocket itself (body frame), so they must be rotated to get measurements in the Earth frame. Furthermore, an accelerometer cannot distinguish between gravity and uniform acceleration (equivalence principle in General Relativity), so the gravity vector must be first subtracted from accelerometer readings. Both of these operations require accurate orientation; any small error in the measured orientation will cause the gravity vector to "leak" into the true acceleration, causing huge drift. An small angular error $\theta$ will cause roughly $g\theta$ of acceleration error; over time, this results in $\frac{1}{2}g\theta t^2$ of position error. A $1^\circ$ error over $10~\text{s}$ results in $8.6~\text{m}$ of position drift and $1.7~\text{m/s}$ of velocity drift. Thus, accurate orientation is of paramount concern.
 
+That single calculation sets the priorities for everything below. It is why the attitude filter runs at 200 Hz while the position loop runs at 8 Hz, why the [IMU lever arm](/projects/aeolus/avionics#where-the-imu-sits) is compensated, and why the horizontal channel is given ten times the process noise of the vertical one.
+
+## Frame Convention
+
+Aeolus uses an **X-up body frame**: the roll axis, X, points along the vehicle's length and therefore vertically when it is standing on the pad. Sitting level, the accelerometer reads $+1$ g on X and zero on Y and Z.
+
+This is the natural choice for a rocket — the axis of symmetry is the axis you care about, and it keeps the roll axis first — but it is not the convention most reference implementations assume, and that had consequences downstream.
+
 ## Madgwick Filter
-The simplest way to get orientation is to directly integrate the gyro rate:
 
-https://x-io.co.uk/downloads/madgwick-phd-thesis.pdf
+Integrating the gyro alone gives orientation, but only briefly. Gyro bias is never exactly zero, so integration accumulates it without bound and the estimate walks away. The accelerometer provides an absolute reference — gravity always points down — but it is useless on its own, because it cannot tell gravity from the vehicle's own acceleration and it is drowned in vibration from a fan spinning at 35,000 rpm.
 
-https://doi.org/10.1109/ICORR.2011.5975346
+Madgwick's filter fuses the two by treating attitude correction as an optimisation. It defines an objective function measuring the mismatch between the gravity direction the accelerometer reports and the gravity direction the current attitude estimate predicts:
 
-https://github.com/arduino-libraries/MadgwickAHRS
+$$f(\mathbf{q}, \mathbf{a}) = R(\mathbf{q})\,\hat{\mathbf{g}} - \hat{\mathbf{a}}$$
 
+then takes a single gradient-descent step against that error each cycle, blending it with the gyro integration. The gain $\beta$ sets how hard it leans on the accelerometer versus the gyro.
+
+### Why the Standard Derivation Did Not Apply
+
+The published algorithm — and every reference implementation of it — assumes gravity lies along **Z**. That assumption is not a parameter; it is baked in. Because $\hat{\mathbf{g}} = [0, 0, 1]^{T}$ is a constant, the authors expand $f$ and its Jacobian $J$ analytically and simplify by hand, dropping the terms that multiply the two zero components. What ships is a page of algebra with the Z-up assumption already dissolved into it.
+
+With X as the vertical axis, $\hat{\mathbf{g}} = [1, 0, 0]^{T}$. Different components survive, different terms drop, and the simplified expressions no longer describe the right objective. The gradient $\nabla f = J^{T} f$ has to be re-derived from the objective function for the new reference direction — not translated, not axis-swapped after the fact, but rebuilt from the point where the assumption enters.
+
+Rotating the sensor frame to fake a Z-up convention would have been the shortcut. It also would have put the numerically-privileged axis in the wrong place and left every downstream frame — control, guidance, telemetry — disagreeing with the physical vehicle.
+
+$\beta = 0.04$ in flight. It is a trust parameter: raise it and the filter corrects gyro drift faster but admits more vibration and manoeuvre acceleration into the attitude estimate; lower it and the attitude is smooth but drifts. On a vehicle whose accelerometer sits in the vibration field of an EDF, the accelerometer earns less trust than it would on a quieter platform.
+
+### The Fast Inverse Square Root
+
+The reference implementation normalizes vectors with the famous `0x5f3759df` bit-hack — an integer approximation of $1/\sqrt{x}$ from an era when floating-point division was expensive.
+
+It was replaced with a plain `1.0f / sqrtf(x)` after it showed instability. On a Teensy 4.1 the substitution costs nothing measurable: the Cortex-M7 has a hardware floating-point unit with a square-root instruction, so the trick optimises away a problem the processor no longer has. A famous optimisation can outlive its hardware.
+
+The replacement is guarded, and the guard is argued from physics rather than defensiveness:
+
+```cpp
+if (x <= 1e-10f) {
+    return 0.0f;
+}
+return 1.0f / sqrtf(x);
+```
+
+Every call site passes a sum of squares, so $x$ is non-negative by construction and the only dangerous input is zero. In the gradient-normalisation call, a near-zero gradient magnitude means the filter has converged — the estimate already matches the measurement. Returning zero there is not a safe fallback papering over a division by zero; it is the *physically correct* answer, because the correct correction to apply is none.
+
+---
+
+# Vertical Channel
+
+Altitude and vertical velocity fuse the barometer with the accelerometer. The barometer is absolute but slow and noisy at roughly ±0.5 m; integrated acceleration is smooth and fast but drifts without bound. Each covers the other's weakness.
+
+---
+
+# Horizontal Channel
+
+Horizontal position has no equivalent of the barometer. Nothing on board measures it directly, so dead reckoning from the accelerometer is the only source between GPS fixes — and per the error analysis above, that is precisely the channel where attitude error leaks in as $g\theta$.
+
+That asymmetry is written into the filter tuning. The horizontal velocity states carry ten times the process noise of the vertical one:
+
+<Table
+  maxWidth="max-w-md"
+  note="Process noise variance per second, as flown."
+  columns={[
+    { key: 'ch', label: 'Channel', align: 'left' },
+    { key: 'q', label: 'Q', align: 'center' },
+    { key: 'why', label: 'Reason', align: 'left' }
+  ]}
+  rows={[
+    { ch: 'Vertical', q: '0.002', why: 'Barometer gives a continuous absolute reference' },
+    { ch: 'Horizontal', q: '0.020', why: 'No absolute reference; gravity leakage dominates' }
+  ]}
+/>
+
+Process noise sets how quickly the filter's confidence in its own propagation decays between corrections. Allowing horizontal uncertainty to grow ten times faster means the filter is correspondingly readier to accept a GPS correction when one arrives, which is the right posture given how quickly horizontal dead reckoning goes wrong.
+
+## GPS Fusion
+
+GPS velocity is fused with IMU-integrated velocity through a one-dimensional Kalman filter per axis. This fixed both velocity and position drift, since position is the integral of the corrected velocity rather than an independently estimated state.
+
+The receiver's **Doppler velocity** is used as the correction, not its position solution. Doppler velocity is derived from carrier frequency shift rather than from code-phase ranging, and it is both more accurate and less prone to the slow wandering that afflicts position fixes under multipath. For a vehicle that needs to hold station rather than know its global coordinates, velocity is also the more directly useful observable.
+
+The filter's **innovation** — the difference between the predicted and measured velocity — is logged on all three axes. That is instrumentation added specifically to debug the filter: innovation is where fusion problems become visible, since a filter that is over-trusting, under-trusting, or being fed outliers shows it in the innovation sequence long before the position estimate visibly fails.
+
+## Heading Is the Open Problem
+
+Roll about the vertical axis has no gravity reference. The accelerometer pins two degrees of freedom — it can tell which way is down — but rotation about the down vector leaves it unchanged. Resolving that requires either a magnetometer or motion.
+
+The magnetometer is [calibrated and characterized](/projects/aeolus/avionics#magnetic-interference), and the motor turned out not to disturb it meaningfully. But heading accuracy before recalibration reached 15° of error, and initialising heading reliably is unsolved. The vehicle currently flies without it.
+
+---
+
+# Guidance
+
+Guidance converts a position target into an attitude target through two cascaded loops.
+
+```
+position error  →  [P, 8 Hz]   →  velocity target
+velocity error  →  [PD, 25 Hz] →  acceleration command
+acceleration    →  tilt + bearing  →  target quaternion
+```
+
+A tilted vehicle accelerates horizontally because its thrust vector tips. So a commanded horizontal acceleration becomes a commanded tilt:
+
+$$\text{tilt} = \arcsin\left(\frac{|\mathbf{a}_{cmd}|}{T/m}\right)$$
+
+with the argument clamped to $[-1, 1]$ before the `arcsin` rather than trusting the loop above to produce something physical, and the whole thing skipped when thrust is too low to lean on at all. The bearing comes from `atan2` of the two acceleration components, and the pair are composed into a target quaternion.
+
+Every stage is bounded, and each limit protects against something specific:
+
+<Table
+  maxWidth="max-w-2xl"
+  columns={[
+    { key: 'lim', label: 'Limit', align: 'left' },
+    { key: 'val', label: 'Value', align: 'center' },
+    { key: 'why', label: 'Protects against', align: 'left' }
+  ]}
+  rows={[
+    { lim: 'Position deadband', val: '0.2 m', why: 'Chasing GPS noise around the setpoint' },
+    { lim: 'Max velocity', val: '2 m/s', why: 'Commanding a speed it cannot arrest in the space available' },
+    { lim: 'Max acceleration', val: '2 m/s²', why: 'Demanding a tilt the attitude loop cannot reach in time' },
+    { lim: 'Max tilt', val: '10°', why: 'A confused position loop asking for an attitude it should not be in' }
+  ]}
+/>
+
+## Holding Roll While Tilting
+
+Composing the tilt with the vehicle's current heading has a subtlety worth spelling out. The roll setpoint is extracted from the *previously commanded* target quaternion, not from the measured attitude.
+
+Taking it from the measurement seems natural and is wrong. The velocity loop runs every cycle, and if each cycle rebuilt the target from wherever the vehicle currently is, the roll setpoint would be silently overwritten with the actual roll — which is to say the roll controller would be handed its own output as its reference and would stop correcting anything. Reading from the commanded target keeps the roll setpoint an independent quantity that the roll loop can actually track.
+
+---
+
+# Self-Describing Logs
+
+Every flight log opens with an initialisation record written before any data: gyro biases measured at startup, the initial gravity vector, local $g$, and the ground-level pressure reference.
+
+This costs a few dozen bytes and means a log can be re-analysed months later without hunting for the constants that were in effect when it was recorded. Startup calibration values are exactly the sort of state that is obvious on the day and irrecoverable afterwards, and a log that cannot be interpreted without them is not really a record of anything.
+
+---
+
+## References
+
+- S. Madgwick, [*An efficient orientation filter for inertial and inertial/magnetic sensor arrays*](https://x-io.co.uk/downloads/madgwick-phd-thesis.pdf)
+- S. Madgwick et al., [*Estimation of IMU and MARG orientation using a gradient descent algorithm*](https://doi.org/10.1109/ICORR.2011.5975346), IEEE ICORR 2011
+- [Arduino MadgwickAHRS reference implementation](https://github.com/arduino-libraries/MadgwickAHRS)

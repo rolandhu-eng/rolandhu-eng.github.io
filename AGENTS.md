@@ -1,22 +1,8 @@
-## Development
+# Agent instructions
 
-When starting the dev server, use background mode:
+This project keeps its agent/contributor instructions in [CLAUDE.md](./CLAUDE.md).
 
-```
-astro dev --background
-```
-
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
-
-## Documentation
-
-Full documentation: https://docs.astro.build
-
-Consult these guides before working on related tasks:
-
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+Read that file — it covers the dev server, the Astro docs to consult, and the
+content conventions. This file exists only so tools that look for `AGENTS.md`
+are pointed at the right place; keeping a second copy of the text here would
+just let the two drift apart.

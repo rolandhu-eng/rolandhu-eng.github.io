@@ -1,15 +1,15 @@
 ---
 import ProjectCard from '../components/ProjectCard.astro';
-import { getProject } from '../data/projects';
+import { getProject, projectHref } from '../data/projects';
 import Layout from '../layouts/Layout.astro';
 
-const primaryProject = getProject('aeolus');
-const featuredGrid = [
+const primaryProject = await getProject('aeolus');
+const shipModel = await getProject('ship-model');
+const featuredGrid = (await Promise.all([
   getProject('wind-tunnel'),
   getProject('quadruped-robot'),
-  getProject('penny-hockey')
-];
-const shipModel = getProject('ship-model');
+  getProject('schlieren-imaging'),
+])).filter((p) => p !== undefined);
 ---
 
 <Layout title="Roland Hu | Engineering Portfolio" description="Roland Hu - Engineering Portfolio">
@@ -46,8 +46,7 @@ const shipModel = getProject('ship-model');
       </p>
 
       <p class="mt-6 text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-        High school engineer working across aerodynamics, embedded systems,
-        and fabrication — from CAD to flight test.
+        Aspiring aerospace engineer.
       </p>
 
       <div class="mt-10 flex flex-wrap justify-center gap-3">
@@ -67,7 +66,7 @@ const shipModel = getProject('ship-model');
     </div>
   </section>
 <script>
-  const WORDS = ['build', 'design', 'test', 'engineer', 'make', 'learn'];
+  const WORDS = ['build', 'design', 'test', 'engineer', 'make', 'learn', 'iterate', 'prototype'];
   const el = document.getElementById('rotating-word');
 
   if (el) {
@@ -115,12 +114,12 @@ const shipModel = getProject('ship-model');
       <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-2">
         <div>
           <h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white tracking-tight">Featured Projects</h2>
-          <p class="text-xs text-slate-500 mt-1">Selected builds focused on airflow, fabrication, robotics, and experimental setups.</p>
+          <p class="text-xs text-slate-500 mt-1">Some stuff I've made and the things I've learned along the way</p>
         </div>
         <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline whitespace-nowrap" href="/projects">View All →</a>
       </div>
 
-      <ProjectCard project={primaryProject} size="large" />
+      {primaryProject && <ProjectCard project={primaryProject} size="large" />}
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         {featuredGrid.map((project) => (
@@ -131,11 +130,46 @@ const shipModel = getProject('ship-model');
       <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline whitespace-nowrap block" href="/projects">View All →</a>
     </section>
 
+    <section id="research" class="space-y-4">
+      <h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3 tracking-tight">Research &amp; Recognition</h2>
+
+      <a href="https://doi.org/10.64336/001c.154674" target="_blank" rel="noopener"
+         class="no-underline block p-5 rounded-lg border bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 space-y-3">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="tag bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-500/30">Peer-reviewed</span>
+          <span class="font-mono text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">Sole author</span>
+        </div>
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-white leading-snug">
+          Altitude-Dependent Performance Analysis of Bell, Aerospike and Expansion-Deflection Nozzles for Rotating Detonation Engines
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
+          A CFD study comparing three nozzle geometries for rotating detonation engines across the
+          altitude range, evaluating how thrust coefficient and efficiency trade off as ambient
+          pressure falls and each design moves in and out of its matched condition.
+        </p>
+        <p class="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+          <em class="not-italic text-slate-700 dark:text-slate-300">Journal of High School Science</em>,
+          Vol. 9, Issue 4 &middot; December 2025
+          <span class="block mt-1 text-blue-600 dark:text-blue-500">doi.org/10.64336/001c.154674 &rarr;</span>
+        </p>
+      </a>
+
+      <div class="p-5 rounded-lg border bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800">
+        <span class="font-mono text-[10px] font-bold text-slate-400 tracking-widest uppercase block mb-3">Awards</span>
+        <div class="flex items-baseline gap-3">
+          <span class="tag bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/30 shrink-0">Silver Medal</span>
+          <p class="text-sm text-slate-700 dark:text-slate-300 font-normal m-0">
+            USA Physics Olympiad (USAPhO)
+          </p>
+        </div>
+      </div>
+    </section>
+
     <section id="ship-model" class="space-y-4">
       <h2 class="text-lg font-mono font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3 tracking-tight">Ship Model Building</h2>
-      <a href={shipModel.href} class="no-underline grid grid-cols-1 md:grid-cols-3 gap-6 p-5 rounded-lg border items-center bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600">
+      <a href={shipModel ? projectHref(shipModel) : "/projects/ship-model"} class="no-underline grid grid-cols-1 md:grid-cols-3 gap-6 p-5 rounded-lg border items-center bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600">
         <div class="aspect-video md:aspect-square bg-slate-100 dark:bg-slate-950 rounded border border-slate-200 dark:border-slate-800 overflow-hidden md:col-span-1">
-          <img src={shipModel.cover} alt={shipModel.coverAlt} class="w-full h-full object-cover" />
+          <img src={shipModel?.data.cover} alt={shipModel?.data.coverAlt ?? "Scale ship model"} loading="lazy" class="w-full h-full object-cover" />
         </div>
         <div class="md:col-span-2 space-y-3">
           <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">
@@ -154,7 +188,7 @@ const shipModel = getProject('ship-model');
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <div class="md:col-span-2 space-y-4">
           <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-            I'm a high school student with a passion for engineering and physics. I enjoy building hardware that connects theoretical concepts directly to physical performance logs.
+            I'm a high school student with a passion for engineering, physics, and learning.
           </p>
           <a class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline" href="/projects">Browse All Projects →</a>
         </div>
@@ -176,7 +210,7 @@ const shipModel = getProject('ship-model');
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-5 rounded-lg space-y-3">
           <h3 class="font-mono text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wide">Reach Out</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Prefer email for project discussions, collaborations, and scheduling.</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Send me an email about anything.</p>
           <a href="mailto:rhu2718@gmail.com" class="inline-block font-mono text-xs px-4 py-2 rounded-full no-underline bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-80">
             Send Email
           </a>
@@ -185,7 +219,7 @@ const shipModel = getProject('ship-model');
           <h3 class="font-mono text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wide">Networks</h3>
           <p class="text-xs text-slate-500 dark:text-slate-400">External references and updates.</p>
           <a href="https://linkedin.com/in/hu-roland" target="_blank" rel="noopener" class="font-mono text-xs text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 no-underline block">
-            LinkedIn Profile
+            LinkedIn
           </a>
         </div>
       </div>

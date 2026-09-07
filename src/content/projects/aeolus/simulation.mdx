@@ -1,23 +1,35 @@
 ---
 title: "Simulation"
+order: 6
+navLabel: "Simulation"
 showHero: false
 ---
 import Dropdown from '../../../components/Dropdown.astro';
+import Table from '../../../components/Table.astro';
 
-# Preliminary Sim
+# Why Simulate
+
+Aeolus is unstable at hover and has [1.23 thrust-to-weight](/projects/aeolus/propulsion). There is very little margin for finding out in flight that a gain is wrong, and every test flight costs a battery cycle, a setup, and a risk of breaking the vehicle.
+
+Simulation was used for two specific things. First, to produce an aerodynamic model good enough to tune a controller against before the hardware existed — the vane force curve had to come from somewhere, and CFD was cheaper than iterating vane geometry in the shop. Second, and more valuable in practice, to answer questions *about flights that had already happened*: when the vehicle oscillated, the model was where the fix was found before it was flown.
+
+What simulation was not used for is deciding whether the vehicle would work. Every number that mattered was eventually measured on a bench or extracted from a flight log, and where the two disagreed, the measurement won.
+
+---
 
 # CFD
 
 To obtain an accurate aerodynamic model for use in the full MATLAB/Simulink control simulation, aerodynamic coefficients were calculated in ANSYS Fluent. RAS Aero II was also initially used as a much less computationally expensive tool, but lacks the alpha sweep (0-15º only) and unique characteristics of Aeolus (EDF tube, complex intake geometry and airflow interactions). Missile DATCOM was also considered but it is unobtainable due to ITAR restrictions.
 
+The geometry is the reason the cheap tools did not work. Standard rocket aero codes assume a body with fins in clean external flow. Aeolus has an intake partway up the airframe, an internal duct, and control surfaces sitting in the exhaust jet rather than in freestream — three interactions those codes have no representation for. A vane in a jet sees dynamic pressure set by the fan, not by airspeed, which is precisely why the vehicle has any control authority at hover at all.
+
   <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/simulation/cfd_parametric.webp" 
-      alt="Power PCB" 
+      alt="Parametric CFD study across vane deflection angles" 
         style={{maxWidth: '70%'}}
-      class = "mx-auto"
-    />
-    <p>Parametric CFD study</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">Parametric CFD study</p>
   </div>
 
 
@@ -25,28 +37,96 @@ To obtain an accurate aerodynamic model for use in the full MATLAB/Simulink cont
   <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/simulation/streamlines.webp" 
-      alt="Power PCB" 
+      alt="Streamlines through the duct and around the vanes" 
    
-      class = "mx-auto"
-    />
-    <p>Streamlines</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">Streamlines</p>
   </div>
   <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/simulation/pres_contour.webp" 
-      alt="Servo PCB" 
+      alt="Pressure contour over the vehicle" 
 
-      class = "mx-auto"
-    />
-    <p>Pressure contour</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">Pressure contour</p>
   </div>
   <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/simulation/vane_contour.webp" 
-      alt="Servo PCB" 
+      alt="Pressure contour and streamlines around a deflected vane" 
    
-      class = "mx-auto"
-    />
-    <p>Pressour contour and streamlines around deflected vane</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">Pressure contour and streamlines around deflected vane</p>
   </div>
 </div>
+
+The vane result is the one that fed the controller: sweeping deflection angle gives lateral force, and lateral force times moment arm gives the control authority the gains are [derived from](/projects/aeolus/control#deriving-the-gains).
+
+That number was later measured two more ways — on the [thrust stand](/projects/aeolus/control#static--thrust-stand) and from [flight data](/projects/aeolus/control#dynamic--from-flight-data). Three independent estimates of the same quantity is the useful position to be in, because it is the disagreements that tell you which assumptions were load-bearing.
+
+<Dropdown title="Full CFD image set">
+<div class="not-prose grid grid-cols-2 md:grid-cols-3 gap-3">
+  <img src="/assets/aeolus/simulation/cfd/cfd-1.webp" alt="CFD result 1 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-2.webp" alt="CFD result 2 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-3.webp" alt="CFD result 3 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-4.webp" alt="CFD result 4 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-5.webp" alt="CFD result 5 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-6.webp" alt="CFD result 6 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-7.webp" alt="CFD result 7 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-8.webp" alt="CFD result 8 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-9.webp" alt="CFD result 9 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-10.webp" alt="CFD result 10 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-11.webp" alt="CFD result 11 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-12.webp" alt="CFD result 12 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-13.webp" alt="CFD result 13 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-14.webp" alt="CFD result 14 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+</div>
+</Dropdown>
+
+---
+
+# Simulink
+
+The 6DOF model brings the pieces together: rigid-body dynamics driven by the vane aerodynamics from CFD, the [mass and inertia measured on the bifilar pendulum](/projects/aeolus/vehicle#moment-of-inertia-testing), and the same control law that runs on the vehicle.
+
+  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
+    <img 
+      src="/assets/aeolus/simulation/simulink_model.webp" 
+      alt="Full Simulink 6DOF model" 
+        style={{maxWidth: '100%'}}
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">Full simulink model</p>
+  </div>
+
+## Impulse Response — Flight Test vs. Simulink
+
+<div style={{ flex: '1', minWidth: '300px' }}>
+    <video controls width="100%" preload="metadata">
+    <source src="/assets/aeolus/simulation/simulink_impulse_comparison.webm" type="video/webm" />
+    Your browser does not support the video tag.
+    </video>
+</div>
+
+The vehicle was struck by hand while hovering on a tether and allowed to recover; the same disturbance was applied in the model. Overlaying the two is the only real test of whether the simulation describes the vehicle or merely something that resembles it.
+
+The comparison is worth reading for where the curves *separate* as much as where they agree. Agreement in the first swing says the inertia and the control authority are right, since those two numbers set the initial angular acceleration and nothing else contributes yet. Agreement in the decay envelope says the damping — and therefore the derivative gain acting through the real servo response — is right. Divergence in the tail is where unmodelled effects live: servo slew limits, backlash, and the aerodynamic interactions the model represents as a single linear coefficient.
+
+## Validated Again in Free Flight
+
+A model tuned against tethered data can quietly encode the tether. The stronger check came later: measured thrust in untethered flight matched the Simulink prediction almost exactly.
+
+That closes a loop that started with an assumption. Thrust was predicted from a fan model, measured on a static stand, [inverted into an RPM setpoint](/projects/aeolus/propulsion#thrust-from-rpm) for the governor, and then confirmed in free flight against the simulation built on top of all of it.
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/simulation/thrust-vs-simulink.webp" alt="Measured thrust in free flight against the Simulink prediction." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Measured thrust in free flight against the Simulink prediction.</figcaption>
+</figure>
+
+
+## Used Predictively, Not Just Descriptively
+
+The most useful thing the model did was choose a gain before that gain was flown.
+
+The first free flights showed oscillation traced to lag between the commanded velocity and the attitude the vehicle actually reached — the velocity loop asking for a tilt, and the attitude loop taking long enough to get there that the correction arrived late. Rather than tune it by flying repeatedly, the behaviour was reproduced in the model, and the model indicated that a derivative gain of about 0.5 on the affected loop should largely remove it.
+
+Reproducing a real oscillation in simulation is what makes a model trustworthy: it is a prediction the model could have failed. Using it to pick a value that then goes to the vehicle is the entire reason to build one.
