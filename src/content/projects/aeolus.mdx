@@ -1,253 +1,226 @@
 ---
 title: "Aeolus"
+description: "EDF-powered hybrid TVC/fin active control rocket"
+dateRange: "Jan 2026 - Present"
+tags: ["CAD", "MATLAB/Simulink", "CFD", "C++", "Python"]
+cover: "/assets/aeolus/aeolustemp.png"
+coverAlt: "Aeolus rocket CAD preview"
+ogImage: "/assets/aeolus/vehicle/vehicleTransparent.webp"
+sidebarTitle: "Contents"
 showHero: true
-statusLabel: "In Development"
+statusLabel: "Flight Testing"
 statusDot: true
 ---
 
 # Overview
 
-Aeolus is a hybrid thrust vector control (TVC) & aerodynamic fin controlled electric ducted (EDF) fan rocket designed for controlled flight in a small space. Unlike the common solid rocket motors, an EDF can be throttled continuously, enabling controlled ascent, hover, and landing without the large field clearances that these motors require. This throttleability introduces a harder engineering problem: at hover, airspeed is zero, fins generate no restoring moment, and the vehicle is aerodynamically unstable. The only stabilization mechanism is active attitude control via four exhaust vanes in the EDF jet — which requires accurate real-time attitude estimation, a fast closed-loop controller, and a reliable telemetry link, all running on custom flight hardware. Every subsystem was designed and built from scratch: the sensor fusion pipeline, radio protocol, RPM governor, 6DOF simulation, and ground station.
+Aeolus is a thrust-vectored electric ducted fan (EDF) rocket built to hover and fly under closed-loop control. Unlike a solid motor, an EDF throttles continuously — which buys controlled ascent, hover, and landing without the field clearance a solid motor demands. It also removes the one thing that normally keeps a rocket pointing where it is going.
+
+**At hover, airspeed is zero.** Fins need airflow to generate a restoring moment, so below a few metres per second they do nothing at all. The vehicle is aerodynamically unstable from the moment it leaves the ground, and at hover it never picks up the speed that would fix that.
+
+**The only thing holding it upright is four vanes in the EDF exhaust**, driven by a control loop running at 200 Hz on hardware I built. That demands an attitude estimate good to a fraction of a degree, gains matched to the real vehicle rather than guessed, and enough measured control authority to know the vanes can actually win. Each of those is a page in this section.
+
+Every subsystem was designed and built from scratch: the airframe and CAD, three custom PCBs, the flight firmware, the sensor fusion and control laws, CFD and a 6DOF Simulink model, the LoRa link and browser ground station, and the load-cell test stand used to characterize it.
+
+<figure class="not-prose my-8 mx-auto max-w-sm">
+  <video controls loop muted playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800">
+    <source src="/assets/aeolus/free-flight.mp4" type="video/mp4" />
+  </video>
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Untethered flight — August 2026. No tether, no safety line.</figcaption>
+</figure>
 
 ---
 
-# Contents
+# At a Glance
 
-```
-# Project Aeolus — Full Page & Heading Outline
+<div class="not-prose grid grid-cols-2 md:grid-cols-4 gap-px bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 my-6">
+  <div class="bg-white dark:bg-slate-950 p-4">
+    <div class="font-mono text-xl font-semibold text-slate-900 dark:text-white">1.444<span class="text-sm font-normal text-slate-400 ml-1">kg</span></div>
+    <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Vehicle mass</div>
+  </div>
+  <div class="bg-white dark:bg-slate-950 p-4">
+    <div class="font-mono text-xl font-semibold text-slate-900 dark:text-white">200<span class="text-sm font-normal text-slate-400 ml-1">Hz</span></div>
+    <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Attitude loop</div>
+  </div>
+  <div class="bg-white dark:bg-slate-950 p-4">
+    <div class="font-mono text-xl font-semibold text-slate-900 dark:text-white">38,500<span class="text-sm font-normal text-slate-400 ml-1">rpm</span></div>
+    <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Peak EDF speed</div>
+  </div>
+  <div class="bg-white dark:bg-slate-950 p-4">
+    <div class="font-mono text-xl font-semibold text-slate-900 dark:text-white">27<span class="text-sm font-normal text-slate-400 ml-1">deg</span></div>
+    <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Max vane deflection</div>
+  </div>
+  <div class="bg-white dark:bg-slate-950 p-4">
+    <div class="font-mono text-xl font-semibold text-slate-900 dark:text-white">0.0033<span class="text-sm font-normal text-slate-400 ml-1">N·m/°</span></div>
+    <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Roll authority, measured</div>
+  </div>
+  <div class="bg-white dark:bg-slate-950 p-4">
+    <div class="font-mono text-xl font-semibold text-slate-900 dark:text-white">0.013<span class="text-sm font-normal text-slate-400 ml-1">N·m/°</span></div>
+    <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Pitch/yaw authority</div>
+  </div>
+  <div class="bg-white dark:bg-slate-950 p-4">
+    <div class="font-mono text-xl font-semibold text-slate-900 dark:text-white">3</div>
+    <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Custom PCBs</div>
+  </div>
+  <div class="bg-white dark:bg-slate-950 p-4">
+    <div class="font-mono text-xl font-semibold text-slate-900 dark:text-white">915<span class="text-sm font-normal text-slate-400 ml-1">MHz</span></div>
+    <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">LoRa telemetry, 10 Hz</div>
+  </div>
+</div>
 
+Four semi-elliptical exhaust vanes, 40 mm chord × 25 mm span. Measured inertia $I_{xx} = 0.00165$, $I_{yy/zz} = 0.065$ kg·m². Teensy 4.1 flight computer.
 
-## /projects/aeolus — Overview
+---
 
-H1: Project Aeolus
-Sub: Active-control thrust-vectored EDF rocket — flight software,
-     sensor fusion, and control theory built from first principles
+# System Architecture
 
-H2: The Problem
-  - Zero-airspeed instability on the pad; no passive aerodynamic
-    stability until the vehicle has forward velocity
+The rate hierarchy *is* the design: the estimator and attitude loop run fastest because attitude error leaks straight into position error, and the outer guidance loops run slowest because they only need to nudge a setpoint.
 
-H2: System Overview
-  - One diagram: vehicle → propulsion → avionics → state estimation
-    → control → simulation → comms → testing, as a data/signal flow,
-    not just a page list
+<div class="not-prose my-8 max-w-2xl mx-auto text-[12px] leading-snug">
 
-H2: Current Status
-  - Honest one-paragraph status. This is the paragraph that ages
-    fastest — update it every time project state changes
+  <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-slate-400 mb-2">Sensors</div>
+    <div class="flex flex-wrap gap-1.5">
+      <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">ICM-20948 IMU · 200 Hz</span>
+      <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">BMP388 baro · 50 Hz</span>
+      <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">NEO-M9N GPS</span>
+      <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">INA power monitors</span>
+      <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">ESC RPM counter</span>
+    </div>
+  </div>
 
-Section nav cards → 1–8 below
+  <div class="flex items-center justify-center gap-2 py-1.5 text-slate-400 dark:text-slate-500">
+    <span class="text-base leading-none">↓</span>
+    <span class="font-mono text-[10px]">calibrated measurements</span>
+  </div>
 
+  <div class="rounded-lg border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 p-3">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">State estimation · 200 Hz</div>
+    <div class="flex flex-wrap gap-1.5">
+      <span class="px-2 py-1 rounded bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300">Madgwick AHRS (X-up)</span>
+      <span class="px-2 py-1 rounded bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300">baro/accel altitude</span>
+      <span class="px-2 py-1 rounded bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300">GPS/IMU velocity KF</span>
+    </div>
+  </div>
 
-## /projects/aeolus/vehicle — 1. Vehicle
+  <div class="flex items-center justify-center gap-2 py-1.5 text-slate-400 dark:text-slate-500">
+    <span class="text-base leading-none">↓</span>
+    <span class="font-mono text-[10px]">attitude quaternion · velocity · altitude</span>
+  </div>
 
-H1: Vehicle
+  <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-slate-400 mb-2">Guidance</div>
+    <div class="flex flex-wrap items-center gap-1.5">
+      <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">position · 8 Hz</span>
+      <span class="text-slate-400">→</span>
+      <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">velocity · 25 Hz</span>
+      <span class="text-slate-400">→</span>
+      <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">target quaternion + thrust</span>
+    </div>
+  </div>
 
-H2: 1.1 Airframe & Structure
-  H3: Material Selection — PC-CF, PET-CF
-      - why these over standard PLA/ABS: thermal + structural rigidity
-        under EDF vibration and exhaust heat
-  H3: Load Paths & Failure Modes
+  <div class="flex items-center justify-center gap-2 py-1.5 text-slate-400 dark:text-slate-500">
+    <span class="text-base leading-none">↓</span>
+    <span class="font-mono text-[10px]">setpoints</span>
+  </div>
 
-H2: 1.2 CAD & Mechanical Design
-  H3: Design Iteration History
-      - brief: what changed between revisions and why
-  [Accordion] Full CAD Screenshots & Dimensioned Drawings
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <div class="rounded-lg border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 p-3">
+      <div class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">Attitude · 200 Hz</div>
+      <div class="text-slate-600 dark:text-slate-400">quaternion-error PID → vane mixing → 4 servos</div>
+    </div>
+    <div class="rounded-lg border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 p-3">
+      <div class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">Thrust</div>
+      <div class="text-slate-600 dark:text-slate-400">altitude PID → RPM setpoint → governor → ESC</div>
+    </div>
+  </div>
 
-H2: 1.3 Recovery System
-  H3: Recovery Method & Trigger Logic
-  H3: Design Constraints (mass, deployment force, packing volume)
+  <div class="mt-2 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 p-3 flex flex-wrap items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
+    <span class="font-mono text-[10px] uppercase tracking-wider">Ground link</span>
+    <span>RFM95W LoRa 915 MHz</span>
+    <span class="text-slate-400">↔</span>
+    <span>ESP32 ground station</span>
+    <span class="text-slate-400">↔</span>
+    <span>browser dashboard</span>
+  </div>
 
-H2: 1.4 Moment of Inertia
-  H3: Why MOI Matters for Control Authority
-      I = Σ m_i r_i²
-  H3: Bifilar Pendulum Method
-      - oscillation period → I derivation
-  [Accordion] Raw MOI Data — measured vs. CAD estimate, per-axis
+</div>
 
+---
 
-## /projects/aeolus/propulsion — 2. Propulsion
+# Theory Meets Reality
 
-H1: Propulsion
+Most hobby PID tuning is trial and error. Because I had independently measured both the vehicle's inertia — by [bifilar pendulum](/projects/aeolus/vehicle#moment-of-inertia-testing) — and the vanes' torque per degree, I could treat each axis as a damped harmonic oscillator and *solve* for the gains instead of guessing them:
 
-H2: 2.1 EDF & Motor Selection
-  H3: Selection Criteria — thrust-to-weight, RPM range, size constraints
-  H3: Tradeoffs Against Alternatives Considered
+$$I\ddot{\theta} + K_d\dot{\theta} + K_p\theta = 0$$
 
-H2: 2.2 Battery Selection
-  H3: Power Budget & Discharge Requirements
-  H3: Dual-Battery Isolation Rationale
+Picking a closed-loop natural frequency $\omega$ and damping ratio $\zeta$ then fixes both gains directly, converted from physical torque into commanded vane degrees:
 
-H2: 2.3 Thrust Characterization
-  H3: Bench Test Setup
-  H3: Thrust vs. Throttle Curve
-  [Accordion] Raw Bench Data — thrust, current, vibration spectrum
-              across throttle range
+$$K_p = \frac{I\omega^2}{\tau/\text{deg}}\cdot\frac{\pi}{180} \qquad\qquad K_d = \frac{2I\zeta\omega}{\tau/\text{deg}}\cdot\frac{\pi}{180}$$
 
-H2: 2.4 RPM Governor
-  H3: Feedforward + PID Structure
-  H3: Feedforward Model Bias — 1/V vs. 1/V²
-      - state the gap plainly; this is a real, unresolved finding
-  [Accordion] Governor Tuning Logs — Ki bisection history,
-              Kp/Kd bench sweeps
+Targeting $\omega = 4$ rad/s and $\zeta = 0.85$ on roll produced gains that worked on the first attempt. The flown configuration corresponds to $\zeta \approx 0.83$, and the measured roll response tracked the model closely. Pitch and yaw, tuned the same way for $\zeta = 0.8$, came out slightly *less* damped than predicted in flight — but the trim angles the model predicted were spot on.
 
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/control/roll-response.webp" alt="Measured roll response with the derived gains" class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll response flown with the derived gains.</figcaption>
+</figure>
 
-## /projects/aeolus/avionics — 3. Avionics
+The same reasoning is what told me not to reuse the method on the velocity loop. There, acceleration is the *first* derivative of the controlled variable rather than the second, so the loop is first-order: oscillation is impossible and the response is a pure exponential, $v = v_0 e^{-t/\tau}$ with $\tau = (K_d + 1)/K_p$. Those gains came from a target settling time instead of a damping ratio. Knowing when a method stops applying mattered more than the derivation itself.
 
-H1: Avionics
+---
 
-H2: 3.1 Power Architecture
-  H3: Distribution & Isolation Strategy
-  H3: Noise Isolation Near High-Current ESC Lines
+# Selected Findings
 
-H2: 3.2 PCB Design
-  H3: Three-Board Architecture (PDB, FC, Sensor Interface)
-      - why split across three boards rather than one
-  [Accordion] Schematics & Ground Plane Topology
+<div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-3 my-6">
 
-H2: 3.3 Sensor Suite
-  H3: Sensor Table — IMU, barometer, GPS, current/power monitors
-      - include the NEO-M9N GPS explicitly; it was missing before
-  H3: IMU/Barometer Complementarity
-      - why both are needed, what each corrects for
+  <a href="/projects/aeolus/control" class="block no-underline rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1.5">Control</div>
+    <div class="text-sm font-semibold text-slate-900 dark:text-white mb-1">Gains derived, not tuned</div>
+    <p class="text-[13px] leading-relaxed text-slate-600 dark:text-slate-400">Measured inertia and measured vane torque were enough to solve for the gains analytically. Flight matched the predicted damping ratio.</p>
+  </a>
 
+  <a href="/projects/aeolus/avionics#magnetic-interference" class="block no-underline rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1.5">Avionics</div>
+    <div class="text-sm font-semibold text-slate-900 dark:text-white mb-1">The interference that never appeared</div>
+    <p class="text-[13px] leading-relaxed text-slate-600 dark:text-slate-400">An infinite-wire model said the EDF's 30 A should swamp Earth's field at the magnetometer. It didn't. The wires form a small loop, not a straight conductor — as a dipole the prediction drops from 50 µT to 2.5 µT, matching what I measured.</p>
+  </a>
 
-## /projects/aeolus/state-estimation — 4. State Estimation
+  <a href="/projects/aeolus/control#what-doubling-the-area-actually-bought" class="block no-underline rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1.5">Control</div>
+    <div class="text-sm font-semibold text-slate-900 dark:text-white mb-1">Doubling vane area didn't double roll authority</div>
+    <p class="text-[13px] leading-relaxed text-slate-600 dark:text-slate-400">Pitch and yaw scaled as predicted, roughly 2×. Roll rose only 1.32× on the same vanes. Still unexplained.</p>
+  </a>
 
-H1: State Estimation
+  <a href="/projects/aeolus/communications#a-struct-that-grew-and-crashed-the-flight-computer" class="block no-underline rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1.5">Firmware</div>
+    <div class="text-sm font-semibold text-slate-900 dark:text-white mb-1">A struct that grew and crashed the flight computer</div>
+    <p class="text-[13px] leading-relaxed text-slate-600 dark:text-slate-400">Adding two fields to the log record pushed the compiler into emitting double-word loads on a packed, unaligned struct — which the Cortex-M7 refuses. Hard fault on every write.</p>
+  </a>
 
-H2: 4.1 Frame Convention
-  H3: X-Up Body Frame — Why It Was Chosen
-      - and what it required re-deriving downstream (Madgwick, below)
+  <a href="/projects/aeolus/simulation#validated-again-in-free-flight" class="block no-underline rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1.5">Simulation</div>
+    <div class="text-sm font-semibold text-slate-900 dark:text-white mb-1">The 6DOF model held up in free flight</div>
+    <p class="text-[13px] leading-relaxed text-slate-600 dark:text-slate-400">Thrust measured in untethered flight matched the Simulink prediction almost exactly — and the model was used to pick a damping gain before flying it.</p>
+  </a>
 
-H2: 4.2 Sensor Pipeline
-  H3: Data Flow — IMU → filter → fusion → control loop
-  H3: EDF Vibration & Digital LPF
-      - current DLPF cutoffs (111 Hz accel / 119 Hz gyro) sit near
-        Nyquist of 225 Hz ODR — state this limitation directly,
-        it shows you understand the margin problem
+  <a href="/projects/aeolus/testing#a-3-hz-roll-oscillation-that-only-appears-untethered" class="block no-underline rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1.5">Open problem</div>
+    <div class="text-sm font-semibold text-slate-900 dark:text-white mb-1">A 3.0 Hz roll oscillation that only shows up untethered</div>
+    <p class="text-[13px] leading-relaxed text-slate-600 dark:text-slate-400">Visible in both the video and an FFT of the flight log, and absent from every tethered test. Servo backlash, stiction, or a lag-driven limit cycle — not yet resolved.</p>
+  </a>
 
-H2: 4.3 Accelerometer Calibration
-  H3: Ellipsoid-Fit Calibration Method
-  [Accordion] Calibration Matrices & Raw Noise Spectrum
+</div>
 
-H2: 4.4 Madgwick Filter (X-Up Rederivation)
-  H3: Why the Standard Derivation Didn't Apply
-  H3: The Rederivation
-      - this is one of your strongest "I didn't just import a library"
-        pieces of evidence — do not bury it in an accordion
+---
 
-H2: 4.5 Vertical Channel — Complementary Filter
-  H3: Barometer/Accelerometer Fusion for Altitude
+# Status
 
-H2: 4.6 GPS/IMU Fusion  [consider adding — currently has no home]
-  H3: Velocity-Primary Architecture
-      - GPS Doppler velocity as primary correction, not raw position
-  H3: Why Roll Is the Dominant Threat
-      - no gravity reference for roll; magnetometer degrades under
-        motor current
-  H3: Current-Gated Magnetometer Trust
-      - current sensor (not throttle %) as the physically correct
-        compensation variable
+*Updated 31 August 2026.*
 
+**Aeolus flies.** Roll, pitch, and yaw control were isolated and validated on a tether through July. The vanes were enlarged in early August and each axis re-characterized against the new geometry. The horizontal velocity loop flew on 21 August, and the first untethered flight followed on 22 August. Position hold was tested on 27 August and ended in the vehicle's first crash — hard enough to be worth recording, gentle enough that inspection found no damage.
 
-## /projects/aeolus/control — 5. Control
+Three things are open. A 3.0 Hz roll limit cycle appears in free flight and in no tethered test. RPM sensor interference produced an oscillating throttle on one flight. And heading initialization is unsolved, so it currently flies without the magnetometer.
 
-H1: Control
-
-H2: 5.1 Vane Design & Aerodynamics
-  H3: Semi-Ellipse Vane Geometry
-  H3: Stall Behavior at Current Geometry
-      - state plainly: fully stalled across full deflection range
-        (Re ≈ 58,500); nonlinear force curve is a consequence of
-        stall, not a geometry error — this is a root-cause finding,
-        keep it visible, not in an accordion
-
-H2: 5.2 Vane Moment Testing
-  H3: Thrust-Stand Setup for dM/dδ
-  [Accordion] Raw Torque-vs-Deflection Data
-
-H2: 5.3 Servo Calibration
-  H3: Slew Rate Under Loaded Exhaust Airflow
-  [Accordion] Bench Calibration Logs
-
-H2: 5.4 PID Attitude Controller
-  H3: Cascaded Quaternion-Based Structure
-      u(t) = Kp·e(t) + Ki∫e(τ)dτ + Kd·de/dt
-  H3: Quaternion Error Formulation
-      - 2·sin(θ/2) approximation vs. atan2 form for roll
-      - antipodal sign discontinuity near 180°, hysteresis fix
-  H3: Steady-State Trim / Feedforward
-  H3: Anti-Windup Logic
-  [Accordion] C++ Controller Code Extracts
-
-
-## /projects/aeolus/simulation — 6. Simulation
-
-H1: Simulation
-
-H2: 6.1 Why Simulation
-  - what simulation de-risked before hardware — brief, states purpose
-
-H2: 6.2 CFD — ANSYS Fluent
-  H3: Vane Deflection vs. Lateral Force (Fy)
-  H3: Choking & Flow Loss Limits
-      - max deflection angle before backpressure reduces axial thrust
-  [Figure] Pressure distribution, velocity vector meshes
-
-H2: 6.3 6DOF — MATLAB/Simulink
-  H3: Model Architecture
-      - explicit: built using Simulink's Aerospace Blockset 6DOF
-        Quaternion block; state clearly what you derived and fed
-        into it (vane aero curve, mass/MOI, control law) vs. what
-        the block itself provides — do not imply the integrator
-        was self-derived
-  H3: Simulated Step Response Under Disturbance
-
-
-## /projects/aeolus/communications — 7. Communications
-
-H1: Communications
-
-H2: 7.1 Radio Protocol
-  H3: LoRa Link Architecture (RFM95W)
-  H3: Packet Structure & Failsafe Logic
-      - if isGroundLost() failsafe isn't wired into main loop yet,
-        this is an honest place to say so — "identified, not yet
-        integrated" is a legitimate engineering status
-
-H2: 7.2 Ground Station Dashboard
-  H3: Web Serial Architecture (Browser-Based, No Install)
-  H3: LIVE/FULL Toggle & Staleness Watchdog
-  [Accordion] Binary Log Format — packed-struct spec, PSRAM buffering
-              → LittleFS bulk transfer on stopLog()
-
-
-## /projects/aeolus/testing — 8. Testing
-
-H1: Testing
-
-H2: 8.1 Ground Testing
-  H3: Static Thrust & Vibration Characterization
-  H3: Single-Axis Gimbal Rig — Closed-Loop PID Tuning
-
-H2: 8.2 Tethered Flight — Status & Blockers
-  [Write only once status is current. If still blocked, name the
-   blockers directly: arm-transient behavior during disarmed state,
-   idle-gate discontinuity at spool-up, failsafe not yet called in
-   main.cpp. This reads as engineering maturity, not failure.]
-  H3: Telemetry Comparison (once available)
-      - Plot A: early/oscillating response
-      - Plot B: tuned/damped response
-
-H2: 8.3 Next Steps
-  H3: Vane Resizing (target: +45% lateral force)
-  H3: Mass Relocation (target: -30% moment of inertia)
-  H3: Control Authority Ceiling
-      α_max = (Fy,max · d_vane) / I_yy
-      - label as hand-calc/CFD-derived until thrust-stand verified
-  [Accordion] Full Raw Telemetry Logs & Python Parsing Scripts
-```
 ---
 
 # Timeline
@@ -326,9 +299,10 @@ H2: 8.3 Next Steps
       {/* <!-- Content Panel --> */}
       <div class="w-full md:w-[45%] pl-6 md:pl-0">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">June 2026</span>
-        <h4 class="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">Static Fire Testing</h4>
+        <h4 class="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">Static Fire & First Tethered Test</h4>
         <ul class="mt-2 text-xs text-slate-600 dark:text-slate-400 space-y-1 list-none">
           <li>• Ran static-fire thrust sweeps on custom dual-ring stand</li>
+          <li>• Measured vane moments on a 4-bar load cell stand</li>
           <li>• Optimized I2C bus speeds to isolate 20ms library loop lags</li>
         </ul>
         <details class="mt-2 text-[10px] text-slate-400 cursor-pointer hover:text-blue-500">
@@ -340,7 +314,24 @@ H2: 8.3 Next Steps
       </div>
     </div>
 
-    {/* <!-- PHASE 5: Center/Highlight (Stretches or spans beautifully at the end) --> */}
+    {/* <!-- PHASE 5: Left Side --> */}
+    <div class="relative flex flex-col md:flex-row items-start md:justify-between group">
+      <div class="absolute left-0 md:left-1/2 w-3 h-3 rounded-full bg-blue-500 border-2 border-white dark:border-slate-900 -translate-x-1/2 top-1.5 z-10"></div>
+
+      <div class="w-full md:w-[45%] pl-6 md:pl-0 md:text-right">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">July 2026</span>
+        <h4 class="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">State Estimation & Tethered Control</h4>
+        <ul class="mt-2 text-xs text-slate-600 dark:text-slate-400 space-y-1 inline-block md:text-right list-none">
+          <li>• Deployed <b>Madgwick filter</b> and 3D IMU calibration matrices</li>
+          <li>• Closed the loop on <b>RPM</b> with feedforward + median/plausibility filtering</li>
+          <li>• Derived roll and pitch/yaw gains from <b>measured inertia and vane torque</b></li>
+          <li>• Isolated and validated each axis on a tether</li>
+        </ul>
+      </div>
+      <div class="hidden md:block w-[45%]"></div>
+    </div>
+
+    {/* <!-- PHASE 6: Center/Highlight — active --> */}
     <div class="relative flex flex-col md:flex-row items-start md:justify-between group">
       {/* <!-- Active Emerald Pulsing Dot --> */}
       <div class="absolute left-0 md:left-1/2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900 shadow-[0_0_8px_rgba(16,185,129,0.6)] -translate-x-1/2 top-1.5 z-10 animate-pulse"></div>
@@ -350,13 +341,14 @@ H2: 8.3 Next Steps
       {/* <!-- Full centered focus for the live step --> */}
       <div class="w-full md:w-[60%] pl-6 md:pl-0 md:text-center bg-emerald-50/10 dark:bg-emerald-950/10 p-4 rounded-xl border border-emerald-500/10">
         <span class="text-xs font-bold text-emerald-500 uppercase tracking-wider flex items-center md:justify-center gap-1">
-          July 2026 — Present
+          Aug 2026 — Present
         </span>
-        <h4 class="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">State Estimation & Controls</h4>
-        <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-slate-600 dark:text-slate-400 text-left md:text-center">
-          <div>• Deployed <b>Madgwick Filter</b> to remove drift</div>
-          <div>• Programmed 3D <b>IMU calibration matrices</b></div>
-          <div>• Actively tuning real-time <b>PID loops</b></div>
+        <h4 class="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">Free Flight</h4>
+        <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400 text-left md:text-center">
+          <div>• Fused <b>GPS velocity</b> with IMU to kill drift</div>
+          <div>• Enlarged vanes, re-measured control authority</div>
+          <div>• Flew the <b>horizontal velocity loop</b> — 21 Aug</div>
+          <div>• <b>First untethered flight</b> — 22 Aug</div>
         </div>
       </div>
 
@@ -366,9 +358,12 @@ H2: 8.3 Next Steps
   </div>
 </div>
 
+---
 
 # Log
-## days-when-i-felt-like-logging log
+
+Raw daily log — unedited, written as I went.
+
 <div class="not-prose w-full overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
   <iframe 
     src="https://docs.google.com/document/d/e/2PACX-1vRGjRAyJZuHRyKDWYdyjGmsTZIF6W0by51dd9NAaZUFTywKvHwm4Cu_CrWPh-bFE2LRuQuwVcUoknX4/pub?embedded=true"

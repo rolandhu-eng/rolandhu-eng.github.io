@@ -1,70 +1,231 @@
 ---
 title: "Vehicle"
+order: 1
+navLabel: "Vehicle"
 showHero: false
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 import Table from '../../../components/Table.astro';
 
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/vehicle/vehicleFull.webp" 
-    alt="Vehicle" 
-    style={{ maxWidth: '100%'}}
-    class="mx-auto"
-  />
+# Configuration
+
+<div class="not-prose grid grid-cols-2 gap-6 my-8 items-end max-w-2xl mx-auto">
+  <figure class="m-0 text-center">
+    <img src="/assets/aeolus/vehicle/vehicleFull.webp" alt="Aeolus exterior CAD render" class="mx-auto max-h-[420px] w-auto" loading="lazy" decoding="async" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Exterior — nose cone, forward body, intake shoulder, EDF section, and the four control vanes with fixed fins at the base.</figcaption>
+  </figure>
+  <figure class="m-0 text-center">
+    <img src="/assets/aeolus/vehicle/vehicleTransparent.webp" alt="Aeolus cutaway CAD render showing internal layout" class="mx-auto max-h-[420px] w-auto" loading="lazy" decoding="async" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Internals — recovery mechanism in the nose, avionics stack, battery and ESC bay, then the EDF and vane linkages aft of the intake.</figcaption>
+  </figure>
 </div>
 
 <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
   <img 
     src="/assets/aeolus/vehicle/Subsystems.drawio.png" 
-    alt="Pitch/Yaw MOI measurement setup" 
+    alt="Aeolus subsystem block diagram" 
     style={{ maxWidth: '60%'}}
-    class="mx-auto invert dark:invert-0 hue-rotate-0 dark:hue-rotate-180"
-  />
-  <p>Initial systems planning</p>
+    class="mx-auto invert dark:invert-0 hue-rotate-0 dark:hue-rotate-180" loading="lazy" decoding="async" />
+  <p class="fig-caption">Initial systems planning</p>
+</div>
+
+## CAD Model Viewer
+<div class="not-prose my-6 w-full aspect-[4/3] sm:aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
+  <iframe
+    src="https://glenbrook225741.autodesk360.com/shares/public/SH28cd1QT2badd0ea72bf5c30d426e1b3726?mode=embed"
+    title="Aeolus CAD model viewer"
+    loading="lazy"
+    class="w-full h-full"
+    frameborder="0"
+    allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
 </div>
 
 ---
 
 # Airframe & Structure
 
-The airframe was divided into two sections: the aft section (aft of the intake) and the forward section (forward of the intake). The aft section needed to accomodate the EDF and control mechanism, and was designed to be supported purely through 3D printed parts due to the rather tight space and complex geometry. The forward section held the batteries, ESC, and avionics, and was designed to have 4 carbon fiber rods acting as the main structural support with a thin 3D printed shell around it. The CF rods give it good strength and minimal weight compared to an entirely 3D printed structure.
+The airframe was divided into two sections: the aft section (aft of the intake) and the forward section (forward of the intake). The aft section needed to accommodate the EDF and control mechanism, and was designed to be supported purely through 3D printed parts due to the rather tight space and complex geometry. The forward section held the batteries, ESC, and avionics, and was designed to have 4 carbon fiber rods acting as the main structural support with a thin 3D printed shell around it. The CF rods give it good strength and minimal weight compared to an entirely 3D printed structure.
+
+The split is really a split in **load path**. Aft of the intake, thrust and vane reaction loads are fed into printed structure directly, because the geometry there is too congested for rods to run through cleanly. Forward of the intake, the four CF rods carry essentially all axial load, and the printed shell around them is an aerodynamic fairing rather than a structural member — which is what lets it be thin. Mass in the forward section is also the mass furthest from the centre of mass, so it is the mass that costs the most pitch and yaw inertia. Keeping the shell non-structural was as much a control decision as a weight one.
 
 Since this was a first prototype, all 3D printed parts were made from regular PLA due to its high stiffness, relatively good strength, and low cost. Future versions will likely use PC for its tensile strength, impact resistance, and stiffness while still being relatively affordable.
 
-
+The structure got an unplanned test on 27 August, when a position-hold flight ended in the vehicle's first crash. Inspection afterwards found no damage — a useful data point for a prototype airframe printed in a material chosen mostly for cost.
 
 ---
+
 # CAD & Mechanical Design
+
+Two parts were designed rather than simply drawn: the fairing hinges, which were generated, and the shock cord attachment, which was simulated.
+
 <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
   <img 
     src="/assets/aeolus/vehicle/gen_design_dash.webp" 
-    alt="generative design" 
+    alt="Generative design study for the fairing hinges" 
     style={{ maxWidth: '100%'}}
-    class="mx-auto"
-  />
-  <p>Generative design used to create the [fairing hinges](#fairing-vid)</p>
+    class="mx-auto" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Generative design study used to produce the <a href="#fairing-vid">fairing hinges</a>. Each point is a candidate geometry; the study sweeps mass against displacement so the trade is visible rather than guessed</figcaption>
 </div>
+
+The hinge is a small part with an awkward job: it has to survive the deployment load, fit inside a curved keep-out volume, and add as little mass as possible at the very top of the vehicle, where mass is most expensive in pitch and yaw inertia. Rather than iterating by hand, the load cases and keep-out volumes were handed to a generative study and the resulting population of candidates compared directly.
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/vehicle/gen-design-fairing.webp" alt="Generated fairing hinge geometry." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Generated fairing hinge geometry.</figcaption>
+</figure>
+
 
 <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
   <img 
     src="/assets/aeolus/vehicle/nose_struct_sim2.webp" 
-    alt="FEA sim of shock cord attachment" 
+    alt="FEA of the nose cone shock cord attachment" 
     style={{ maxWidth: '50%'}}
-    class="mx-auto"
-  />
+    class="mx-auto" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">FEA of the shock cord attachment in the nose</figcaption>
 </div>
+
+The shock cord attachment was simulated because it is a single point of failure. The entire recovery load passes through one small feature, and if it strips or tears out, the parachute stays attached to nothing and the vehicle comes down ballistic. It is the one part of the airframe where a local failure loses the whole vehicle, which makes it worth the analysis time in a way that most of the structure is not.
 
 ---
 
-# Recovery System
+# Powered Landing
 
-<div style={{ flex: '1', minWidth: '300px'}} id='fairing-vid'>
-  <video controls width="50%" loop>
+Recovery is powered. The vehicle flies its own descent and sets itself down under thrust, using the same loops that hold a hover — the altitude PID simply tracks a descending setpoint instead of a fixed one.
+
+This is only possible because the propulsion is an EDF. A solid motor burns once and cannot be modulated, so recovery has to be passive: something has to fall, and a parachute is the only thing standing between it and the ground. Continuous throttle authority turns descent into just another commanded velocity, which means the hardest part of landing — arresting the descent at the right moment — is handled by a controller that already exists rather than a mechanism that has to work first time.
+
+At the altitudes flown so far this also makes an unrecovered failure survivable, which is what makes powered-only landing an acceptable risk today. The 27 August position-hold test provided the evidence: the vehicle crashed from a hover and inspection found no damage. That argument stops holding as the envelope grows, which is why the parachute below is deferred rather than abandoned, and why the nose fairing and its deployment mechanism are still on the vehicle.
+
+---
+
+# Parachute Failsafe
+
+The parachute is designed, sized, and characterized, but not currently flown. It returns as an emergency system once flights go high enough that a control failure is no longer survivable. The nose fairing carries it, and the [generatively designed hinges](#cad--mechanical-design) above exist for it.
+
+<div style={{ flex: '1', minWidth: '300px',  textAlign: 'center' }} id='fairing-vid'>
+  <video controls width="50%" loop class="mx-auto">
     <source src="/assets/aeolus/vehicle/fairing_deploy.webm" type="video/webm" />
     Your browser does not support the video tag.
   </video>
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Nose fairing deployment. The hinges are the generatively designed parts above.</figcaption>
 </div>
+
+## Canopy Sizing
+
+Descent rate follows from a force balance at terminal velocity:
+
+$$v = \sqrt{\frac{2mg}{\rho A C_d}}$$
+
+The interesting term is $A C_d$, not $A$ alone. A toroidal canopy runs a drag coefficient near $2.2$ against roughly $0.75$ for a flat canopy, so it buys the same drag from far less fabric. Sizing both to a comparable descent rate makes the gap concrete:
+
+<Table
+  note="Sized for a 1.5 kg vehicle at sea level. Canopy mass from 48 g/m² ripstop nylon. Toroid inner diameter fixed at 0.2 × outer."
+  columns={[
+    { key: 'design', label: 'Design', align: 'left' },
+    { key: 'cd', label: 'Cd', align: 'center' },
+    { key: 'area', label: 'Canopy area (m²)', align: 'center' },
+    { key: 'v', label: 'Descent (m/s)', align: 'center' },
+    { key: 'mass', label: 'Fabric (g)', align: 'center' }
+  ]}
+  rows={[
+    { design: 'Flat octagon, 1.0 m', cd: '0.75', area: '0.83', v: '6.22', mass: '40' },
+    { design: 'Flat octagon, 1.2 m', cd: '0.75', area: '1.19', v: '5.18', mass: '57' },
+    { design: 'Flat octagon, 1.5 m', cd: '0.75', area: '1.86', v: '4.14', mass: '89' },
+    { design: 'Toroid, 0.6 m', cd: '2.2', area: '0.27', v: '6.34', mass: '—', groupStart: true },
+    { design: 'Toroid, 0.7 m', cd: '2.2', area: '0.37', v: '5.44', mass: '—', highlight: true }
+  ]}
+/>
+
+A 0.7 m toroid reaches 5.44 m/s on 0.37 m² of canopy. A flat octagon needs roughly 1.15 m across and about 1.09 m² for the same descent rate — **three times the fabric for the same result**. In the nose, where every gram sits at the worst possible station for pitch and yaw inertia, and where packing volume is tightest, that ratio is what decided the design.
+
+The fabric column is left blank for the toroid deliberately: projected area sets drag, but a toroidal canopy is a three-dimensional surface whose *total* fabric area is meaningfully larger than its projection, so multiplying through by areal density would understate it. The pattern generator reports both numbers separately for exactly this reason.
+
+<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
+  <figure class="mx-auto"><img src="/assets/aeolus/vehicle/parachute-gores.webp" alt="Openchute" class="w-full rounded-lg mx-auto" style={{maxWidth: "70%"}} loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Toroidal parachute designed in Openchute</figcaption></figure>
+</div>
+
+
+The final canopy is a **12-gore toroidal design**. The gore pattern was generated in openchute, an open-source parachute pattern tool, which outputs a DXF for laser cutting.
+
+## Shock Cord Characterization
+
+A shock cord is not a spring. It is stiff at low strain, soft through the middle of its range, and then stiffens hard as the fibers lock up — and the opening load depends entirely on where in that curve the cord ends up. So it was measured rather than assumed, by stretching samples against a meter stick and reading tension off a force scale.
+
+The complication is that stiffness $k = F/\delta l$ depends on sample length, so results from different pieces of cord cannot be compared directly. Normalizing by the unstretched length removes that dependence:
+
+$$S = k L_0 = EA$$
+
+$S$ is a property of the material and cross-section, not of the particular sample. If the measurement is sound, samples of different length must collapse onto a single $S(\lambda)$ curve — which is exactly what happened:
+
+<Table
+  note="Extension ratio λ = 1 + δl/L₀. Agreement within 3% across samples differing in length by a factor of three."
+  columns={[
+    { key: 'lambda', label: 'λ', align: 'center' },
+    { key: 'short', label: 'S from L₀ = 0.30 m', align: 'center' },
+    { key: 'long', label: 'S from L₀ = 0.91 m', align: 'center' }
+  ]}
+  rows={[
+    { lambda: '1.33', short: '77.1', long: '79.5' },
+    { lambda: '1.67', short: '56.6', long: '56.5' },
+    { lambda: '2.00', short: '51.6', long: '53.3' }
+  ]}
+/>
+
+That collapse is the result worth having. It says the numbers describe the cord itself rather than one arbitrary piece of it, which is what makes them safe to use as model inputs. Across the full range $S$ falls from about 121 at $\lambda = 1.17$, bottoms out near 52 around $\lambda = 2.0$, and climbs back to roughly 76 by $\lambda = 2.6$ — the stiff, soft, then strain-stiffening shape expected of an elastomer.
+
+One honest limitation: the shortest samples carry the largest relative error, since a few millimetres of meter-stick uncertainty on a 50 mm elongation is several percent. The high-stiffness point anchoring the low-strain end is the least trustworthy number in the set.
+
+## Opening Shock Model
+
+Peak cord tension is what sizes the shock cord attachment, and it cannot be read off a static pull test — it depends on how the rocket and canopy decelerate against each other. So the deployment transient was simulated as a genuine two-body problem: rocket and canopy as separate masses, coupled only through the cord, integrated with Euler–Cromer at 0.1 ms steps.
+
+The measured cord data enters as a fitted force law, slack below $\lambda = 1$ and asymptotic at maximum extension:
+
+$$F(\lambda) = A(\lambda - 1)^{p} + \frac{B(\lambda - 1)}{\lambda_{max} - \lambda}$$
+
+with $A = 35.5$, $B = 12.6$, $p = 0.4$, $\lambda_{max} = 2.8$. Through the mid-range the fit tracks the bench data to within about 4%; it loosens past $\lambda \approx 2.4$, where the asymptotic term turns sharply and the measurements thin out.
+
+<div class="not-prose my-8">
+  <svg viewBox="0 0 640 384" class="w-full h-auto text-slate-500 dark:text-slate-400" role="img" aria-label="Shock cord tension versus extension ratio, showing twelve bench measurements, the fitted force law, and the extrapolated design load">
+    <rect x="560.9" y="16" width="63.1" height="320" class="fill-amber-500/10" />
+    <g class="stroke-current opacity-20">
+      <line x1="56" y1="247.1" x2="624" y2="247.1" /><line x1="56" y1="158.2" x2="624" y2="158.2" /><line x1="56" y1="69.3" x2="624" y2="69.3" />
+    </g>
+    <g class="stroke-current opacity-60">
+      <line x1="56" y1="16" x2="56" y2="336" /><line x1="56" y1="336" x2="624" y2="336" />
+    </g>
+    <line x1="624" y1="16" x2="624" y2="336" class="stroke-current opacity-40" stroke-dasharray="4 4" />
+    <path d="M56.0,336.0 L68.6,327.0 L81.2,324.0 L93.9,321.7 L106.5,319.7 L119.1,318.0 L131.7,316.4 L144.4,315.0 L157.0,313.6 L169.6,312.2 L182.2,310.9 L194.8,309.7 L207.5,308.4 L220.1,307.2 L232.7,305.9 L245.3,304.7 L258.0,303.4 L270.6,302.2 L283.2,300.9 L295.8,299.5 L308.4,298.2 L321.1,296.8 L333.7,295.3 L346.3,293.8 L358.9,292.2 L371.6,290.4 L384.2,288.6 L396.8,286.7 L409.4,284.5 L422.0,282.2 L434.7,279.7 L447.3,276.8 L459.9,273.6 L472.5,269.9 L475.7,268.9 L478.8,267.9 L482.0,266.8 L485.2,265.7 L488.3,264.5 L491.5,263.3 L494.6,262.0 L497.8,260.7 L500.9,259.3 L504.1,257.8 L507.2,256.3 L510.4,254.7 L513.6,253.0 L516.7,251.2 L519.9,249.3 L523.0,247.3 L526.2,245.2 L529.3,242.9 L532.5,240.5 L535.6,237.9 L538.8,235.1 L542.0,232.2 L545.1,229.0 L548.3,225.5 L551.4,221.8 L554.6,217.7 L557.7,213.2 L560.9,208.3 L564.0,202.9 L567.2,196.9 L570.4,190.2 L573.5,182.7 L576.7,174.2 L579.8,164.6 L583.0,153.4 L586.1,140.4 L589.3,125.0 L592.4,106.6 L595.6,84.1 L598.8,56.0 L601.9,19.9" fill="none" class="stroke-blue-600 dark:stroke-blue-400" stroke-width="2" />
+    <g class="fill-none stroke-current" stroke-width="1.5">
+      <circle cx="108.6" cy="318.1" r="4" /><circle cx="161.2" cy="313.2" r="4" /><circle cx="266.4" cy="302.5" r="4" /><circle cx="371.6" cy="290.1" r="4" /><circle cx="508.3" cy="270.2" r="4" /><circle cx="560.9" cy="228.4" r="4" />
+    </g>
+    <g class="fill-current">
+      <circle cx="160.0" cy="312.7" r="3.5" /><circle cx="267.5" cy="302.3" r="3.5" /><circle cx="371.6" cy="288.6" r="3.5" /><circle cx="521.7" cy="216.4" r="3.5" /><circle cx="508.6" cy="243.2" r="3.5" /><circle cx="476.7" cy="268.6" r="3.5" />
+    </g>
+    <path d="M600,34.4 L607,42.4 L600,50.4 L593,42.4 Z" class="fill-amber-500" />
+    <line x1="600" y1="50.4" x2="600" y2="336" class="stroke-amber-500 opacity-50" stroke-dasharray="3 3" />
+    <g class="fill-current" font-size="11" font-family="ui-monospace, monospace">
+      <text x="50" y="340" text-anchor="end">0</text><text x="50" y="251" text-anchor="end">100</text><text x="50" y="162" text-anchor="end">200</text><text x="50" y="73" text-anchor="end">300</text>
+      <text x="56" y="353" text-anchor="middle">1.0</text><text x="182.2" y="353" text-anchor="middle">1.4</text><text x="308.4" y="353" text-anchor="middle">1.8</text><text x="434.7" y="353" text-anchor="middle">2.2</text><text x="560.9" y="353" text-anchor="middle">2.6</text>
+      <text x="340" y="374" text-anchor="middle">extension ratio λ</text>
+      <text x="16" y="176" text-anchor="middle" transform="rotate(-90 16 176)">cord tension (N)</text>
+    </g>
+    <g font-size="11" font-family="ui-monospace, monospace">
+      <text x="586" y="30" text-anchor="end" class="fill-amber-600 dark:fill-amber-400">330 N design load</text>
+    </g>
+  </svg>
+  <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Measured tension against extension ratio. Open circles are the 0.30 m samples, filled are the 0.91–1.24 m samples; both fall on one curve. The shaded band past λ = 2.6 is beyond any measurement — and the predicted design load sits inside it. [Desmos regression](https://www.desmos.com/calculator/xigpjjhgbi)</p>
+</div>
+
+The canopy side carries one term that is easy to miss. A parachute does not just accelerate its own fabric — it drags a substantial column of air with it, and that entrained air dominates the canopy's effective inertia:
+
+$$m_{added} = \frac{4}{3}\pi\rho r^3, \qquad r = \sqrt{A/\pi}$$
+
+For this canopy that comes to 0.646 kg against 50 g of fabric, so the entrained air is roughly **fourteen times** the mass of the parachute itself. Leave it out and the opening load is underpredicted by a factor of three.
+
+For the sizing case — a 1.6 kg vehicle deploying at 20 m/s — the model returns a peak cord tension of **330 N** and a peak vehicle deceleration of **20 g**, both about 120 ms after the cord goes taut. That peak tension is the load case behind the [shock cord attachment FEA](#cad--mechanical-design) above, which closes the loop: bench measurement feeds the material model, the material model feeds the deployment simulation, and the simulation sets the load the part is designed against.
+
+That number carries an honest caveat. At peak load the cord reaches $\lambda = 2.72$, past the highest point on the bench (2.6) and deep into the region where the asymptotic term dominates and nothing has been measured. The design load is therefore an extrapolation, not an interpolation. Pulling the cord to $\lambda \approx 2.75$ — close to failure, on a sample that can be sacrificed — is the single measurement that would most improve confidence in the recovery system, and it is the next thing to do if the parachute is reinstated.
 
 ---
 # Moment of Inertia Testing
@@ -130,20 +291,18 @@ To measure the moments of inertia, a pendulum setup can be used. The most common
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.17_PM.png" 
-      alt="Pitch/Yaw MOI measurement setup" 
+      alt="Roll-axis bifilar pendulum setup" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100"
-    />
-    <p>Pitch/Yaw MOI measurement setup</p>
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
+    <p class="fig-caption">Pitch/Yaw MOI measurement setup</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.28_PM.png" 
       alt="Roll MOI measurement setup" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100"
-    />
-    <p>>Roll MOI measurement setup</p>
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
+    <p class="fig-caption">Roll MOI measurement setup</p>
   </div>
 </div>
 
@@ -158,8 +317,7 @@ $$
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.08.59_PM.png" 
       alt="Newtonian Derivation" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100"
-    />
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
 </Dropdown>
 
 <Dropdown title="Lagrangian Derivation">
@@ -167,8 +325,7 @@ $$
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.11.40_PM.png" 
       alt="Lagrangian Derivation" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100"
-    />
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
 </Dropdown>
 
 The measurement uncertainty in this setup $\delta I$ can be simply calculated by summing the relative uncertainties in $T, d, L$ in quadrature, approximating them as gaussian.
@@ -182,7 +339,7 @@ Compared to the standard pendulum method below, the propagated uncertainties in 
 <Dropdown title="Standard Pendulum">
 ### Standard Pendulum
 
-<img src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.19.02_PM.png" alt="diagram" width="40%" class = "mx-auto dark:invert brightness-105 dark:brightness-100"/>
+<img src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.19.02_PM.png" alt="Standard pendulum geometry diagram" width="40%" class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
 
 For a standard pendulum setup, the MOI about the CM is given below (from $T=2\pi\sqrt{I/mgd}$ and the parallel axis theorem).
 
@@ -196,8 +353,7 @@ The uncertainty can be calculated by taking partial derivatives w.r.t. to $T$ an
     src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.39.55_PM.png" 
     alt="Uncertainty Propogation" 
     style={{ maxWidth: '70%', borderRadius: '8px' }}
-    class = "mx-auto dark:invert brightness-105 dark:brightness-100"
-/>
+    class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
 
 $$
 \delta I_{sp} = \sqrt{(I + m d^2)^2 \left( \frac{2 \delta T}{T} \right)^2 + (I - m d^2)^2 \left( \frac{\delta d}{d} \right)^2}
@@ -285,4 +441,30 @@ Since the first flight test will be done with a bare rocket just for control ver
 
     ]}
   />
+  The uncertainties are around the same size as the actual measurements, total unusable \:\<
 </Dropdown>
+
+---
+
+## EDF Rotor Inertia, Without Measuring It
+
+The bifilar pendulum measures the MOI of the entire vehicle. However, the MOI of the EDF rotor is useful as it determines the gyroscopic moments induced during pitching maneuvers and the roll moment during startup/spindown.
+
+When the EDF spins up while the vehicle hangs freely on the tether, there is no significant external torque about the roll axis, so angular momentum about that axis conserved. The rotor accelerates one way and the airframe rotates the other. Since $I_{edf} \ll I_{rkt}$:
+
+$$
+I_{rkt}\,\omega_{rkt} = I_{edf}\,\omega_{edf}
+$$
+
+During roll testing the airframe reached roughly $11~\mathrm{rad/s}$ while the EDF peaked near $29{,}000$ rpm, or about $3040~\mathrm{rad/s}$. With $I_{xx}$ already measured:
+
+$$
+I_{edf} \approx \frac{I_{rkt}\,\omega_{rkt}}{\omega_{edf}} \approx \boxed{6\times10^{-6}~\mathrm{kg\,m^2}}
+$$
+
+This is a rough estimate. The biggest issue is that $\omega_{rkt}$ was only estimated, as the vanes were producing torque in the opposite direction throught the entire spinup.
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/vehicle/edf-spinup-roll.webp" alt="Airframe roll rate during EDF spin-up" class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Airframe roll rate during EDF spin-up. The counter-rotation here is what the rotor inertia is derived from.</figcaption>
+</figure>

@@ -15,15 +15,30 @@ interface SubpageItem {
   children?: SubpageItem[];
 }
 
+/**
+ * Tailwind only generates classes it can find as literal strings in source, so
+ * an interpolated class name produced a utility that was never compiled. Keep the
+ * literals here and index into them.
+ */
+const HERO_POSITION = {
+  top: 'object-top',
+  center: 'object-center',
+  bottom: 'object-bottom',
+} as const;
+
+type HeroPosition = keyof typeof HERO_POSITION;
+
 interface Props {
   title: string;
   description: string;
   dateRange: string;
   tags: string[];
-  heroMedia: string;
+  heroMedia?: string;
   isVideo?: boolean;
+  /** Social/link-preview image for this page. */
+  ogImage?: string;
   /** Vertical object alignment for hero backgrounds */
-  heroPosition?: string;
+  heroPosition?: HeroPosition;
   toc: TocItem[];
   /** If provided, renders multi-page navigation with nested TOC under the active page */
   subpages?: SubpageItem[];
@@ -46,8 +61,9 @@ const {
   description, 
   dateRange, 
   tags, 
-  heroMedia, 
-  isVideo = false, 
+  heroMedia,
+  isVideo = false,
+  ogImage,
   heroPosition = 'center',
   toc,
   subpages,
@@ -80,16 +96,16 @@ const prevPage = currentIndex > 0 ? flatPages[currentIndex - 1] : undefined;
 const nextPage = (currentIndex !== -1 && currentIndex < flatPages.length - 1) ? flatPages[currentIndex + 1] : undefined;
 ---
 
-<Layout title={`${title} | Roland Hu`} description={`${title} Project - Roland Hu`}>
+<Layout title={`${title} | Roland Hu`} description={description} image={ogImage}>
   <!-- HERO -->
   {showHero && (
     <section class="relative w-full h-[50vh] min-h-[400px] flex items-center overflow-hidden border-b border-slate-200 dark:border-slate-800">
       {isVideo ? (
-        <video class={`absolute inset-0 w-full h-full object-cover object-${heroPosition}`} autoplay loop muted playsinline>
+        <video class={`absolute inset-0 w-full h-full object-cover ${HERO_POSITION[heroPosition]}`} autoplay loop muted playsinline aria-label={`${title} project`}>
           <source src={heroMedia} type="video/mp4" />
         </video>
       ) : (
-        <img src={heroMedia} alt={`${title} project`} class={`absolute inset-0 w-full h-full object-cover object-${heroPosition}`} />
+        <img src={heroMedia} alt={`${title} project`} class={`absolute inset-0 w-full h-full object-cover ${HERO_POSITION[heroPosition]}`} />
       )}
 
       <div class="absolute inset-0 bg-slate-950/50 dark:bg-slate-950/60 z-10"></div>
@@ -157,6 +173,42 @@ const nextPage = (currentIndex !== -1 && currentIndex < flatPages.length - 1) ? 
 
     <!-- Center Column: Content -->
     <div class="min-w-0 max-w-5xl mx-auto w-full flex flex-col gap-14">
+      {/* Mobile/tablet table of contents. The sidebar is lg-only, so without
+          this there is no in-page navigation at all on narrow screens. */}
+      {(toc.length > 0 || hasSubpages) && (
+        <details class="lg:hidden group rounded-lg border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 -mb-8">
+          <summary class="list-none flex items-center justify-between gap-2 px-4 py-3 cursor-pointer select-none font-mono text-xs uppercase tracking-widest text-stone-500 dark:text-slate-400">
+            {sidebarTitle}
+            <svg class="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-open:rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </summary>
+          <div class="px-2 pb-3 border-t border-slate-200 dark:border-slate-800 pt-2">
+            {hasSubpages && (
+              <div class="flex flex-col gap-0.5 mb-2">
+                {subpages!.map((page) => (
+                  <a href={page.href}
+                     class={`rounded-md px-3 py-2 font-mono text-[13px] no-underline block ${page.id === activePageId
+                       ? 'bg-blue-100/70 dark:bg-blue-500/10 text-blue-800 dark:text-blue-300 font-medium'
+                       : 'text-stone-500 dark:text-slate-400'}`}>
+                    {page.label}
+                  </a>
+                ))}
+              </div>
+            )}
+            {toc.length > 0 && (
+              <div class={`flex flex-col gap-0.5 ${hasSubpages ? 'ml-3 pl-3 border-l border-stone-300/50 dark:border-slate-700/60' : ''}`}>
+                {toc.map((item) => (
+                  <a href={`#${item.id}`} class="rounded-md px-3 py-1.5 font-mono text-[11px] text-stone-500 dark:text-slate-400 no-underline block">
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </details>
+      )}
+
       {/* Subpage header when hero is hidden */}
       {!showHero && projectName && (
         <div class="border-b border-slate-200 dark:border-slate-800 pb-4">

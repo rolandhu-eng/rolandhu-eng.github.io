@@ -4,12 +4,22 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  /** Social/link-preview image. Root-relative path; resolved against `site`. */
+  image?: string;
 }
 
-const { 
-  title = "Roland Hu | Engineering Portfolio", 
-  description = "Roland Hu - Engineering Portfolio" 
+const DEFAULT_OG_IMAGE = '/assets/aeolus/avionics/av_bay.webp';
+
+const {
+  title = "Roland Hu | Engineering Portfolio",
+  description = "Roland Hu - Engineering Portfolio",
+  image = DEFAULT_OG_IMAGE,
 } = Astro.props;
+
+// Astro.site is set in astro.config.mjs; fall back to a relative URL in dev.
+const year = new Date().getFullYear();
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+const ogImage = new URL(image, Astro.site ?? Astro.url.origin);
 ---
 
 <!DOCTYPE html>
@@ -19,7 +29,22 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <link rel="canonical" href={canonical} />
 
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Roland Hu" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 
     <script is:inline>
@@ -67,6 +92,11 @@ const {
   </head>
 
   <body class="bg-[#f5f3ef] dark:bg-[#020817] text-slate-700 dark:text-slate-300 antialiased font-sans min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
+    <a href="#main-content"
+       class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded focus:bg-slate-900 focus:text-white focus:font-mono focus:text-xs focus:no-underline">
+      Skip to content
+    </a>
+
     <!-- HEADER -->
     <header id="site-header" class="sticky top-0 z-50 w-full border-b bg-[#f5f3ef]/90 dark:bg-[#020817]/90 border-slate-200 dark:border-slate-800 backdrop-blur-sm">
       <div class="max-w-5xl mx-auto px-4 py-3">
@@ -78,6 +108,7 @@ const {
             <ul class="hidden sm:flex items-center gap-6 font-mono text-xs list-none m-0 p-0">
               <li><a href="/#about" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">About</a></li>
               <li><a href="/projects" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Projects</a></li>
+              <li><a href="/#research" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Research</a></li>
               <li><a href="/#contact" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Contact</a></li>
             </ul>
             
@@ -96,16 +127,18 @@ const {
         <ul id="nav-links" class="hidden flex-col gap-3 font-mono text-xs list-none m-0 p-0 border-t border-slate-200 dark:border-slate-800 mt-3 pt-3 pb-1">
           <li><a href="/#about" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">About</a></li>
           <li><a href="/projects" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Projects</a></li>
+              <li><a href="/#research" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Research</a></li>
           <li><a href="/#contact" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Contact</a></li>
         </ul>
       </div>
     </header>
 
+    <div id="main-content" tabindex="-1"></div>
     <slot />
 
     <!-- FOOTER -->
     <footer class="max-w-5xl w-full mx-auto px-4 py-6 border-t border-slate-200 dark:border-slate-800 text-center font-mono text-xs text-slate-400 dark:text-slate-600">
-      Designed & Built by Roland Hu | © 2026
+      Designed & Built by Roland Hu | © {year}
     </footer>
 
     <script>

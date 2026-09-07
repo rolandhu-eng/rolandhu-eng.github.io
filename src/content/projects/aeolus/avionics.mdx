@@ -1,5 +1,7 @@
 ---
 title: "Avionics"
+order: 4
+navLabel: "Avionics"
 showHero: false
 ---
 import Dropdown from '../../../components/Dropdown.astro';
@@ -11,21 +13,19 @@ The avionics system handles sensing, control, and power distribution for Aeolus�
 <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
   <img 
     src="/assets/aeolus/avionics/Avionics.drawio.png" 
-    alt="Pitch/Yaw MOI measurement setup" 
+    alt="Avionics system block diagram" 
     style={{ maxHeight: '500px' }}
-    class="mx-auto dark:invert dark:hue-rotate-0"
-  />
-  <p>Initial avionics planning</p>
+    class="mx-auto dark:invert dark:hue-rotate-0" loading="lazy" decoding="async" />
+  <p class="fig-caption">Initial avionics planning</p>
 </div>
 
 <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
   <img 
     src="/assets/aeolus/avionics/av_bay.webp" 
-    alt="Power PCB" 
+    alt="Assembled avionics bay: flight computer and power distribution board" 
     style={{ maxHeight: '500px', borderRadius: '8px' }}
-    class = "mx-auto"
-  />
-  <p>Flight computer and power distribution board</p>
+    class = "mx-auto" loading="lazy" decoding="async" />
+  <p class="fig-caption">Flight computer and power distribution board</p>
 </div>
 </div>
 ---
@@ -37,24 +37,47 @@ My flight computer was built around the Teensy 4.1, chosen for its clock speed, 
 
 In the future, I will likely switch to an LSM6DSOX or ISM330DHCX IMU for lower drift than my current setup. I will also switch to a BMP581 for its ~3 cm altitude precision compared to my current ~50 cm precision.
 
+## Bus Allocation
+
+The 200 Hz control loop sets the timing budget for everything else, and the peripherals are deliberately split across buses rather than sharing one:
+
+<Table
+  maxWidth="max-w-2xl"
+  columns={[
+    { key: 'dev', label: 'Device', align: 'left' },
+    { key: 'bus', label: 'Bus', align: 'left' },
+    { key: 'rate', label: 'Poll interval', align: 'center' },
+    { key: 'why', label: 'Why this bus', align: 'left' }
+  ]}
+  rows={[
+    { dev: 'ICM-20948', bus: 'SPI @ 4 MHz', rate: '5 ms', why: 'Needs the bandwidth and the deterministic timing' },
+    { dev: 'BMP388', bus: 'I2C @ 1 MHz', rate: '20 ms', why: 'Slow sensor, tolerates a shared bus' },
+    { dev: 'INA260 / INA228', bus: 'separate I2C @ 400 kHz', rate: '15 ms', why: 'Kept off the baro bus' },
+    { dev: 'NEO-M9N', bus: 'UART5', rate: 'streamed', why: 'Frees both I2C buses from long transfers' },
+    { dev: 'RFM95W', bus: 'SPI', rate: '100 ms', why: 'Burst transfers, not time-critical' }
+  ]}
+/>
+
+Putting the power monitors on their own I2C bus is the deliberate part. A blocking transfer or a stretched clock on a shared bus delays everything behind it, and the barometer feeds the altitude estimate — a stall there shows up as an altitude glitch. Separating them means a slow power read cannot ever hold up a control-relevant sensor.
+
+The GPS is on a hardware UART for the same reason. Early bench testing with the u-blox library showed parsing occasionally blocking for up to 6000 µs — long enough to drop three full control cycles. Re-running the same test on a separate microcontroller as a diagnostic gave 38 µs mean with 1.7 µs standard deviation, which confirmed the spikes were a software and interface problem rather than the receiver being slow.
+
 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/avionics/fc_front.webp" 
       alt="FC front" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto"
-    />
-    <p>FC front</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">FC front</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/avionics/fc_back.webp" 
       alt="FC back" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto"
-    />
-    <p>FC back</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">FC back</p>
   </div>
 </div>
 
@@ -74,29 +97,26 @@ The power distribution board was designed to distribute and convert power from t
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/avionics/pwrpcb.webp" 
-      alt="Power PCB" 
+      alt="Power distribution board PCB layout" 
       style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "mx-auto rotate-90"
-    />
-    <p>Power distribution board layout</p>
+      class = "mx-auto rotate-90" loading="lazy" decoding="async" />
+    <p class="fig-caption">Power distribution board layout</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/avionics/pwr_front.webp" 
       alt="PCB front" 
       style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "mx-auto"
-    />
-    <p>Front</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">Front</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/avionics/pwr_back.webp" 
       alt="PCB back" 
       style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "mx-auto"
-    />
-    <p>Back</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">Back</p>
   </div>
 </div>
 
@@ -107,20 +127,18 @@ The servo distribution board was simple as it just needed to distribute power an
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/avionics/svrpcb.webp" 
-      alt="Servo PCB" 
+      alt="Servo distribution board PCB layout" 
       style={{ maxHeight: '500px', borderRadius: '8px' }}
-      class = "mx-auto"
-    />
-    <p>Servo distribution board layout</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">Servo distribution board layout</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/avionics/svr_board.jpeg" 
-      alt="Servo PCB" 
+      alt="Servo distribution board mounted in the vehicle" 
       style={{ maxHeight: '500px', borderRadius: '8px' }}
-      class = "mx-auto"
-    />
-    <p>Servo distribution board mounted</p>
+      class = "mx-auto" loading="lazy" decoding="async" />
+    <p class="fig-caption">Servo distribution board mounted</p>
   </div>
 </div>
 
@@ -143,6 +161,7 @@ I may also add an NTC thermistor to monitor the temperature of the ESC or wires 
     { part: "Teensy 4.1", function: "Flight computer MCU", interface: "—", spec: "600 MHz, +8 MB PSRAM, +16 MB flash" },
     { part: "ICM-20948", function: "9-DOF IMU (accel/gyro/mag)", interface: "SPI", spec: "State estimation" },
     { part: "BMP388", function: "Barometer", interface: "I2C", spec: "±0.5 m altitude precision" },
+    { part: "NEO-M9N", function: "GNSS receiver", interface: "UART5", spec: "Doppler velocity for drift correction" },
     { part: "RFM95W", function: "LoRa radio", interface: "SPI", spec: "Command uplink / telemetry downlink" },
     { part: "INA260", function: "Power monitor", interface: "I2C", spec: "Avionics bus voltage/current" },
     { part: "INA228", function: "Power monitor", interface: "I2C", spec: "EDF motor power" },
@@ -151,6 +170,15 @@ I may also add an NTC thermistor to monitor the temperature of the ESC or wires 
 />
 </div>
 
+## Where the IMU Sits
+
+The IMU is not at the centre of mass. It sits about 0.4 m forward of it along the roll axis, because that is where there was room for it.
+
+That offset has a consequence most builds ignore. An accelerometer at a lever arm from the centre of rotation does not measure the vehicle's linear acceleration — it measures that plus the centripetal and tangential acceleration produced by the vehicle rotating about its own centre. Pitch the vehicle and the IMU swings through an arc, reporting acceleration that the vehicle as a whole is not experiencing. Feed that straight into a velocity estimate and rotation is silently integrated into translation.
+
+The offsets are stored in the flight code and the rotational terms subtracted before the accelerometer reading reaches the estimator, so what the filter sees is acceleration at the centre of mass rather than at the sensor.
+
+---
 
 # Accel/Mag calibration
 Plotting accelerometer and magnetometer readings in 3D as the sensor is rotated through all orientations should trace a sphere: radius 1 g for the accelerometer, ~50 µT (Earth's field at this location) for the magnetometer. In practice, sensor errors distort this sphere into an offset ellipsoid.
@@ -189,29 +217,143 @@ The centroid measures the center of mass of all points to visualize the extent o
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/accel-mag-cal/mag-raw.webp" 
+      alt="Magnetometer point cloud before calibration — an offset, distorted ellipsoid" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert dark:hue-rotate-180"
-    />
-    <p>Magnetometer points before calibration</p>
+      class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" />
+    <p class="fig-caption">Magnetometer points before calibration</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/accel-mag-cal/mag-corrected.webp" 
+      alt="Magnetometer point cloud after calibration — a centred sphere" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert dark:hue-rotate-180"
-    />
-    <p>Magnetometer points after calibration</p>
+      class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" />
+    <p class="fig-caption">Magnetometer points after calibration</p>
   </div>
 </div>
 
 <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
   <img 
     src="/assets/aeolus/accel-mag-cal/accel.webp" 
+    alt="Accelerometer point cloud" 
     style={{ maxWidth: '50%', borderRadius: '8px' }}
-    class = "mx-auto dark:invert dark:hue-rotate-180"
-  />
-  <p>Accelerometer points (no visible difference pre/post calibration)</p>
+    class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" />
+  <p class="fig-caption">Accelerometer points (no visible difference pre/post calibration)</p>
 </div>
 
 </Dropdown>
+
+## Judging a Calibration
+
+The first magnetometer calibration was not good enough, and how that was determined matters more than the fix.
+
+A calibration hands back a matrix and a bias vector. Whether it is any good is judged by applying it and checking that the corrected magnitude is constant — the Earth's field strength should not depend on which way the sensor happens to be pointing. Two things were tracked: the standard deviation of $|\mathbf{m}|$ as a fraction of its mean, and the *shape* of the residual distribution.
+
+Location dominated the result. Calibrating indoors near a laptop gave 3%, then 7% of mean on a second attempt. Moving outside and away from the laptop brought it to **0.9%** on the third.
+
+The distribution shape is the sharper diagnostic of the two. After a bad calibration the residuals were skewed with a heavy tail — the signature of structure the ellipsoid fit failed to absorb, meaning real distortion is still present. After a good one they were close to normal, which is what remains when the only error left is sensor noise. A normal residual is evidence that the error model was the right one; a skewed residual says the model has not finished its job no matter how small the standard deviation looks. Coverage was checked as well: 93.1% of 72 orientation bins occupied, so the fit was not extrapolating across an unsampled patch of the sphere.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-recal-fit.webp" alt="Ellipsoid fit to the recalibration sweep." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Ellipsoid fit to the recalibration sweep.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-recal-residual.webp" alt="Residual distribution after correction — close to normal." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Residual distribution after correction — close to normal.</figcaption></figure>
+</div>
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/avionics/mag-cal-outdoor.webp" alt="Outdoor calibration, away from the laptop: 0.9% of mean." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Outdoor calibration, away from the laptop: 0.9% of mean.</figcaption>
+</figure>
+
+
+## A Bug Hiding in a Convention
+
+For a long time the Y and Z IMU axes appeared inverted, and the flight code carried a sign flip to compensate.
+
+That flip produced correct behaviour, which is why it survived. It was still wrong — it was correcting for something that was not happening. The axes were fine. The *ground station* was displaying them wrong: it interpreted the attitude quaternion as an earth-to-body rotation when the flight computer was sending body-to-earth, and that mistake inverts precisely those axes. The original axis assignment had been made by reading that display, so a bug in the ground station had propagated backwards into the vehicle's coordinate conventions and then been patched over on the vehicle side.
+
+---
+
+# Magnetic Interference
+
+The magnetometer sits about 12 cm from the nearest motor wiring, which carries up to 30 A. Before flying with it, the obvious question was whether that current would swamp the Earth's field.
+
+Modelling the wire as an infinite straight conductor:
+
+$$B = \frac{\mu_0 I}{2\pi d} = \frac{(4\pi\times10^{-7})(30)}{2\pi(0.12)} \approx 50~\mu\mathrm{T}$$
+
+That is the same magnitude as the Earth's field at this location. If true, heading would be unusable at any appreciable throttle.
+
+Measured data showed almost no interference at all. Comparing magnetometer readings from a flight against a reference recording with the EDF off, the difference was on the order of the reference's own fluctuation.
+
+The prediction was wrong because the model was wrong. The motor wiring does not run as one long straight conductor past the sensor — it doubles back, forming a roughly triangular loop only about 1.5 cm across. At 12 cm away that is $R \ll d$, which is the dipole limit, not the infinite-wire limit. Outgoing and return currents very nearly cancel, and the field falls off as $1/d^3$ rather than $1/d$:
+
+$$B = \frac{\mu_0 I R^2}{2 d^3} \approx 2.5~\mu\mathrm{T}$$
+
+Twenty times smaller, and squarely in line with what was observed.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-edf-off.webp" alt="Reference recording, EDF off." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Reference recording, EDF off.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-in-flight.webp" alt="Magnetometer during flight — no large excursion." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Magnetometer during flight — no large excursion.</figcaption></figure>
+</div>
+
+
+The useful part was not the number. It was that a confident prediction failed, and the reason was a geometric assumption imported without checking whether it applied. The wire was never infinite; it only had to be long compared to 12 cm, and it is not.
+
+The magnetometer is nonetheless not currently in the loop. Heading initialization is still unsolved — before recalibration the heading error reached 15° — so the vehicle flies without it and takes its heading reference elsewhere.
+
+---
+
+# GPS Characterization
+
+The receiver is a u-blox NEO-M9N, used for Doppler velocity rather than raw position. Three things were established on the bench before it was trusted in the estimator.
+
+## The Default That Was Silently Wrong
+
+The receiver ships in a *pedestrian* dynamic model. That model embeds assumptions about plausible speed and acceleration, and it filters the solution accordingly — assumptions which are wrong for a vehicle that accelerates vertically.
+
+Switching to the *airborne* model produced an immediate and large improvement in velocity noise:
+
+<Table
+  maxWidth="max-w-md"
+  note="Velocity standard deviation, static, after switching the dynamic model to airborne."
+  columns={[
+    { key: 'axis', label: 'Component', align: 'left' },
+    { key: 'std', label: 'σ (m/s)', align: 'center' }
+  ]}
+  rows={[
+    { axis: 'North', std: '0.125' },
+    { axis: 'East', std: '0.062' },
+    { axis: 'Down', std: '0.091' }
+  ]}
+/>
+
+Nothing was broken beforehand and nothing reported an error. The receiver simply produced quietly worse data than it was capable of, which is the failure mode that gets found only by going and looking.
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/avionics/gps-airborne-std.webp" alt="Velocity spread after switching the dynamic model to airborne." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Velocity spread after switching the dynamic model to airborne.</figcaption>
+</figure>
+
+
+## The Noise Is Not Gaussian
+
+Velocity noise was characterized over roughly 8300 static samples. The standard deviation is small — around 0.02 m/s at best — but the distributions have visibly **heavy tails**: they look normal in the middle and produce far more large excursions than a Gaussian would.
+
+This matters directly downstream. A Kalman filter assumes Gaussian measurement noise, and a heavy-tailed distribution means occasional outliers many sigma out. Tuning the filter's measurement covariance from the standard deviation alone would leave it over-trusting exactly those samples. Knowing the tails are there is what justifies gating the fusion rather than accepting every fix.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+  <figure class="m-0"><img src="/assets/aeolus/avionics/gps-noise-hist.webp" alt="Velocity error distribution — normal through the middle." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Velocity error distribution — normal through the middle.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/avionics/gps-noise-qq.webp" alt="The tails departing from a Gaussian." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The tails departing from a Gaussian.</figcaption></figure>
+</div>
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/avionics/gps-velocity-series.webp" alt="Static velocity over time." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Static velocity over time.</figcaption>
+</figure>
+
+
+## Testing Its Own Interference
+
+The vehicle transmits on 915 MHz and receives GNSS on 1575 MHz, with both antennas within centimetres of each other. Rather than wait to discover a problem in flight, the RFM95W was set transmitting at 6 dBm and placed directly on top of the GPS patch antenna — a deliberately worse case than the real installation.
+
+No measurable change in DOP or any other quality metric. A null result, and worth recording as one: it rules out a failure mode that would otherwise stay on the list of things that might explain a bad flight.
 
