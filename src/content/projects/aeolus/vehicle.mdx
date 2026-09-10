@@ -11,11 +11,11 @@ import Table from '../../../components/Table.astro';
 
 <div class="not-prose grid grid-cols-2 gap-6 my-8 items-end max-w-2xl mx-auto">
   <figure class="m-0 text-center">
-    <img src="/assets/aeolus/vehicle/vehicleFull.webp" alt="Aeolus exterior CAD render" class="mx-auto max-h-[420px] w-auto" loading="lazy" decoding="async" />
-    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Exterior — nose cone, forward body, intake shoulder, EDF section, and the four control vanes with fixed fins at the base.</figcaption>
+    <img src="/assets/aeolus/vehicle/vehicleFull.webp" alt="Aeolus exterior CAD render" class="mx-auto max-h-[420px] w-auto" loading="lazy" decoding="async"  width="616" height="1280" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Exterior — nose cone, forward body, intake shoulder, EDF section, and the four steerable fins at the base, each sharing a shaft with a vane inside the exhaust.</figcaption>
   </figure>
   <figure class="m-0 text-center">
-    <img src="/assets/aeolus/vehicle/vehicleTransparent.webp" alt="Aeolus cutaway CAD render showing internal layout" class="mx-auto max-h-[420px] w-auto" loading="lazy" decoding="async" />
+    <img src="/assets/aeolus/vehicle/vehicleTransparent.webp" alt="Aeolus cutaway CAD render showing internal layout" class="mx-auto max-h-[420px] w-auto" loading="lazy" decoding="async"  width="562" height="1682" />
     <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Internals — recovery mechanism in the nose, avionics stack, battery and ESC bay, then the EDF and vane linkages aft of the intake.</figcaption>
   </figure>
 </div>
@@ -25,8 +25,13 @@ import Table from '../../../components/Table.astro';
     src="/assets/aeolus/vehicle/Subsystems.drawio.png" 
     alt="Aeolus subsystem block diagram" 
     style={{ maxWidth: '60%'}}
-    class="mx-auto invert dark:invert-0 hue-rotate-0 dark:hue-rotate-180" loading="lazy" decoding="async" />
-  <p class="fig-caption">Initial systems planning</p>
+    class="mx-auto invert dark:invert-0 hue-rotate-0 dark:hue-rotate-180" loading="lazy" decoding="async"  width="827" height="1011" />
+  <p class="fig-caption">Initial systems planning, January. Most of it survived — the parachute recovery path is the part that did not.</p>
+</div>
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8">
+  <figure class="m-0"><img src="/assets/aeolus/vehicle/rocket-night.webp" alt="The assembled vehicle with its outer shell and nose cone removed" class="w-full rounded-lg" loading="lazy" decoding="async"  width="933" height="1800" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The real thing, shell and nose cone off — avionics stack, battery bay, EDF, and fins.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/vehicle/rocket-intake-night.webp" alt="Intake end of the vehicle with internals exposed" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1132" height="1600" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Intake end, showing the wiring run between the avionics bay and the EDF section.</figcaption></figure>
 </div>
 
 ## CAD Model Viewer
@@ -63,14 +68,14 @@ Two parts were designed rather than simply drawn: the fairing hinges, which were
     src="/assets/aeolus/vehicle/gen_design_dash.webp" 
     alt="Generative design study for the fairing hinges" 
     style={{ maxWidth: '100%'}}
-    class="mx-auto" loading="lazy" decoding="async" />
+    class="mx-auto" loading="lazy" decoding="async"  width="2064" height="646" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Generative design study used to produce the <a href="#fairing-vid">fairing hinges</a>. Each point is a candidate geometry; the study sweeps mass against displacement so the trade is visible rather than guessed</figcaption>
 </div>
 
 The hinge is a small part with an awkward job: it has to survive the deployment load, fit inside a curved keep-out volume, and add as little mass as possible at the very top of the vehicle, where mass is most expensive in pitch and yaw inertia. Rather than iterating by hand, the load cases and keep-out volumes were handed to a generative study and the resulting population of candidates compared directly.
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/vehicle/gen-design-fairing.webp" alt="Generated fairing hinge geometry." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/vehicle/gen-design-fairing.webp" alt="Generated fairing hinge geometry." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1365" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Generated fairing hinge geometry.</figcaption>
 </figure>
 
@@ -80,27 +85,17 @@ The hinge is a small part with an awkward job: it has to survive the deployment 
     src="/assets/aeolus/vehicle/nose_struct_sim2.webp" 
     alt="FEA of the nose cone shock cord attachment" 
     style={{ maxWidth: '50%'}}
-    class="mx-auto" loading="lazy" decoding="async" />
+    class="mx-auto" loading="lazy" decoding="async"  width="822" height="800" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">FEA of the shock cord attachment in the nose</figcaption>
 </div>
 
-The shock cord attachment was simulated because it is a single point of failure. The entire recovery load passes through one small feature, and if it strips or tears out, the parachute stays attached to nothing and the vehicle comes down ballistic. It is the one part of the airframe where a local failure loses the whole vehicle, which makes it worth the analysis time in a way that most of the structure is not.
+The shock cord attachment was simulated because it is a single point of failure. The entire recovery load passes through one small feature, and if it snaps, the parachute stays attached to nothing and the vehicle comes down in a free fall. It is the one part of the airframe where a local failure loses the whole vehicle.
 
 ---
 
-# Powered Landing
+# Recovery System
 
-Recovery is powered. The vehicle flies its own descent and sets itself down under thrust, using the same loops that hold a hover — the altitude PID simply tracks a descending setpoint instead of a fixed one.
-
-This is only possible because the propulsion is an EDF. A solid motor burns once and cannot be modulated, so recovery has to be passive: something has to fall, and a parachute is the only thing standing between it and the ground. Continuous throttle authority turns descent into just another commanded velocity, which means the hardest part of landing — arresting the descent at the right moment — is handled by a controller that already exists rather than a mechanism that has to work first time.
-
-At the altitudes flown so far this also makes an unrecovered failure survivable, which is what makes powered-only landing an acceptable risk today. The 27 August position-hold test provided the evidence: the vehicle crashed from a hover and inspection found no damage. That argument stops holding as the envelope grows, which is why the parachute below is deferred rather than abandoned, and why the nose fairing and its deployment mechanism are still on the vehicle.
-
----
-
-# Parachute Failsafe
-
-The parachute is designed, sized, and characterized, but not currently flown. It returns as an emergency system once flights go high enough that a control failure is no longer survivable. The nose fairing carries it, and the [generatively designed hinges](#cad--mechanical-design) above exist for it.
+The parachute is designed, sized, and characterized, but not currently flown. The nose fairing carries it, and the [generatively designed hinges](#cad--mechanical-design) above exist for it.
 
 <div style={{ flex: '1', minWidth: '300px',  textAlign: 'center' }} id='fairing-vid'>
   <video controls width="50%" loop class="mx-auto">
@@ -141,7 +136,7 @@ A 0.7 m toroid reaches 5.44 m/s on 0.37 m² of canopy. A flat octagon needs roug
 The fabric column is left blank for the toroid deliberately: projected area sets drag, but a toroidal canopy is a three-dimensional surface whose *total* fabric area is meaningfully larger than its projection, so multiplying through by areal density would understate it. The pattern generator reports both numbers separately for exactly this reason.
 
 <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <figure class="mx-auto"><img src="/assets/aeolus/vehicle/parachute-gores.webp" alt="Openchute" class="w-full rounded-lg mx-auto" style={{maxWidth: "70%"}} loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Toroidal parachute designed in Openchute</figcaption></figure>
+  <figure class="mx-auto"><img src="/assets/aeolus/vehicle/parachute-gores.webp" alt="Openchute" class="w-full rounded-lg mx-auto" style={{maxWidth: "70%"}} loading="lazy" decoding="async"  width="1400" height="856" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Toroidal parachute designed in Openchute</figcaption></figure>
 </div>
 
 
@@ -171,7 +166,7 @@ $S$ is a property of the material and cross-section, not of the particular sampl
   ]}
 />
 
-That collapse is the result worth having. It says the numbers describe the cord itself rather than one arbitrary piece of it, which is what makes them safe to use as model inputs. Across the full range $S$ falls from about 121 at $\lambda = 1.17$, bottoms out near 52 around $\lambda = 2.0$, and climbs back to roughly 76 by $\lambda = 2.6$ — the stiff, soft, then strain-stiffening shape expected of an elastomer.
+That collapse is what convinced me the measurement was sound. It says the numbers describe the cord itself rather than one arbitrary piece of it, which is what makes them safe to use as model inputs. Across the full range $S$ falls from about 121 at $\lambda = 1.17$, bottoms out near 52 around $\lambda = 2.0$, and climbs back to roughly 76 by $\lambda = 2.6$ — the stiff, soft, then strain-stiffening shape expected of an elastomer.
 
 One honest limitation: the shortest samples carry the largest relative error, since a few millimetres of meter-stick uncertainty on a 50 mm elongation is several percent. The high-stiffness point anchoring the low-strain end is the least trustworthy number in the set.
 
@@ -293,7 +288,7 @@ To measure the moments of inertia, a pendulum setup can be used. The most common
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.17_PM.png" 
       alt="Roll-axis bifilar pendulum setup" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="980" height="880" />
     <p class="fig-caption">Pitch/Yaw MOI measurement setup</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -301,7 +296,7 @@ To measure the moments of inertia, a pendulum setup can be used. The most common
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.28_PM.png" 
       alt="Roll MOI measurement setup" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="660" height="812" />
     <p class="fig-caption">Roll MOI measurement setup</p>
   </div>
 </div>
@@ -317,7 +312,7 @@ $$
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.08.59_PM.png" 
       alt="Newtonian Derivation" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="2008" height="1536" />
 </Dropdown>
 
 <Dropdown title="Lagrangian Derivation">
@@ -325,7 +320,7 @@ $$
       src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.11.40_PM.png" 
       alt="Lagrangian Derivation" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
+      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="1350" height="1750" />
 </Dropdown>
 
 The measurement uncertainty in this setup $\delta I$ can be simply calculated by summing the relative uncertainties in $T, d, L$ in quadrature, approximating them as gaussian.
@@ -353,7 +348,7 @@ The uncertainty can be calculated by taking partial derivatives w.r.t. to $T$ an
     src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.39.55_PM.png" 
     alt="Uncertainty Propogation" 
     style={{ maxWidth: '70%', borderRadius: '8px' }}
-    class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
+    class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="1994" height="602" />
 
 $$
 \delta I_{sp} = \sqrt{(I + m d^2)^2 \left( \frac{2 \delta T}{T} \right)^2 + (I - m d^2)^2 \left( \frac{\delta d}{d} \right)^2}
@@ -465,6 +460,6 @@ $$
 This is a rough estimate. The biggest issue is that $\omega_{rkt}$ was only estimated, as the vanes were producing torque in the opposite direction throught the entire spinup.
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/vehicle/edf-spinup-roll.webp" alt="Airframe roll rate during EDF spin-up" class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/vehicle/edf-spinup-roll.webp" alt="Airframe roll rate during EDF spin-up" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="533" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Airframe roll rate during EDF spin-up. The counter-rotation here is what the rotor inertia is derived from.</figcaption>
 </figure>

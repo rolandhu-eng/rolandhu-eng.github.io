@@ -114,7 +114,16 @@ const ogImage = new URL(image, Astro.site ?? Astro.url.origin);
             
             <!-- Updated Toggle Button -->
             <button id="theme-toggle" aria-label="Toggle theme" class="flex items-center justify-center w-8 h-8 rounded-full border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-500 dark:hover:border-slate-500 bg-white/60 dark:bg-slate-900/60">
-              <span id="theme-icon" class="text-[13px] leading-none">☀</span>
+              <!-- Inline SVG rather than ☀/☾ text: Chrome substitutes its colour emoji
+                   font for U+2600, Safari renders the monochrome glyph. Swapped by CSS
+                   off the .dark class, so there is no icon flash before JS runs. -->
+              <svg class="hidden dark:block w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4.2"/>
+                <path d="M12 2.6v2.1M12 19.3v2.1M4.4 4.4l1.5 1.5M18.1 18.1l1.5 1.5M2.6 12h2.1M19.3 12h2.1M4.4 19.6l1.5-1.5M18.1 5.9l1.5-1.5"/>
+              </svg>
+              <svg class="block dark:hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.5 13.3A8.4 8.4 0 1 1 10.7 3.5a6.6 6.6 0 0 0 9.8 9.8z"/>
+              </svg>
             </button>
 
             <button class="nav-toggle sm:hidden p-1.5 border border-slate-300 dark:border-slate-700 rounded" aria-label="Toggle navigation" aria-controls="nav-links" aria-expanded="false">
@@ -133,6 +142,16 @@ const ogImage = new URL(image, Astro.site ?? Astro.url.origin);
       </div>
     </header>
 
+    <!-- Runs during parsing, before the hero is laid out. Astro's normal <script>
+         is a deferred module and lands after first paint, which left the hero
+         sized against the 64px fallback and short of the viewport bottom. -->
+    <script is:inline>
+      (function () {
+        var h = document.getElementById('site-header');
+        if (h) document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
+      })();
+    </script>
+
     <div id="main-content" tabindex="-1"></div>
     <slot />
 
@@ -150,20 +169,18 @@ const ogImage = new URL(image, Astro.site ?? Astro.url.origin);
       }
       setHeaderHeightVar();
       window.addEventListener('resize', setHeaderHeightVar);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(setHeaderHeightVar);
       
       const html = document.documentElement;
       const toggleBtn = document.getElementById('theme-toggle');
-      const icon = document.getElementById('theme-icon');
 
       function setTheme(dark: boolean) {
         if (dark) {
           html.classList.add('dark');
           html.style.background = '#020817';
-          if (icon) icon.textContent = '☀';
         } else {
           html.classList.remove('dark');
           html.style.background = '#f5f3ef';
-          if (icon) icon.textContent = '☾';
         }
         localStorage.setItem('theme', dark ? 'dark' : 'light');
       }

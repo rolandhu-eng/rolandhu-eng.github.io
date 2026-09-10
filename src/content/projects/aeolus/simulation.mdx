@@ -28,8 +28,8 @@ The geometry is the reason the cheap tools did not work. Standard rocket aero co
       src="/assets/aeolus/simulation/cfd_parametric.webp" 
       alt="Parametric CFD study across vane deflection angles" 
         style={{maxWidth: '70%'}}
-      class = "mx-auto" loading="lazy" decoding="async" />
-    <p class="fig-caption">Parametric CFD study</p>
+      class = "mx-auto" loading="lazy" decoding="async"  width="1878" height="1118" />
+    <p class="fig-caption">Vane deflection swept against lateral force. The slope of this curve is the control authority every attitude gain is derived from.</p>
   </div>
 
 
@@ -39,47 +39,47 @@ The geometry is the reason the cheap tools did not work. Standard rocket aero co
       src="/assets/aeolus/simulation/streamlines.webp" 
       alt="Streamlines through the duct and around the vanes" 
    
-      class = "mx-auto" loading="lazy" decoding="async" />
-    <p class="fig-caption">Streamlines</p>
+      class = "mx-auto" loading="lazy" decoding="async"  width="900" height="897" />
+    <p class="fig-caption">Flow entering the intake partway up the body and turning into the duct — the interaction standard rocket aero codes have no way to represent.</p>
   </div>
   <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/simulation/pres_contour.webp" 
       alt="Pressure contour over the vehicle" 
 
-      class = "mx-auto" loading="lazy" decoding="async" />
-    <p class="fig-caption">Pressure contour</p>
+      class = "mx-auto" loading="lazy" decoding="async"  width="833" height="871" />
+    <p class="fig-caption">Pressure distribution over the airframe at angle of attack.</p>
   </div>
   <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/simulation/vane_contour.webp" 
       alt="Pressure contour and streamlines around a deflected vane" 
    
-      class = "mx-auto" loading="lazy" decoding="async" />
-    <p class="fig-caption">Pressure contour and streamlines around deflected vane</p>
+      class = "mx-auto" loading="lazy" decoding="async"  width="665" height="863" />
+    <p class="fig-caption">A deflected vane inside the jet. Its dynamic pressure comes from the fan rather than from airspeed, which is why it still produces a moment at zero airspeed.</p>
   </div>
 </div>
 
 The vane result is the one that fed the controller: sweeping deflection angle gives lateral force, and lateral force times moment arm gives the control authority the gains are [derived from](/projects/aeolus/control#deriving-the-gains).
 
-That number was later measured two more ways — on the [thrust stand](/projects/aeolus/control#static--thrust-stand) and from [flight data](/projects/aeolus/control#dynamic--from-flight-data). Three independent estimates of the same quantity is the useful position to be in, because it is the disagreements that tell you which assumptions were load-bearing.
+That number was later measured two more ways — on the [thrust stand](/projects/aeolus/control#static--thrust-stand) and from [flight data](/projects/aeolus/control#dynamic--from-flight-data). Having three independent estimates let me see which assumptions the number actually rested on — they disagree, and the disagreements are the informative part.
 
 <Dropdown title="Full CFD image set">
 <div class="not-prose grid grid-cols-2 md:grid-cols-3 gap-3">
-  <img src="/assets/aeolus/simulation/cfd/cfd-1.webp" alt="CFD result 1 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-2.webp" alt="CFD result 2 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-3.webp" alt="CFD result 3 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-4.webp" alt="CFD result 4 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-5.webp" alt="CFD result 5 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-6.webp" alt="CFD result 6 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-7.webp" alt="CFD result 7 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-8.webp" alt="CFD result 8 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-9.webp" alt="CFD result 9 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-10.webp" alt="CFD result 10 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-11.webp" alt="CFD result 11 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-12.webp" alt="CFD result 12 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-13.webp" alt="CFD result 13 of 14" class="w-full rounded" loading="lazy" decoding="async" />
-  <img src="/assets/aeolus/simulation/cfd/cfd-14.webp" alt="CFD result 14 of 14" class="w-full rounded" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-1.webp" alt="CFD result 1 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1396" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-2.webp" alt="CFD result 2 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1431" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-3.webp" alt="CFD result 3 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1703" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-4.webp" alt="CFD result 4 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1449" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-5.webp" alt="CFD result 5 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1199" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-6.webp" alt="CFD result 6 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1371" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-7.webp" alt="CFD result 7 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1464" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-8.webp" alt="CFD result 8 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1260" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-9.webp" alt="CFD result 9 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1436" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-10.webp" alt="CFD result 10 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1169" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-11.webp" alt="CFD result 11 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1538" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-12.webp" alt="CFD result 12 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1817" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-13.webp" alt="CFD result 13 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="1415" />
+  <img src="/assets/aeolus/simulation/cfd/cfd-14.webp" alt="CFD result 14 of 14" class="w-full rounded" loading="lazy" decoding="async"  width="1400" height="834" />
 </div>
 </Dropdown>
 
@@ -94,8 +94,8 @@ The 6DOF model brings the pieces together: rigid-body dynamics driven by the van
       src="/assets/aeolus/simulation/simulink_model.webp" 
       alt="Full Simulink 6DOF model" 
         style={{maxWidth: '100%'}}
-      class = "mx-auto" loading="lazy" decoding="async" />
-    <p class="fig-caption">Full simulink model</p>
+      class = "mx-auto" loading="lazy" decoding="async"  width="2886" height="1194" />
+    <p class="fig-caption">The 6DOF model. CFD vane coefficients and pendulum-measured mass properties feed a rigid-body block running the same control law as the vehicle.</p>
   </div>
 
 ## Impulse Response — Flight Test vs. Simulink
@@ -118,7 +118,7 @@ A model tuned against tethered data can quietly encode the tether. The stronger 
 That closes a loop that started with an assumption. Thrust was predicted from a fan model, measured on a static stand, [inverted into an RPM setpoint](/projects/aeolus/propulsion#thrust-from-rpm) for the governor, and then confirmed in free flight against the simulation built on top of all of it.
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/simulation/thrust-vs-simulink.webp" alt="Measured thrust in free flight against the Simulink prediction." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/simulation/thrust-vs-simulink.webp" alt="Measured thrust in free flight against the Simulink prediction." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="318" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Measured thrust in free flight against the Simulink prediction.</figcaption>
 </figure>
 
@@ -129,4 +129,4 @@ The most useful thing the model did was choose a gain before that gain was flown
 
 The first free flights showed oscillation traced to lag between the commanded velocity and the attitude the vehicle actually reached — the velocity loop asking for a tilt, and the attitude loop taking long enough to get there that the correction arrived late. Rather than tune it by flying repeatedly, the behaviour was reproduced in the model, and the model indicated that a derivative gain of about 0.5 on the affected loop should largely remove it.
 
-Reproducing a real oscillation in simulation is what makes a model trustworthy: it is a prediction the model could have failed. Using it to pick a value that then goes to the vehicle is the entire reason to build one.
+Reproducing the oscillation first mattered: the model could have failed to show it, and if it had I would not have trusted the gain it suggested.
