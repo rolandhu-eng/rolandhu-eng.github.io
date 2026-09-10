@@ -1,6 +1,6 @@
 ---
 title: "Guidance, Navigation, Control"
-order: 5
+order: 4
 navLabel: "GNC"
 showHero: false
 ---
@@ -50,7 +50,7 @@ $\beta = 0.04$ in flight. It is a trust parameter: raise it and the filter corre
 
 The reference implementation normalizes vectors with the famous `0x5f3759df` bit-hack — an integer approximation of $1/\sqrt{x}$ from an era when floating-point division was expensive.
 
-It was replaced with a plain `1.0f / sqrtf(x)` after it showed instability. On a Teensy 4.1 the substitution costs nothing measurable: the Cortex-M7 has a hardware floating-point unit with a square-root instruction, so the trick optimises away a problem the processor no longer has. A famous optimisation can outlive its hardware.
+It was replaced with a plain `1.0f / sqrtf(x)` after it showed instability. On a Teensy 4.1 the substitution costs nothing measurable: the Cortex-M7 has a hardware floating-point unit with a square-root instruction, so the trick optimises away a problem the processor no longer has. The trick was solving a problem this processor does not have.
 
 The replacement is guarded, and the guard is argued from physics rather than defensiveness:
 
@@ -150,11 +150,57 @@ Taking it from the measurement seems natural and is wrong. The velocity loop run
 
 ---
 
+# Flight Sequencing
+
+Everything above describes loops that hold a setpoint. Something has to decide what the setpoint *is*, and when to change it. That is a state machine running above the whole cascade, and since September it flies the entire profile with no input after the launch command.
+
+```
+IDLE → LAUNCH → BOOST_UP → APOGEE → [COAST_DOWN] → DESCENT → LANDING
+```
+
+Each state owns two things: which control loops are active, and what the thrust mode is (off, idle, governed, or max). `BOOST_UP` climbs on the altitude PID. `APOGEE` holds a 3 s hover at the target — deliberately, so the drop always starts from the same known condition rather than from whatever state the climb happened to end in. `DESCENT` tracks a computed arrest curve down to 0.3 m, and `LANDING` takes the last stretch at a fixed 0.1 m/s.
+
+`ABORT` is reachable from every state. Two policy decisions in it are worth stating plainly, because both are cases where the obvious response is wrong:
+
+**Link loss lands the vehicle. It never aborts.** Aborting cuts thrust, and a vehicle that has lost its radio is not a vehicle that has lost its ability to fly. Cutting the fan because the operator stopped talking would convert a communications fault into a crash.
+
+**A sink the vehicle cannot arrest does not abort either.** When the descent rate exceeds what maximum thrust could still stop from the current height, the machine latches a `committed_` flag and keeps braking at full thrust. It cannot save the landing at that point, but every metre per second it removes before contact is a metre per second the airframe does not have to absorb. Giving up because the situation is unrecoverable makes it strictly worse. The fan is cut only below 0.4 m and only if the vehicle is still coming down faster than 0.8 m/s — that cut exists to prevent a rotor burst on impact, not to end the flight.
+
+## The Relight Solve
+
+The interesting state is the one that gets skipped.
+
+`COAST_DOWN` drops the fan to idle and lets the vehicle fall ballistically, which is the whole point of a drop test. Restarting from idle is not instant: the fan takes about 1.5 s to spool, the vehicle keeps accelerating downward the entire time, and only then does braking begin. So before entering the coast the machine solves for the altitude at which it would have to relight:
+
+$$h_{relight} = \underbrace{v_d t + \tfrac{t^2}{2}\left(g - \tfrac{T_{idle}}{m}\right) - \tfrac{t^2 (T_{max}-T_{idle})}{6m}}_{\text{fall during spool}} \;+\; \underbrace{\frac{v_{end}^2}{2 a_{dec}}}_{\text{braking}} \;+\; 2\,\mathrm{m}$$
+
+The first group integrates a linear thrust ramp from idle to maximum over the spool time; the second is the distance needed to arrest the speed that ramp leaves you with. If that number is larger than the current altitude, there is no coast budget and `COAST_DOWN` is skipped entirely — the fan stays under the governor and the vehicle flies a powered descent instead. In practice that threshold sits near 19 m, so every flight below it descends under power whether or not a drop was requested.
+
+The arrest curve itself is computed in energy form rather than as a fixed rate, so the descent speed limit falls smoothly to the landing rate exactly at the handover altitude instead of collapsing to zero and relying on a floor to catch it:
+
+$$v_{cap} = \min\left(\sqrt{v_{land}^2 + 2 a_{dec} h},\; 12~\mathrm{m/s}\right)$$
+
+## Idle That Cannot Windmill
+
+`COAST_DOWN` does not shut the fan off. It runs a computed idle, and the reason is a failure mode specific to ducted fans falling base-first.
+
+If the fan produces less thrust than the oncoming air's momentum flux, the flow through the duct reverses and the rotor windmills backwards. An ESC asked to restart a rotor that is already spinning the wrong way does so slowly and unreliably — which is exactly the wrong behaviour to discover at the bottom of a relight solve that assumed 1.5 s. So idle thrust is set to keep the duct flowing forward with margin:
+
+$$T_{idle} = \min\left(T_{hover},\; \max\left(T_{min},\; 1.5 \cdot 2 \rho A v^2\right)\right)$$
+
+floored at the ESC's minimum stable speed and capped at hover, since anything above hover would not be a coast.
+
+## Events, Not Just Telemetry
+
+Every transition, abort reason, forced landing, commit latch and touchdown writes a timestamped record into the flash log. Previously that context lived only in `Serial.printf`, which meant it existed only if somebody happened to have a console attached — and the flights that most need explaining are the ones nobody was tethered to.
+
+---
+
 # Self-Describing Logs
 
 Every flight log opens with an initialisation record written before any data: gyro biases measured at startup, the initial gravity vector, local $g$, and the ground-level pressure reference.
 
-This costs a few dozen bytes and means a log can be re-analysed months later without hunting for the constants that were in effect when it was recorded. Startup calibration values are exactly the sort of state that is obvious on the day and irrecoverable afterwards, and a log that cannot be interpreted without them is not really a record of anything.
+This costs a few dozen bytes and means a log can be re-analysed months later without hunting for the constants that were in effect when it was recorded. I added it after going back to an old log and realising I no longer knew what gyro bias had been in effect when it was written.
 
 ---
 

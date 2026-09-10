@@ -1,6 +1,6 @@
 ---
 title: "Control"
-order: 3
+order: 5
 navLabel: "Control"
 showHero: false
 ---
@@ -11,7 +11,19 @@ import Table from '../../../components/Table.astro';
 
 Four vanes sit in the EDF exhaust, each on an axle offset from but linked to the external fin axles and driven by its own servo. They are the only source of control moment at hover, when airspeed is zero and the fins produce nothing.
 
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/control/vane-linkage.webp" alt="Control section with the vane linkage exposed" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1600" height="1200" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The control section with its shell off — four servos driving pushrods and bellcranks onto the vane axles, which run through bearings out to the external fins.</figcaption>
+</figure>
+
+
 Each vane is a half-ellipse — the planform that minimises induced drag for a given area. The first set had a 25 mm span and a 20 mm chord. In August they were replaced with a 40 mm chord on the same 25 mm span, doubling the area.
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/control/vanes-old-new.webp" alt="Original and replacement vanes side by side" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1600" height="1244" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Replacement vane (left) beside the original (right). Same span and the same axle stub; the chord is what doubled.</figcaption>
+</figure>
+
 
 ## What Doubling the Area Actually Bought
 
@@ -54,11 +66,11 @@ A baseline test was run at 70% throttle to get baseline forces at 0 degree fin d
 
 <div class="grid grid-cols-2 gap-4">
   <figure>
-    <img src="/assets/aeolus/vane-moment-testing/Screenshot_2026-06-04_at_11.03.50_PM.png" alt="Forces on load cells" loading="lazy" decoding="async" />
+    <img src="/assets/aeolus/vane-moment-testing/Screenshot_2026-06-04_at_11.03.50_PM.png" alt="Forces on load cells" loading="lazy" decoding="async"  width="1990" height="986" />
     <figcaption>Forces on each load cell at 70% throttle 0 fin deflection pure axial loading ~1550g thrust. Expected 387.5 g evenly across each load cell.</figcaption>
   </figure>
   <figure>
-    <img src="/assets/aeolus/vane-moment-testing/Screenshot_2026-06-04_at_11.07.59_PM.png" alt="1 N-m moment testing" loading="lazy" decoding="async" />
+    <img src="/assets/aeolus/vane-moment-testing/Screenshot_2026-06-04_at_11.07.59_PM.png" alt="1 N-m moment testing" loading="lazy" decoding="async"  width="1486" height="916" />
     <figcaption>1 N-m moment. Expected LC 1 & 4 to have same negative force, and LC 2 & 3 to have same positive force of same magnitude as 1 & 4.</figcaption>
   </figure>
 </div>
@@ -71,7 +83,7 @@ Rather than discard the run, the measurement was salvaged by referencing it agai
 Surprisingly, the measured moments at 70% throttle correlated closely with published flat-plate $C_l$ data at comparable Reynolds number. The vane cross-section is a very thin airfoil, which turns out to be near enough to a flat plate.
 
 <figure class="w-1/2 mx-auto">
-  <img src="/assets/aeolus/vane-moment-testing/image.png" alt="Measured moment vs alpha" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/vane-moment-testing/image.png" alt="Measured moment vs alpha" loading="lazy" decoding="async"  width="962" height="1246" />
   <figcaption>Measured moment vs alpha (purple dots) and experimental flat plate data (red line). Overlaid flat plate data was scaled to fit the dots as I am only comparing the trend, not the numbers. Moment is directly proportional to force and thus Cl, matching the scaled flat plate Cl data nicely. ($C_l$ ≈ 0.5 @ $\alpha = 5\deg$, experimental data gives $C_l$ ≈ 0.6, very close given the vane geometry and thrust tube exit interaction)</figcaption>
 </figure>
 
@@ -92,8 +104,8 @@ $$\frac{\tau}{\mathrm{deg}} = I \cdot \frac{d\alpha}{d\delta}$$
 For roll, a slope of about 1.5 deg⁻¹s⁻² against $I_{xx} = 0.00165$ gives 0.0025 N·m/deg. For pitch and yaw, 0.1 deg⁻¹s⁻² against $I_{yy} = 0.065$ gives 0.0065 N·m/deg. Both are the v1 figures in the table above.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/control/ransac-fit-1.webp" alt="RANSAC fit of angular acceleration against commanded deflection." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">RANSAC fit of angular acceleration against commanded deflection.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/control/ransac-fit-2.webp" alt="The same fit over a longer segment of the log." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The same fit over a longer segment of the log.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/ransac-fit-1.webp" alt="RANSAC fit of angular acceleration against commanded deflection." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1374" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">RANSAC fit of angular acceleration against commanded deflection.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/ransac-fit-2.webp" alt="The same fit over a longer segment of the log." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1377" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The same fit over a longer segment of the log.</figcaption></figure>
 </div>
 
 
@@ -104,8 +116,8 @@ The fitted line does not pass through the origin. That offset is not noise — i
 Physically it reflects small asymmetries: geometry that is not quite symmetric, vanes that are not quite aligned, a thrust axis fractionally off the centre of mass. The values flown now are 3.0° roll, −0.35° pitch, and 0.9° yaw, re-measured after the vane change. They are added to the PID output rather than left for the integrator to discover, so the controller starts from the right place instead of winding its way there.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/control/pitchyaw-fit-1.webp" alt="Pitch/yaw authority fit — slope gives torque per degree." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Pitch/yaw authority fit — slope gives torque per degree.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/control/pitchyaw-fit-2.webp" alt="The non-zero x-intercept is the trim deflection." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The non-zero x-intercept is the trim deflection.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/pitchyaw-fit-1.webp" alt="Pitch/yaw authority fit — slope gives torque per degree." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="869" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Pitch/yaw authority fit — slope gives torque per degree.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/pitchyaw-fit-2.webp" alt="The non-zero x-intercept is the trim deflection." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="808" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The non-zero x-intercept is the trim deflection.</figcaption></figure>
 </div>
 
 
@@ -115,7 +127,7 @@ Physically it reflects small asymmetries: geometry that is not quite symmetric, 
 
 This is the part I would point at first.
 
-Because the inertia had been measured on a [bifilar pendulum](/projects/aeolus/vehicle#moment-of-inertia-testing) and the vane torque measured two independent ways, there was no need to tune the attitude loop by trial and error. Each axis is a rotational mass with a restoring term and a damping term — a damped harmonic oscillator:
+Because the inertia had been measured on a [bifilar pendulum](/projects/aeolus/vehicle#moment-of-inertia-testing) and the vane torque measured two independent ways — [on the thrust stand](#static--thrust-stand) and [from flight data](#dynamic--from-flight-data) — there was no need to tune the attitude loop by trial and error. Each axis is a rotational mass with a restoring term and a damping term — a damped harmonic oscillator:
 
 $$I\ddot{\theta} + K_d\dot{\theta} + K_p\theta = 0$$
 
@@ -168,9 +180,9 @@ Roll behaved as the model said it would. The flown configuration sits at $\zeta 
 Pitch and yaw were tuned the same way to the same target and came out slightly *less* damped in flight than predicted — a real discrepancy, most likely because their authority figure was less well pinned down at the time. The trim angles the same analysis predicted, however, were spot on.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-3 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/control/roll-response.webp" alt="Roll response" class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/control/pitch-response.webp" alt="Pitch response" class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Pitch</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/control/yaw-response.webp" alt="Yaw response" class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Yaw</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/roll-response.webp" alt="Roll response" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="700" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/pitch-response.webp" alt="Pitch response" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1120" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Pitch</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/yaw-response.webp" alt="Yaw response" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1120" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Yaw</figcaption></figure>
 </div>
 <p class="text-[11px] text-slate-500 dark:text-slate-400 text-center">Flown response on each axis with the derived gains.</p>
 
@@ -183,7 +195,15 @@ $$K_p v + (K_d + 1)\dot{v} = 0 \quad \Longrightarrow \quad v = v_0 e^{-t/\tau}, 
 
 There is no oscillation to damp and no natural frequency to place — the response is a pure exponential decay. Asking for a damping ratio would be meaningless. The gain came from a target 2% settling time of one second instead, which is roughly $4\tau$.
 
-Recognising that the method did not transfer mattered more than the derivation itself.
+I tried the second-order method on the velocity loop first and it gave nonsense, which is how I noticed the loop was first-order at all.
+
+## What It Rests On
+
+The whole approach is only as good as the two measurements underneath it, and they fail differently.
+
+An error in inertia scales $K_p$ and $K_d$ by the same factor, so the damping ratio survives it — $\zeta$ depends on the *ratio* of the gains, not their magnitude. A vehicle tuned with a 20% inertia error would still settle with the intended shape, just at the wrong frequency. That is a forgiving failure, and it is why sub-5% uncertainty on the bifilar measurement was enough.
+
+Control authority is less forgiving, because it enters the conversion from commanded angular acceleration to vane degrees. Get $\tau/\text{deg}$ wrong and every gain is wrong proportionally *and* the saturation limit is wrong, so the controller believes it has authority it does not have. That asymmetry is the reason authority was measured twice by unrelated methods rather than once — and why the pitch and yaw axes, whose figure was the less settled of the two at the time, are the ones that came out off-target in flight.
 
 ---
 
@@ -206,6 +226,8 @@ Attitude error is computed as a quaternion difference rather than as Euler angle
 
 A quaternion and its negation represent the same orientation, so error extracted naively flips sign as the vehicle passes through 180°. In roll testing this showed up concretely: the controller reversed direction past 180°, which meant the high roll rates present at spin-up were driven the wrong way instead of being arrested. It was found in flight data on 22 July and fixed the next day.
 
+That was not the end of it. The July fix handled the wrap at 180°, but the underlying formulation can invert the error sign at *any* large angle if the vehicle is rotating fast enough — which is exactly what happened in September, when a roll error crossing 115° flipped sign in a single tick and briefly drove the spin instead of arresting it. Full diagnosis on the testing page: [the unwinding bug](/projects/aeolus/testing#the-unwinding-bug).
+
 The fix ties into a second choice visible in the [PID implementation](#pid-controller): the attitude loop uses a second `update()` overload that takes the measured gyro rate directly, so the derivative term is $-K_d \cdot \dot{\theta}_{measured}$ rather than a numerical difference of the error signal. Taking the derivative on the measurement instead of on the error avoids derivative kick when the setpoint steps, and it sidesteps the sign discontinuity entirely — the gyro does not care how the error is parameterised.
 
 ## Mixing and Saturation
@@ -218,7 +240,9 @@ This was one of three candidate explanations for the first tethered flight losin
 
 Two corrections keep the altitude loop honest while the vanes are working:
 
-**Vane drag.** Deflected vanes block the jet and cost axial thrust. Thrust is boosted in proportion to total deflection beyond a deadband, so that manoeuvring does not quietly sink the vehicle. The deadband exists so that small deflections around hover do not cause the correction to chatter.
+**Vane drag.** Deflected vanes should block the jet and cost axial thrust, so commanded thrust is boosted in proportion to total deflection beyond a deadband — the deadband stopping small deflections around hover from making the correction chatter.
+
+The 40 m flight log does not support this. The measured thrust-versus-deflection slope came out *positive*, and about five times the coded magnitude — the wrong sign for a loss at all. The correction is therefore inflating commanded thrust to compensate for something that is not in the data. Closed-loop that is harmless, since the altitude PID absorbs the offset; open-loop it is not, because it makes every thrust budget built on top of it — the [relight solve](/projects/aeolus/gnc#the-relight-solve) especially — optimistic. Unresolved.
 
 **Tilt.** Only the vertical component of thrust fights gravity, so the commanded thrust is divided by $\cos(\text{tilt})$. It is computed straight from the quaternion components with no trigonometric calls, and floored at 0.8 so a large attitude excursion cannot drive the divisor toward zero and command infinite thrust.
 
@@ -310,6 +334,54 @@ The anti-windup is done by back-calculating the integral from its clamped contri
 
 ---
 
+# Control Allocation
+
+The attitude controller asks for a torque. Something has to turn that into four servo angles, and the conversion factor is not a constant — it changes continuously through the flight.
+
+## Authority Is Recomputed Every Tick
+
+Both effectors on a shaft contribute, from different physics:
+
+$$k_{net} = \underbrace{K_{vane} \cdot \text{(vane drive)}}_{\propto\ \text{thrust}} \;+\; \underbrace{K_{aero} \cdot \bar{q} \cdot \text{flow sign}}_{\propto\ \text{airspeed}^2}$$
+
+The vane term scales with thrust, which moves with throttle, battery voltage and how far through a spool-up the fan happens to be. The aero term scales with dynamic pressure, which moves with speed. So the deflection needed to produce a given torque is different at every moment, and the allocator computes $k_{net}$ fresh each cycle before dividing the demanded torque by it.
+
+One detail matters more than it looks: the thrust estimate comes from **measured** RPM, not commanded RPM. During a spool-up the governor may be asking for 38,000 while the tachometer reads 24,000, and the authority the vehicle actually has is whatever the tachometer says. Using the command would have the controller confidently under-deflecting exactly during the transient where it needs the most help.
+
+## When the Two Effectors Fight
+
+Because vane and fin share a shaft, their moments do not always add.
+
+In base-first descent, ram air pushes back through the duct against the fan's flow. The allocator models this directly — vane drive is thrust minus that backflow momentum — and when the backflow wins, **vane drive goes negative and the vane's moment reverses**. The vane now deflects with the fin rather than against it. The two only genuinely oppose in powered descent, where the fan is pushing one way and the freestream the other.
+
+Near the crossover their contributions nearly cancel, and the *sign* of the net authority becomes unknowable. Deflecting on a sign you cannot determine is worse than not deflecting: get it wrong and the correction becomes a disturbance. So there is a null guard — if the two terms oppose and their magnitudes are within ±15% of each other, that axis parks at neutral until the ambiguity resolves.
+
+## No Authority Is Different From Weak Authority
+
+Below a floor value of $k_{net}$ there is not weak authority — there is none. Both effectors are inert, and the full 27° of deflection would produce about $2.7\times10^{-5}$ N·m, which is nothing.
+
+This code originally slammed to the mechanical stop in that case, on the reasoning that weak authority deserves maximum deflection. That reasoning is correct when $k_{net}$ is small but non-zero, and in that regime the division saturates on its own anyway. It is wrong at exactly zero — which turns out to be the *normal* condition on the pad, because `LAUNCH` holds zero throttle until the target RPM ramps up to the fan's minimum, roughly 0.4 s during which thrust and dynamic pressure are both zero.
+
+The result was that every single launch drove all four surfaces hard to ±27° on gyro noise for that window, before the vehicle had left the ground. It now parks at neutral instead.
+
+## Trim as a Torque, Not an Angle
+
+The [trim offsets](#trim-for-free) are stored as torque per newton of thrust rather than as fixed angles. Trim comes from real disturbances — exhaust swirl, a thrust axis slightly off the centre of mass — and those scale with thrust. Dividing that torque by $k_{net}$, which also scales with thrust, leaves the resulting *angle* constant in still air, which is what the measurement actually showed.
+
+## Saturating Without Rotating the Torque
+
+The four servo commands are formed as $-\text{roll} \pm \text{pitch}$ or $\pm\text{yaw}$, so clamping each axis independently would let one servo clip while the others do not — which does not just reduce the torque, it points it somewhere else.
+
+Instead the allocator finds the peak servo command and, if it exceeds the mechanical limit, scales all three axes by the same factor. The commanded torque loses magnitude but keeps its direction. The scale factor is reported in telemetry, so a sustained value below 1 is visible after the flight as "the gains are asking for more authority than the vanes have."
+
+## What Is Still Untested
+
+Honest status: the aerodynamic half of this has barely been exercised. At the speeds flown so far the vane dominates so heavily that `K_AERO`, the flow-sign logic and the null guard have effectively never been tested in flight — the null guard has yet to arm at all.
+
+Two things make that tolerable. There is a written flight test plan with predicted values and stop criteria for exactly these signals, so the first flight that does exercise them will be instrumented for it. And in the hover regime that *has* been flown extensively, the allocator is arithmetically identical to the fixed-constant code it replaced — so the refactor provably reduces to previously validated behaviour everywhere the vehicle has actually been.
+
+---
+
 # Servos
 
 Vane actuation servos were compared on torque, slew speed, deadband, and cost across four units. Deadband was a key criterion since it directly bounds the minimum resolvable vane deflection in the attitude control loop.
@@ -360,12 +432,12 @@ The spread is not small. At the same commanded 45°, the four units differ by 60
 Roll was tested first and in isolation, with the pitch and yaw outputs forced to zero, so that a single axis could be characterized without three controllers interacting. The gain sweep behaved the way the second-order model says it should: low damping produced sustained oscillation, and raising it three-fold produced a visibly overdamped, sluggish return. The values that flew sit between them.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/control/gain-underdamped.webp" alt="Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/control/gain-overdamped.webp" alt="Damping raised three-fold — overdamped and sluggish." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Damping raised three-fold — overdamped and sluggish.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/gain-underdamped.webp" alt="Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="899" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/gain-overdamped.webp" alt="Damping raised three-fold — overdamped and sluggish." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1216" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Damping raised three-fold — overdamped and sluggish.</figcaption></figure>
 </div>
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/control/roll-tuned.webp" alt="Roll with the gains that flew." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/control/roll-tuned.webp" alt="Roll with the gains that flew." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="842" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll with the gains that flew.</figcaption>
 </figure>
 
@@ -375,7 +447,7 @@ Roll was tested first and in isolation, with the pitch and yaw outputs forced to
 Pitch and yaw were tested by hand-disturbing the vehicle while it hovered on a slack tether and watching the impulse response. The first attempts recovered too slowly to be useful and could not reject small taps at all. After raising the gains, the vehicle recovered from a roughly 4° disturbance in about 0.8 seconds — adequate for holding vertical, though still slower than ideal.
 
 <div class="not-prose my-6 mx-auto max-w-xl">
-  <video controls loop muted playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800">
+  <video controls loop playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="406">
     <source src="/assets/aeolus/control/pitch-yaw-test.webm" type="video/webm" />
   </video>
   <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Tethered pitch/yaw disturbance rejection.</p>

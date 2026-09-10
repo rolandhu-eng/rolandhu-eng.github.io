@@ -28,7 +28,10 @@ Nearly every number quoted elsewhere on this site came from one of these. The ri
     { when: '8–17 Aug', test: 'Accel/mag calibration ×3', meas: 'Correction matrices, 0.9% residual', out: 'Found location sensitivity; exposed a frame bug' },
     { when: '8–12 Aug', test: 'GPS bench characterization', meas: 'Velocity noise, DOP under RF', out: 'Switched to airborne dynamic model' },
     { when: '10 Aug', test: 'Vane resize re-characterization', meas: 'New authority, both axes', out: 'Final flight gains' },
-    { when: '21–27 Aug', test: 'Free flight', meas: 'Full closed-loop behaviour', out: 'Confirmed the Simulink model; found a 3 Hz limit cycle', groupStart: true }
+    { when: '21–27 Aug', test: 'Free flight', meas: 'Full closed-loop behaviour', out: 'Confirmed the Simulink model; found a 3 Hz limit cycle', groupStart: true },
+    { when: '4 Sep', test: 'Autonomous ×4 — 1.5, 5, 15, 15 m', meas: 'Event log per flight', out: 'Fixed landing ramp, descent floor stall, and a quaternion unwinding bug', groupStart: true },
+    { when: '5 Sep', test: 'Autonomous 30 m', meas: 'Nominal — no log saved', out: 'Cleared the way for the 40 m attempt' },
+    { when: '5 Sep', test: 'Autonomous 40 m', meas: 'Full log through fence strike', out: 'Found static-source baro error; drove the move to a ground-relative sensor' }
   ]}
 />
 
@@ -43,16 +46,16 @@ It is important to get thrust and control moments for accurate simulation before
     src="/assets/aeolus/testing/stand.webp" 
     alt="Four-bar load cell test stand" 
     style={{ maxWidth: '50%'}}
-    class="mx-auto" loading="lazy" decoding="async" />
-  <p class="fig-caption">4 bar load cell test stand setup</p>
+    class="mx-auto" loading="lazy" decoding="async"  width="2494" height="3116" />
+  <p class="fig-caption">Four load cells in a cross. Summing them gives axial thrust; the differential between opposing pairs gives moment, which is how vane authority was measured.</p>
 </div>
 
 The stand is a build in its own right, with its own firmware — load cell conditioning, a radio link, and a dashboard of its own, so that thrust runs could be commanded and logged without anyone standing next to a 53 A motor.
 
 <div class="not-prose grid grid-cols-3 gap-3 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/testing/stand-1.webp" alt="Four-bar load cell test stand, assembled" class="w-full rounded-lg" loading="lazy" decoding="async" /></figure>
-  <figure class="m-0"><img src="/assets/aeolus/testing/stand-2.webp" alt="Load cell mounting detail on the test stand" class="w-full rounded-lg" loading="lazy" decoding="async" /></figure>
-  <figure class="m-0"><img src="/assets/aeolus/testing/stand-3.webp" alt="Test stand with the vehicle mounted" class="w-full rounded-lg" loading="lazy" decoding="async" /></figure>
+  <figure class="m-0"><img src="/assets/aeolus/testing/stand-1.webp" alt="Four-bar load cell test stand, assembled" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1200" height="1600" /></figure>
+  <figure class="m-0"><img src="/assets/aeolus/testing/stand-2.webp" alt="Load cell mounting detail on the test stand" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1200" height="1600" /></figure>
+  <figure class="m-0"><img src="/assets/aeolus/testing/stand-3.webp" alt="Test stand with the vehicle mounted" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1200" height="1600" /></figure>
 </div>
 <p class="text-[11px] text-slate-500 dark:text-slate-400 text-center">The four-bar load cell stand.</p>
 
@@ -107,7 +110,7 @@ Pitch and yaw followed the same way, disturbed by hand and left to recover. They
 The most useful result was not the flight itself but a comparison: measured thrust in free flight matched the [Simulink prediction](/projects/aeolus/simulation#validated-again-in-free-flight) almost exactly, which validates a model chain running all the way back to the static thrust sweep in June.
 
 <div class="not-prose my-6 mx-auto max-w-sm">
-  <video controls loop muted playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800">
+  <video controls loop playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
     <source src="/assets/aeolus/free-flight.mp4" type="video/mp4" />
   </video>
   <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Untethered flight, August 2026.</p>
@@ -116,7 +119,128 @@ The most useful result was not the flight itself but a comparison: measured thru
 
 ---
 
+# Autonomous Flight
+
+From September the [state machine](/projects/aeolus/gnc#flight-sequencing) flies the whole profile — launch, climb, hover, drop, land — with no input after the launch command. That changed what a test flight produces: instead of a pilot's impression, every flight now returns a timestamped event log alongside the telemetry, so failures can be reconstructed tick by tick.
+
+## 4 September — Four Flights, Three Bugs
+
+Four autonomous launch-hover-drop-land flights at 1.5 m, 5 m, and twice at 15 m. All four completed. Three separate defects came out of the logs, and none of them were visible from the ground.
+
+<figure class="not-prose my-6">
+  <video controls loop playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="1920" height="1080">
+    <source src="/assets/aeolus/flight-15m.webm" type="video/webm" />
+  </video>
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">A 15 m flight at night, with the <a href="/projects/aeolus/communications#ground-station">ground station</a> composited over the footage — state transitions, altitude tracking and vane deflection alongside the vehicle they describe.</figcaption>
+</figure>
+
+**The vehicle was hovering before it landed.** The 1.5 m and 5 m flights both stopped and hung above the ground before finally settling — 46 cm and 65 cm of gap, against 9.5 cm predicted. The landing ramp was missing a rate feedforward term that `DESCENT` already used for its own setpoint, so the commanded altitude lagged the vehicle the whole way down.
+
+**`DESCENT` was stalling on its own transition line.** The descent target clamps at the 0.3 m handover altitude, but the handover to `LANDING` requires actual altitude to fall strictly *below* that line. A converging PD loop has no reason to overshoot its own setpoint, so the vehicle simply sat there until noise nudged it across — 7.5 seconds of a 10.2 second descent on the 5 m flight, doing nothing. Biasing the floor 0.15 m below the real handover altitude gives the hold loop an equilibrium already on the correct side of the line. Stall time fell to 2.15 s and then 0.46 s on the two 15 m flights.
+
+**The landing offset was never being flown.** The 1 m translation to the landing point was commanded on `APOGEE`'s *exit* — the same tick the machine leaves for `DESCENT` — rather than on entry, so the 3 s hover that was supposed to fly it had already ended. Moved to entry. Both 15 m flights still landed 5.13 m and 3.55 m from the pad against a 1 m target, which is not explained.
+
+## The Unwinding Bug
+
+The second 15 m flight spun hard right at the `DESCENT`→`LANDING` transition — a peak of 463 °/s, about 1.3 revolutions per second, sustained for six seconds near the ground. The first 15 m flight showed the same shape of event at 239 °/s and arrested itself. Same firmware, same mechanism, different magnitude.
+
+The obvious suspect was the fins. Reconstructing vane and fin moments from telemetry through the exact allocator math ruled them out: at the ~5 m/s speeds this vehicle actually reaches, aerodynamic fin moment is **0.3–0.4% of the vane moment**. The fins are a rounding error for the entire flight; all real roll authority is the vane.
+
+The log gave up the real cause on a tick-by-tick read. The attitude error's antipodal shortest-path sign is recomputed fresh every control tick from the error quaternion's scalar term. Once roll error crossed roughly 115° while the vehicle was still rotating hard, that sign flipped inside a single 40 ms tick:
+
+| | error | roll rate |
+|---|---|---|
+| tick *n* | +114.3° | −267 °/s |
+| tick *n*+1 | −114.5° | −269 °/s |
+
+The physical state barely moved. The error's sign inverted anyway, which inverted the proportional term, which briefly commanded torque **with** the spin rather than against it — doubling the peak rate.
+
+This is the known *unwinding* failure of quaternion PD attitude control, described by Bhat and Bernstein in 2000. It is not a bug specific to this code; it is a property of the formulation. It had simply never been reached before, because attitude error had never gotten that large.
+
+The fix hands the axis to the derivative term as rates get high enough for the flip to be possible:
+
+```cpp
+static inline float rateBlend(float rate_rads) {
+    float r = fabsf(rate_rads);
+    if (r <= ATT_RATE_PRIORITY_LO_RADS) return 1.0f;
+    if (r >= ATT_RATE_PRIORITY_HI_RADS) return 0.0f;
+    return 1.0f - (r - ATT_RATE_PRIORITY_LO_RADS) / (ATT_RATE_PRIORITY_HI_RADS - ATT_RATE_PRIORITY_LO_RADS);
+}
+```
+
+Across a 90–150 °/s band the error fed to P is scaled toward zero; above it, P is suppressed entirely. D never sees the blend — it comes straight from the gyro, which has no wrapped-position ambiguity to invert. Validation was done by replaying the exact recorded `(error, rate, P, D)` sequence from the bad flight through the new logic: the output stays correctly signed through the flip, and every other tick checked — including the first flight's healthy high-rate recovery — is unchanged. Not yet flight tested.
+
+## 5 September — 30 m Clean, 40 m Into a Fence
+
+The 30 m flight was clean: launch, hover, drop, land, exactly as sequenced. No log was saved.
+
+The 40 m attempt that followed was the first apogee with enough altitude for the [relight solve](/projects/aeolus/gnc#the-relight-solve) to actually close, so it became the first flight to enter `COAST_DOWN` — 0.86 s of ballistic fall, about a metre, then relight. It ended against a fence with the vehicle damaged. Wind was strong throughout.
+
+```
+t = 2.9 s    pad clear
+t = 12.9 s   APOGEE at 40.05 m — already 4.8 m downwind
+t = 15.9 s   COAST_DOWN
+t = 16.8 s   DESCENT
+t = 22.9 s   COMMITTED_SINK — 3.6 m/s at 5 m indicated
+t = 24.5 s   ABORT_TILT at 35° — fence strike
+```
+
+### It was the barometer, not the controller
+
+The vertical loop did its job. The descent built an 8.5 m/s sink — confirmed real by GPS — and the fan arrested it back to about 2 m/s with a sustained 2 m/s² deceleration. Nothing blew through.
+
+The barometer was reading **2.5–5 m low** during the terminal descent. Ambient pressure drift accounts for only about 1.5 m of that; dead-reckoning from the apogee anchor puts the vehicle at least 2.4 m higher than the loop believed at the moment of abort, and eyeballing the video suggests closer to 5 m.
+
+The mechanism is static-source error: a fast, tilted, buffeting, base-first descent puts the pressure port in disturbed flow, and the filter carried that error forward with lag. So the landing setpoint walked down to 0.15 m while the vehicle was still roughly 5 m up and drifting. It flew a correct landing profile into a ground that was not there yet.
+
+The detail that stings: **GPS held a healthy 3D fix on 9–11 satellites for the entire flight and agreed with fused velocity to within 0.2 m/s — but GPS altitude was never used to check the barometer.** A cross-check that was already available would have caught it.
+
+### Wind, and the limits of 10° of tilt
+
+Every stage of the horizontal cascade saturated. The position loop sat at its velocity limit, the velocity loop sat at `MAX_TILT_DEG`, and the vehicle still lost ground — 4.8 m of drift by apogee, another 5 m during the 3 s hover, 12.8 m at peak. Estimated wind was 11–16 m/s.
+
+Worse, the inner loop could not even hold the tilt it was told to: attitude tracking error ran about 13° RMS during boost. Raising the tilt limit is not an available fix, because tilt trades directly against vertical authority on a vehicle whose hover thrust-to-weight is 1.01.
+
+### What the log confirmed anyway
+
+A damaged vehicle still produced the best subsystem data of the project:
+
+<Table
+  note="Derived from the 40 m flight log."
+  columns={[
+    { key: 'item', label: 'Parameter', align: 'left' },
+    { key: 'res', label: 'Result', align: 'left' }
+  ]}
+  rows={[
+    { item: 'THRUST_RPM_CONVERT', res: 'Good — thrust curve fits within +4%, hover check within 3%' },
+    { item: 'Governor gain', res: 'Within −3% of config once voltage-normalised' },
+    { item: 'Fan spool rate', res: 'Sustained ~11k rpm/s, not the 20k assumed — the relight solve under-budgets the transient' },
+    { item: 'THRUST_LOSS_COEFF', res: 'Not supported by the data. Slope is +0.02/deg — wrong sign for a loss' },
+    { item: 'Thrust vs axial airspeed', res: '~16% swing, unmodelled. Fits a propulsor lapse or a body-drag term equally well' },
+    { item: 'Thrust-to-weight', res: 'Hover 1.01, boost peak ~1.2 — marginal' },
+    { item: 'Loop timing', res: 'Clean — 5 / 40 / 120 ms all tight, no accelerometer clipping' }
+  ]}
+/>
+
+The `THRUST_LOSS_COEFF` result is the awkward one: the [vane-drag compensation](/projects/aeolus/control#thrust-compensation) is correcting for a loss that does not appear in the data, and it has been inflating commanded thrust as a result. Harmless inside a closed loop, but it makes every open-loop budget — the relight solve included — optimistic.
+
+---
+
 # Open Problems
+
+## Terminal Altitude Comes From One Unchecked Sensor
+
+The 40 m failure was not a control failure — it was a measurement the controller had no way to doubt. Below roughly 10 m, in disturbed flow, the barometer is the only thing telling the vehicle how high it is, and nothing cross-checks it. GPS altitude was available and healthy on that flight and was simply never consulted.
+
+This is the highest-priority item on the project. Everything else on this page is a refinement; this one loses vehicles.
+
+<p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Fly the same profile with GPS altitude logged alongside barometric altitude and the IMU dead-reckon, and compare all three through the terminal descent. If the barometer diverges from the other two by more than a metre below 10 m, the static-source explanation holds and a ground-relative sensor is the fix. If all three agree, the error is somewhere else and this diagnosis is wrong.</p>
+
+## Landing Accuracy
+
+Both 15 m flights landed 3.5–5× past the 1 m offset target, after the retarget-timing bug was fixed. Unexplained.
+
+<p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Command a pure horizontal translation at fixed altitude, with no descent, and measure how far it actually travels against how far it was told to. That separates a guidance-scaling error from something specific to the descent — if it tracks correctly in level flight, the fault is in the descent phase rather than the position loop.</p>
 
 ## A 3 Hz Roll Oscillation That Only Appears Untethered
 
@@ -130,9 +254,11 @@ That distinction is the most informative thing about it. A tether adds damping a
 
 Distinguishing them is tractable: backlash and stiction would show as a phase relationship between command and response that changes with amplitude, while a lag limit cycle would shift frequency with loop rate. Unresolved.
 
+<p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Halve the attitude loop rate and fly again. A lag-driven limit cycle should drop in frequency roughly in proportion; backlash and stiction should not move at all. If it holds at 3.0 Hz, the loop is exonerated and the cause is mechanical.</p>
+
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/testing/roll-oscillation.webp" alt="Roll angle in free flight — the oscillation is small but persistent." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll angle in free flight — the oscillation is small but persistent.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/testing/roll-fft-3hz.webp" alt="FFT of the same segment, peak at 3.0 Hz." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">FFT of the same segment, peak at 3.0 Hz.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/testing/roll-oscillation.webp" alt="Roll angle in free flight — the oscillation is small but persistent." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1120" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll angle in free flight — the oscillation is small but persistent.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/testing/roll-fft-3hz.webp" alt="FFT of the same segment, peak at 3.0 Hz." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="584" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">FFT of the same segment, peak at 3.0 Hz.</figcaption></figure>
 </div>
 
 
@@ -140,19 +266,38 @@ Distinguishing them is tractable: backlash and stiction would show as a phase re
 
 The 27 August throttle oscillation came from interference on the RPM pickup. The [governor's filtering](/projects/aeolus/propulsion#cleaning-up-the-rpm-signal) is built to reject noise on a signal that is fundamentally sound; it cannot help when the measurement itself is being corrupted. This is wiring and shielding, not software.
 
+<p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Re-run a static throttle sweep on the stand with the RPM signal line shielded and grounded at one end only, logging raw pulse intervals rather than filtered RPM. Clean intervals under the throttle profile that produced the oscillation would confirm pickup rather than a failing sensor.</p>
+
 ## Roll Authority Did Not Scale With Vane Area
 
 Doubling vane area doubled pitch and yaw authority as predicted but produced only a 1.32× improvement in roll. [Still unexplained](/projects/aeolus/control#what-doubling-the-area-actually-bought).
+
+<p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Measure roll authority on the stand with two opposing vanes removed. If per-vane contribution rises once the neighbours are gone, adjacent-vane interference is the cause. If it does not change, the shortfall is geometric and the moment arm assumption needs revisiting.</p>
 
 ## Heading Initialization
 
 The vehicle flies without the magnetometer. Roll about the vertical axis has no gravity reference, so heading has to come from somewhere else, and initialising it reliably is unsolved.
 
+<p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Log magnetometer heading against GPS course-over-ground during a fast horizontal translation, where the two should agree. A fixed offset points at calibration; an offset that grows with motor current points back at interference the dipole analysis said should not be there.</p>
+
 ---
 
 # Next Steps
 
-- **A proper launchpad.** Every flight so far has started from whatever surface was available.
-- **A more aggressive vertical PID.** The altitude loop is conservatively tuned, which costs response.
-- **Integral gain on the attitude axes** to remove the residual steady-state error that trim compensation does not fully absorb.
-- **Full position hold**, which is the point the vehicle has been building toward and the last piece before the flight envelope can grow.
+The 40 m teardown produced a specific list, roughly in priority order.
+
+**A ground-relative altitude sensor.** A downward rangefinder is immune to every barometer error mode seen on that flight, and it is the real fix rather than a mitigation. Until it exists, the interim measures are to fuse GPS altitude, gate the terminal descent on baro/GPS/IMU agreement and hold or abort on divergence, and subtract a dynamic-pressure estimate to correct the static source.
+
+**Descend more slowly near the ground**, so that whatever port error remains is small where it matters most.
+
+**Restore `SM_DESCENT_SAFETY` to ≥ 1.6.** It was running at 1.4, below the margin its own config comment warns about. This flight is that warning being collected.
+
+**Re-derive the relight timing** against the measured ~11k rpm/s spool rate rather than the assumed 20k, and revisit the coast policy — either require genuine altitude budget plus recovery margin, or spool the fan back up through the second half of the coast.
+
+**Wind go/no-go before arming**, plus a drift-limit abort at apogee. The 40 m flight was already 4.8 m downwind before it started descending, and nothing was watching that number.
+
+**Attitude bandwidth.** 13° of tracking error during boost says the inner loop is either under-gained for this disturbance or is being handed a tilt command it cannot slew to. Either way the horizontal cascade cannot saturate less until this improves.
+
+**Revisit `THRUST_LOSS_COEFF`** and add an axial-airspeed term to the thrust model, or widen the open-loop margins enough to cover the ±8% it is currently unaware of.
+
+**Fly the unwinding fix.** It was validated by replay against recorded flight data, which is strong evidence, but it has not yet been in the air.

@@ -1,6 +1,6 @@
 ---
 title: "Avionics"
-order: 4
+order: 3
 navLabel: "Avionics"
 showHero: false
 ---
@@ -15,8 +15,8 @@ The avionics system handles sensing, control, and power distribution for Aeolus�
     src="/assets/aeolus/avionics/Avionics.drawio.png" 
     alt="Avionics system block diagram" 
     style={{ maxHeight: '500px' }}
-    class="mx-auto dark:invert dark:hue-rotate-0" loading="lazy" decoding="async" />
-  <p class="fig-caption">Initial avionics planning</p>
+    class="mx-auto dark:invert dark:hue-rotate-0" loading="lazy" decoding="async"  width="692" height="552" />
+  <p class="fig-caption">Initial avionics planning. Most of this survived; the GPS was added months later, once drift made it necessary.</p>
 </div>
 
 <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -24,10 +24,16 @@ The avionics system handles sensing, control, and power distribution for Aeolus�
     src="/assets/aeolus/avionics/av_bay.webp" 
     alt="Assembled avionics bay: flight computer and power distribution board" 
     style={{ maxHeight: '500px', borderRadius: '8px' }}
-    class = "mx-auto" loading="lazy" decoding="async" />
+    class = "mx-auto" loading="lazy" decoding="async"  width="695" height="1119" />
   <p class="fig-caption">Flight computer and power distribution board</p>
 </div>
 </div>
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/avionics/av-bay-night.webp" alt="Avionics stack installed in the vehicle, powered on" class="w-full rounded-lg" loading="lazy" decoding="async"  width="851" height="1600" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The stack installed and powered, with the outer shell removed.</figcaption>
+</figure>
+
 ---
 
 # Flight Computer
@@ -68,16 +74,16 @@ The GPS is on a hardware UART for the same reason. Early bench testing with the 
       src="/assets/aeolus/avionics/fc_front.webp" 
       alt="FC front" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async" />
-    <p class="fig-caption">FC front</p>
+      class = "mx-auto" loading="lazy" decoding="async"  width="654" height="749" />
+    <p class="fig-caption">Flight computer, front. Teensy 4.1 stood vertically in the centre with sensor breakouts on the four faces around it.</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/avionics/fc_back.webp" 
       alt="FC back" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async" />
-    <p class="fig-caption">FC back</p>
+      class = "mx-auto" loading="lazy" decoding="async"  width="732" height="770" />
+    <p class="fig-caption">Reverse side — the hand-wired runs between each sensor face and the Teensy.</p>
   </div>
 </div>
 
@@ -99,7 +105,7 @@ The power distribution board was designed to distribute and convert power from t
       src="/assets/aeolus/avionics/pwrpcb.webp" 
       alt="Power distribution board PCB layout" 
       style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "mx-auto rotate-90" loading="lazy" decoding="async" />
+      class = "mx-auto rotate-90" loading="lazy" decoding="async"  width="1604" height="1516" />
     <p class="fig-caption">Power distribution board layout</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -107,7 +113,7 @@ The power distribution board was designed to distribute and convert power from t
       src="/assets/aeolus/avionics/pwr_front.webp" 
       alt="PCB front" 
       style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async" />
+      class = "mx-auto" loading="lazy" decoding="async"  width="790" height="744" />
     <p class="fig-caption">Front</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -115,7 +121,7 @@ The power distribution board was designed to distribute and convert power from t
       src="/assets/aeolus/avionics/pwr_back.webp" 
       alt="PCB back" 
       style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async" />
+      class = "mx-auto" loading="lazy" decoding="async"  width="838" height="805" />
     <p class="fig-caption">Back</p>
   </div>
 </div>
@@ -129,7 +135,7 @@ The servo distribution board was simple as it just needed to distribute power an
       src="/assets/aeolus/avionics/svrpcb.webp" 
       alt="Servo distribution board PCB layout" 
       style={{ maxHeight: '500px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async" />
+      class = "mx-auto" loading="lazy" decoding="async"  width="686" height="1358" />
     <p class="fig-caption">Servo distribution board layout</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -137,7 +143,7 @@ The servo distribution board was simple as it just needed to distribute power an
       src="/assets/aeolus/avionics/svr_board.jpeg" 
       alt="Servo distribution board mounted in the vehicle" 
       style={{ maxHeight: '500px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async" />
+      class = "mx-auto" loading="lazy" decoding="async"  width="1831" height="2534" />
     <p class="fig-caption">Servo distribution board mounted</p>
   </div>
 </div>
@@ -174,9 +180,11 @@ I may also add an NTC thermistor to monitor the temperature of the ESC or wires 
 
 The IMU is not at the centre of mass. It sits about 0.4 m forward of it along the roll axis, because that is where there was room for it.
 
-That offset has a consequence most builds ignore. An accelerometer at a lever arm from the centre of rotation does not measure the vehicle's linear acceleration — it measures that plus the centripetal and tangential acceleration produced by the vehicle rotating about its own centre. Pitch the vehicle and the IMU swings through an arc, reporting acceleration that the vehicle as a whole is not experiencing. Feed that straight into a velocity estimate and rotation is silently integrated into translation.
+That offset has a consequence most builds ignore. An accelerometer at a lever arm from the centre of rotation does not measure the vehicle's linear acceleration — it measures that plus the acceleration produced by the vehicle rotating about its own centre. Pitch the vehicle and the IMU swings through an arc, reporting acceleration that the vehicle as a whole is not experiencing. Feed that straight into a velocity estimate and rotation is silently integrated into translation.
 
-The offsets are stored in the flight code and the rotational terms subtracted before the accelerometer reading reaches the estimator, so what the filter sees is acceleration at the centre of mass rather than at the sensor.
+The offsets are stored in the flight code and the centripetal term $\boldsymbol{\omega} \times (\boldsymbol{\omega} \times \mathbf{r})$ is subtracted before the reading reaches the estimator, so what the filter sees is much closer to acceleration at the centre of mass than at the sensor.
+
+The tangential term $\dot{\boldsymbol{\omega}} \times \mathbf{r}$ is *not* corrected, because it needs angular acceleration and differentiating the gyro adds more noise than the term removes at these rates. It is the smaller of the two in sustained rotation and the larger during a sharp transient, so this is a deliberate trade rather than an oversight — but it is a gap.
 
 ---
 
@@ -219,7 +227,7 @@ The centroid measures the center of mass of all points to visualize the extent o
       src="/assets/aeolus/accel-mag-cal/mag-raw.webp" 
       alt="Magnetometer point cloud before calibration — an offset, distorted ellipsoid" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" />
+      class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async"  width="700" height="700" />
     <p class="fig-caption">Magnetometer points before calibration</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -227,7 +235,7 @@ The centroid measures the center of mass of all points to visualize the extent o
       src="/assets/aeolus/accel-mag-cal/mag-corrected.webp" 
       alt="Magnetometer point cloud after calibration — a centred sphere" 
       style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" />
+      class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async"  width="700" height="700" />
     <p class="fig-caption">Magnetometer points after calibration</p>
   </div>
 </div>
@@ -237,7 +245,7 @@ The centroid measures the center of mass of all points to visualize the extent o
     src="/assets/aeolus/accel-mag-cal/accel.webp" 
     alt="Accelerometer point cloud" 
     style={{ maxWidth: '50%', borderRadius: '8px' }}
-    class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" />
+    class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async"  width="761" height="861" />
   <p class="fig-caption">Accelerometer points (no visible difference pre/post calibration)</p>
 </div>
 
@@ -254,12 +262,12 @@ Location dominated the result. Calibrating indoors near a laptop gave 3%, then 7
 The distribution shape is the sharper diagnostic of the two. After a bad calibration the residuals were skewed with a heavy tail — the signature of structure the ellipsoid fit failed to absorb, meaning real distortion is still present. After a good one they were close to normal, which is what remains when the only error left is sensor noise. A normal residual is evidence that the error model was the right one; a skewed residual says the model has not finished its job no matter how small the standard deviation looks. Coverage was checked as well: 93.1% of 72 orientation bins occupied, so the fit was not extrapolating across an unsampled patch of the sphere.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-recal-fit.webp" alt="Ellipsoid fit to the recalibration sweep." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Ellipsoid fit to the recalibration sweep.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-recal-residual.webp" alt="Residual distribution after correction — close to normal." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Residual distribution after correction — close to normal.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-recal-fit.webp" alt="Ellipsoid fit to the recalibration sweep." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="647" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Ellipsoid fit to the recalibration sweep.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-recal-residual.webp" alt="Residual distribution after correction — close to normal." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="467" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Residual distribution after correction — close to normal.</figcaption></figure>
 </div>
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/avionics/mag-cal-outdoor.webp" alt="Outdoor calibration, away from the laptop: 0.9% of mean." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/avionics/mag-cal-outdoor.webp" alt="Outdoor calibration, away from the laptop: 0.9% of mean." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1400" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Outdoor calibration, away from the laptop: 0.9% of mean.</figcaption>
 </figure>
 
@@ -291,8 +299,8 @@ $$B = \frac{\mu_0 I R^2}{2 d^3} \approx 2.5~\mu\mathrm{T}$$
 Twenty times smaller, and squarely in line with what was observed.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-edf-off.webp" alt="Reference recording, EDF off." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Reference recording, EDF off.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-in-flight.webp" alt="Magnetometer during flight — no large excursion." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Magnetometer during flight — no large excursion.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-edf-off.webp" alt="Reference recording, EDF off." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="934" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Reference recording, EDF off.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/avionics/mag-in-flight.webp" alt="Magnetometer during flight — no large excursion." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="934" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Magnetometer during flight — no large excursion.</figcaption></figure>
 </div>
 
 
@@ -326,10 +334,10 @@ Switching to the *airborne* model produced an immediate and large improvement in
   ]}
 />
 
-Nothing was broken beforehand and nothing reported an error. The receiver simply produced quietly worse data than it was capable of, which is the failure mode that gets found only by going and looking.
+Nothing was broken beforehand and nothing reported an error. The receiver simply produced worse data than it was capable of, and I only found it by going through the configuration register by register.
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/avionics/gps-airborne-std.webp" alt="Velocity spread after switching the dynamic model to airborne." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/avionics/gps-airborne-std.webp" alt="Velocity spread after switching the dynamic model to airborne." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="539" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Velocity spread after switching the dynamic model to airborne.</figcaption>
 </figure>
 
@@ -341,12 +349,12 @@ Velocity noise was characterized over roughly 8300 static samples. The standard 
 This matters directly downstream. A Kalman filter assumes Gaussian measurement noise, and a heavy-tailed distribution means occasional outliers many sigma out. Tuning the filter's measurement covariance from the standard deviation alone would leave it over-trusting exactly those samples. Knowing the tails are there is what justifies gating the fusion rather than accepting every fix.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/avionics/gps-noise-hist.webp" alt="Velocity error distribution — normal through the middle." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Velocity error distribution — normal through the middle.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/avionics/gps-noise-qq.webp" alt="The tails departing from a Gaussian." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The tails departing from a Gaussian.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/avionics/gps-noise-hist.webp" alt="Velocity error distribution — normal through the middle." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="840" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Velocity error distribution — normal through the middle.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/avionics/gps-noise-qq.webp" alt="The tails departing from a Gaussian." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1167" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The tails departing from a Gaussian.</figcaption></figure>
 </div>
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/avionics/gps-velocity-series.webp" alt="Static velocity over time." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/avionics/gps-velocity-series.webp" alt="Static velocity over time." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="840" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Static velocity over time.</figcaption>
 </figure>
 
@@ -354,6 +362,12 @@ This matters directly downstream. A Kalman filter assumes Gaussian measurement n
 ## Testing Its Own Interference
 
 The vehicle transmits on 915 MHz and receives GNSS on 1575 MHz, with both antennas within centimetres of each other. Rather than wait to discover a problem in flight, the RFM95W was set transmitting at 6 dBm and placed directly on top of the GPS patch antenna — a deliberately worse case than the real installation.
+
+<figure class="not-prose my-6 mx-auto max-w-md">
+  <img src="/assets/aeolus/avionics/gps-radio-test.webp" alt="NEO-M9N GPS module mounted directly beneath the RFM9x LoRa radio" class="w-full rounded-lg" loading="lazy" decoding="async"  width="997" height="1600" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The test as run — the 915 MHz LoRa breakout sitting directly on the NEO-M9N, closer than anything in the real airframe.</figcaption>
+</figure>
+
 
 No measurable change in DOP or any other quality metric. A null result, and worth recording as one: it rules out a failure mode that would otherwise stay on the list of things that might explain a bad flight.
 

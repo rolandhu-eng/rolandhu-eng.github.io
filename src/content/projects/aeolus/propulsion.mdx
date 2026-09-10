@@ -18,16 +18,16 @@ The EDF itself was selected by trading thrust against mass, not just picking the
       src="/assets/aeolus/propulsion/edfjacket.webp" 
       alt="70 mm EDF unit" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async" />
-    <p class="fig-caption">edf</p>
+      class = "mx-auto" loading="lazy" decoding="async"  width="1118" height="1000" />
+    <p class="fig-caption">The 70 mm EDF in its printed jacket. One moving part, and the only reason the vehicle can hover rather than arc.</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
     <img 
       src="/assets/aeolus/propulsion/edfshroud.webp" 
       alt="Aft shroud for aerodynamics and wire routing" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async" />
-    <p class="fig-caption">aft shroud for aerodynamics and wire routing</p>
+      class = "mx-auto" loading="lazy" decoding="async"  width="649" height="1000" />
+    <p class="fig-caption">Aft shroud. It cleans up the base aerodynamically and carries the servo wiring aft, which is why it is not simply a cone.</p>
   </div>
 </div>
 
@@ -154,7 +154,7 @@ Checking the square law against the bench sweep:
   note="Square-law thrust model against measured RPM."
 />
 
-The fit is tightest at high RPM and loosens toward idle — which is the right way round, since the vehicle spends its whole flight near hover and never operates down at 20% throttle. Being worst where it matters least is a property worth having.
+The fit is tightest at high RPM and loosens toward idle — which is the right way round, since the vehicle spends its whole flight near hover and never operates down at 20% throttle. The vehicle spends its whole flight near hover, so the region where the fit is loosest is the one it never operates in.
 
 ---
 
@@ -207,12 +207,12 @@ $$\alpha = 1 - e^{-\Delta t/\tau}, \qquad \tau = 15~\mathrm{ms}$$
 A fixed $\alpha$ silently changes the filter's time constant whenever loop timing jitters, which on a system also running attitude estimation at 200 Hz it does. Deriving $\alpha$ from measured $\Delta t$ holds the time constant at 15 ms regardless.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/propulsion/rpm-raw.webp" alt="Raw RPM — jitter on every sample." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Raw RPM — jitter on every sample.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/propulsion/rpm-filtered.webp" alt="After filtering, τ = 15 ms." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">After filtering, τ = 15 ms.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/propulsion/rpm-raw.webp" alt="Raw RPM — jitter on every sample." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="398" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Raw RPM — jitter on every sample.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/propulsion/rpm-filtered.webp" alt="After filtering, τ = 15 ms." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="388" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">After filtering, τ = 15 ms.</figcaption></figure>
 </div>
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/propulsion/rpm-spike.webp" alt="A noise spike surviving the median window — the case the plausibility gate exists for." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/propulsion/rpm-spike.webp" alt="A noise spike surviving the median window — the case the plausibility gate exists for." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="388" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">A noise spike surviving the median window — the case the plausibility gate exists for.</figcaption>
 </figure>
 
@@ -221,7 +221,7 @@ A fixed $\alpha$ silently changes the filter's time constant whenever loop timin
 The governor started as a full PID. The derivative term was removed, and the reason is worth stating: the EDF's own response lag meant the D term was reacting to changes the motor had not finished making, and it drove oscillation rather than damping it. Dropping to PI made the response visibly smoother.
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/propulsion/governor-pi-vs-pid.webp" alt="Governor response with and without the derivative term." class="w-full rounded-lg" loading="lazy" decoding="async" />
+  <img src="/assets/aeolus/propulsion/governor-pi-vs-pid.webp" alt="Governor response with and without the derivative term." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="928" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Governor response with and without the derivative term.</figcaption>
 </figure>
  The derivative plumbing is still in the code — filtered rate and all — with the gain set to zero, so it can be reinstated without rewriting anything.
@@ -233,15 +233,15 @@ The integral term is gated rather than merely clamped: `Ki` is active only when 
     src="/assets/aeolus/propulsion/rpm_governor.webp" 
     alt="Measured RPM governor step response" 
     style={{ maxWidth: '100%'}}
-    class="mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" />
+    class="mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async"  width="1200" height="800" />
   <p class="fig-caption">EDF governor response plotted with Python (matplotlib)</p>
 </div>
 
 Steady-state error settles within **±500 RPM**, roughly 1.5% at hover speed. That is small enough to produce no visible motion or hover instability, which was the bar — the governor exists to make thrust repeatable, not to be precise for its own sake.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/propulsion/governor-tracking.webp" alt="Governor tracking a commanded RPM." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Governor tracking a commanded RPM.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/propulsion/governor-steady-state.webp" alt="Steady-state error inside ±500 RPM." class="w-full rounded-lg" loading="lazy" decoding="async" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Steady-state error inside ±500 RPM.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/propulsion/governor-tracking.webp" alt="Governor tracking a commanded RPM." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="813" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Governor tracking a commanded RPM.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/propulsion/governor-steady-state.webp" alt="Steady-state error inside ±500 RPM." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="624" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Steady-state error inside ±500 RPM.</figcaption></figure>
 </div>
 
 ## Open: Sensor Interference

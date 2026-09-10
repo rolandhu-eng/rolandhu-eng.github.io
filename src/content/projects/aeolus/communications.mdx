@@ -64,7 +64,7 @@ struct CommandPacket {
 
 The right-hand column is the part that matters. It is not documentation — it is an interlock. A command arriving in the wrong flight state is rejected, so a stale packet, a mis-click, or a corrupted byte that happens to survive the checksum cannot arm the vehicle mid-flight or erase the flash while it is being written to.
 
-`ABORT` and `DISARM` are the deliberate exceptions, valid in every state. `ABORT` bypasses the state machine entirely. A safety command that could be refused because the vehicle disagreed about what state it was in would not be a safety command.
+`ABORT` and `DISARM` are the deliberate exceptions, valid in every state. `ABORT` bypasses the state machine entirely. If the vehicle disagreed about which state it was in, I still needed to be able to stop it.
 
 ---
 
@@ -111,8 +111,12 @@ A web dashboard was chosen for the simplicity. While performance is expected to 
 
 The dashboard talks to the ESP32 through the browser's Web Serial API, which means there is nothing to install and nothing to keep in sync — the ground station is a page, and the machine at the field only needs a browser. At 10 Hz the throughput ceiling that would normally argue against this never comes into play.
 
-<figure class="not-prose my-6 mx-auto max-w-3xl">
-  <img src="/assets/aeolus/communications/dashboard.webp" alt="The ground station dashboard, running in a browser over Web Serial." class="w-full rounded-lg" loading="lazy" decoding="async" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The ground station dashboard, running in a browser over Web Serial.</figcaption>
+<figure class="not-prose my-6">
+  <img src="/assets/aeolus/communications/dashboard-flight.webp" alt="Ground station dashboard during a flight, showing flight state, altitude, descent tracking, tilt, vane deflection and the state vector" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async"  width="2200" height="1267" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Mid-flight, in <code>BOOST_UP</code>. Nine live charts, a 3D attitude view driven by the downlinked quaternion, the full state vector, and the event log — all of it a web page talking to an ESP32 over Web Serial.</figcaption>
 </figure>
+
+The layout is arranged around what a given moment actually needs. The top strip carries only what matters if you have one second to look: mission time, flight state, altitude, sink rate, pack voltage, whether the allocator is saturated, and how stale the downlink is. Everything else is diagnosis rather than decision.
+
+Two of those deserve mention. **CTRL AUTHORITY** surfaces the [allocator](/projects/aeolus/control#control-allocation) state directly — `SAT` means the controller is asking for more deflection than the vanes can deliver, which is the difference between a vehicle that is tracking badly and one that is out of authority. And the **downlink staleness** counter is prominent because a frozen dashboard and a stable vehicle look identical; the number tells you which one you are looking at.
 
