@@ -89,6 +89,21 @@ const ogImage = new URL(image, Astro.site ?? Astro.url.origin);
         border: 1px solid;
       }
     </style>
+
+    <!-- Google Analytics. is:inline is required — without it Astro compiles these
+         into a bundled ES module, which breaks the gtag snippet. Gated to prod so
+         local dev traffic doesn't land in the property. -->
+    {import.meta.env.PROD && (
+      <>
+        <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-7Q23MTQCDZ"></script>
+        <script is:inline>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-7Q23MTQCDZ');
+        </script>
+      </>
+    )}
   </head>
 
   <body class="bg-[#f5f3ef] dark:bg-[#020817] text-slate-700 dark:text-slate-300 antialiased font-sans min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
