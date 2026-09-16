@@ -109,7 +109,9 @@ The parachute is designed, sized, and characterized, but not currently flown. Th
 
 Descent rate follows from a force balance at terminal velocity:
 
-$$v = \sqrt{\frac{2mg}{\rho A C_d}}$$
+$$
+v = \sqrt{\frac{2mg}{\rho A C_d}}
+$$
 
 The interesting term is $A C_d$, not $A$ alone. A toroidal canopy runs a drag coefficient near $2.2$ against roughly $0.75$ for a flat canopy, so it buys the same drag from far less fabric. Sizing both to a comparable descent rate makes the gap concrete:
 
@@ -142,13 +144,46 @@ The fabric column is left blank for the toroid deliberately: projected area sets
 
 The final canopy is a **12-gore toroidal design**. The gore pattern was generated in openchute, an open-source parachute pattern tool, which outputs a DXF for laser cutting.
 
+## A First Estimate of the Opening Load
+
+Before measuring anything, the peak load is worth bounding. Treat the vehicle as a mass on a spring, the canopy as an effectively fixed end, and the vehicle as already falling at $v_0$ when the cord goes taut. Peak force then occurs at maximum extension, where the vehicle has momentarily stopped.
+
+Equating kinetic energy to the strain energy stored, less the work gravity does over the stretch:
+
+$$
+\tfrac{1}{2}mv_0^2 = \tfrac{1}{2}k\,\Delta l^2 - mg\,\Delta l
+$$
+
+which is a quadratic in $\Delta l$, and taking the positive root:
+
+$$
+\Delta l = \frac{mg}{k}\left(1 + \sqrt{1 + \frac{k v_0^2}{mg^2}}\right)
+$$
+
+$$
+F_{max} = k\,\Delta l = mg\left(1 + \sqrt{1 + \frac{k v_0^2}{mg^2}}\right) \qquad\qquad a_{max} = \frac{F_{max}}{m} - g = \sqrt{1 + \frac{k v_0^2}{mg^2}}\;g
+$$
+
+The acceleration result is the useful form: it is independent of mass except through the ratio inside the root, and it says the deceleration is set by how much stiffer the cord is than the vehicle's weight can accommodate.
+
+For $k = 200$ N/m, $m = 1.5$ kg and $v_0 = 20$ m/s, that gives 1.81 m of stretch, **361 N of cord tension, and 23.6 g** on the airframe.
+
+<figure class="not-prose my-6 mx-auto max-w-md">
+  <img src="/assets/aeolus/vehicle/chute-derivation-1.webp" alt="Handwritten derivation of peak shock cord load from an energy balance" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1931" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The energy balance, and the closed form for stretch, peak force and peak deceleration.</figcaption>
+</figure>
+
+That number is a bound, not a prediction, and it is the reason the next section exists. A bungee is not a linear spring — it is soft in the middle of its range and stiffens sharply near full extension — so a single $k$ either overestimates the force at small stretch or underestimates it at large. Getting a usable design load meant measuring the real force–extension curve.
+
 ## Shock Cord Characterization
 
 A shock cord is not a spring. It is stiff at low strain, soft through the middle of its range, and then stiffens hard as the fibers lock up — and the opening load depends entirely on where in that curve the cord ends up. So it was measured rather than assumed, by stretching samples against a meter stick and reading tension off a force scale.
 
 The complication is that stiffness $k = F/\delta l$ depends on sample length, so results from different pieces of cord cannot be compared directly. Normalizing by the unstretched length removes that dependence:
 
-$$S = k L_0 = EA$$
+$$
+S = k L_0 = EA
+$$
 
 $S$ is a property of the material and cross-section, not of the particular sample. If the measurement is sound, samples of different length must collapse onto a single $S(\lambda)$ curve — which is exactly what happened:
 
@@ -174,11 +209,32 @@ One honest limitation: the shortest samples carry the largest relative error, si
 
 Peak cord tension is what sizes the shock cord attachment, and it cannot be read off a static pull test — it depends on how the rocket and canopy decelerate against each other. So the deployment transient was simulated as a genuine two-body problem: rocket and canopy as separate masses, coupled only through the cord, integrated with Euler–Cromer at 0.1 ms steps.
 
-The measured cord data enters as a fitted force law, slack below $\lambda = 1$ and asymptotic at maximum extension:
+Replacing the linear spring with the measured curve means the energy balance no longer closes in closed form. Writing $x = L/L_0$ for the extension ratio, so $\Delta l = L_0(x-1)$ and $d(\Delta l) = L_0\,dx$:
 
-$$F(\lambda) = A(\lambda - 1)^{p} + \frac{B(\lambda - 1)}{\lambda_{max} - \lambda}$$
+$$
+\tfrac{1}{2}mv_0^2 + mgL_0(x-1) = \int_0^x F\big(L_0(x-1)\big)\,L_0\,dx \;+\; mgL_0
+$$
 
-with $A = 35.5$, $B = 12.6$, $p = 0.4$, $\lambda_{max} = 2.8$. Through the mid-range the fit tracks the bench data to within about 4%; it loosens past $\lambda \approx 2.4$, where the asymptotic term turns sharply and the measurements thin out.
+and the vehicle and canopy have to be carried as two bodies rather than one, since the canopy has its own drag and its own inertia:
+
+$$
+\alpha \dot{y}_p^{\,2} - T = m_{eff}\,\ddot{y}_p \qquad T - mg = m\,\ddot{y}_r \qquad x = \frac{y_p - y_r}{L_0} \qquad T = F(x)
+$$
+
+That coupled pair is what gets integrated numerically below. The measured cord data enters as a fitted force law, slack below $\lambda = 1$ and asymptotic at maximum extension:
+
+$$
+F(\lambda) = A(\lambda - 1)^{p} + \frac{B(\lambda - 1)}{\lambda_{max} - \lambda}
+$$
+
+with $A = 35.5$, $B = 12.6$, $p = 0.4$, $\lambda_{max} = 2.8$.
+
+Through the mid-range the fit tracks the bench data to within about 4%; it loosens past $\lambda \approx 2.4$, where the asymptotic term turns sharply and the measurements thin out.
+
+<figure class="not-prose my-6 mx-auto max-w-md">
+  <img src="/assets/aeolus/vehicle/chute-derivation-2.webp" alt="Handwritten non-linear shock cord model: force law, energy integral and two-body equations" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1756" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The non-linear model — force law, the energy integral, and the two-body deployment equations. The red curve is stiffness, which is why a single spring constant cannot work.</figcaption>
+</figure>
 
 <div class="not-prose my-8">
   <svg viewBox="0 0 640 384" class="w-full h-auto text-slate-500 dark:text-slate-400" role="img" aria-label="Shock cord tension versus extension ratio, showing twelve bench measurements, the fitted force law, and the extrapolated design load">
@@ -214,7 +270,9 @@ with $A = 35.5$, $B = 12.6$, $p = 0.4$, $\lambda_{max} = 2.8$. Through the mid-r
 
 The canopy side carries one term that is easy to miss. A parachute does not just accelerate its own fabric — it drags a substantial column of air with it, and that entrained air dominates the canopy's effective inertia:
 
-$$m_{added} = \frac{4}{3}\pi\rho r^3, \qquad r = \sqrt{A/\pi}$$
+$$
+m_{added} = \frac{4}{3}\pi\rho r^3, \qquad r = \sqrt{A/\pi}
+$$
 
 For this canopy that comes to 0.646 kg against 50 g of fabric, so the entrained air is roughly **fourteen times** the mass of the parachute itself. Leave it out and the opening load is underpredicted by a factor of three.
 

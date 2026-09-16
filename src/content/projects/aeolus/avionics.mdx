@@ -15,7 +15,7 @@ The avionics system handles sensing, control, and power distribution for Aeolus�
     src="/assets/aeolus/avionics/Avionics.drawio.png" 
     alt="Avionics system block diagram" 
     style={{ maxHeight: '500px' }}
-    class="mx-auto dark:invert dark:hue-rotate-0" loading="lazy" decoding="async"  width="692" height="552" />
+    class="w-auto mx-auto dark:invert dark:hue-rotate-0" loading="lazy" decoding="async"  width="692" height="552" />
   <p class="fig-caption">Initial avionics planning. Most of this survived; the GPS was added months later, once drift made it necessary.</p>
 </div>
 
@@ -24,7 +24,7 @@ The avionics system handles sensing, control, and power distribution for Aeolus�
     src="/assets/aeolus/avionics/av_bay.webp" 
     alt="Assembled avionics bay: flight computer and power distribution board" 
     style={{ maxHeight: '500px', borderRadius: '8px' }}
-    class = "mx-auto" loading="lazy" decoding="async"  width="695" height="1119" />
+    class = "w-auto mx-auto" loading="lazy" decoding="async"  width="695" height="1119" />
   <p class="fig-caption">Flight computer and power distribution board</p>
 </div>
 </div>
@@ -74,7 +74,7 @@ The GPS is on a hardware UART for the same reason. Early bench testing with the 
       src="/assets/aeolus/avionics/fc_front.webp" 
       alt="FC front" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async"  width="654" height="749" />
+      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="654" height="749" />
     <p class="fig-caption">Flight computer, front. Teensy 4.1 stood vertically in the centre with sensor breakouts on the four faces around it.</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -82,7 +82,7 @@ The GPS is on a hardware UART for the same reason. Early bench testing with the 
       src="/assets/aeolus/avionics/fc_back.webp" 
       alt="FC back" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async"  width="732" height="770" />
+      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="732" height="770" />
     <p class="fig-caption">Reverse side — the hand-wired runs between each sensor face and the Teensy.</p>
   </div>
 </div>
@@ -105,7 +105,7 @@ The power distribution board was designed to distribute and convert power from t
       src="/assets/aeolus/avionics/pwrpcb.webp" 
       alt="Power distribution board PCB layout" 
       style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "mx-auto rotate-90" loading="lazy" decoding="async"  width="1604" height="1516" />
+      class = "w-auto mx-auto rotate-90" loading="lazy" decoding="async"  width="1604" height="1516" />
     <p class="fig-caption">Power distribution board layout</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -113,7 +113,7 @@ The power distribution board was designed to distribute and convert power from t
       src="/assets/aeolus/avionics/pwr_front.webp" 
       alt="PCB front" 
       style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async"  width="790" height="744" />
+      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="790" height="744" />
     <p class="fig-caption">Front</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -121,7 +121,7 @@ The power distribution board was designed to distribute and convert power from t
       src="/assets/aeolus/avionics/pwr_back.webp" 
       alt="PCB back" 
       style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async"  width="838" height="805" />
+      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="838" height="805" />
     <p class="fig-caption">Back</p>
   </div>
 </div>
@@ -135,7 +135,7 @@ The servo distribution board was simple as it just needed to distribute power an
       src="/assets/aeolus/avionics/svrpcb.webp" 
       alt="Servo distribution board PCB layout" 
       style={{ maxHeight: '500px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async"  width="686" height="1358" />
+      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="686" height="1358" />
     <p class="fig-caption">Servo distribution board layout</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -143,7 +143,7 @@ The servo distribution board was simple as it just needed to distribute power an
       src="/assets/aeolus/avionics/svr_board.jpeg" 
       alt="Servo distribution board mounted in the vehicle" 
       style={{ maxHeight: '500px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async"  width="1831" height="2534" />
+      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="1831" height="2534" />
     <p class="fig-caption">Servo distribution board mounted</p>
   </div>
 </div>
@@ -192,7 +192,9 @@ The tangential term $\dot{\boldsymbol{\omega}} \times \mathbf{r}$ is *not* corre
 Plotting accelerometer and magnetometer readings in 3D as the sensor is rotated through all orientations should trace a sphere: radius 1 g for the accelerometer, ~50 µT (Earth's field at this location) for the magnetometer. In practice, sensor errors distort this sphere into an offset ellipsoid.
 
 Accelerometers require correction for scale (a constant multiplier), bias (a constant offset), and cross-axis sensitivity (each axis not being truly independent from the others). Magnetometers require correction for hard iron offsets (fixed fields from nearby magnetized materials) and soft iron distortions (caused by induced fields in nearby ferromagnetic materials). Because both error models for the accelerometer and magnetometer distort a sphere into an ellipsoid, both sensors can be corrected with the same equation:
-$$\mathbf{M'=A(M-b)}$$
+$$
+\mathbf{M'=A(M-b)}
+$$
 where $\mathbf{M'}$ and $\mathbf{M}$ are the corrected and raw measurement vectors, and $\mathbf{A}$ and $\mathbf{b}$ are the correction matrix and bias vector, transforming the offset ellipsoid into a centered sphere.
 
 **Procedure:** The IMU was held stationary in several orientations spanning the full range of attitudes. Recorded data was filtered and downsampled to help mitigate orientation clustering from biasing the least-squares ellipsoid fit. MATLAB's `magcal` function then computed the best-fit ellipsoid and returned $\mathbf{A}$, $\mathbf{b}$, and the radius of the corrected sphere for both sensors.
@@ -272,6 +274,60 @@ The distribution shape is the sharper diagnostic of the two. After a bad calibra
 </figure>
 
 
+## Mounting Misalignment
+
+The ellipsoid calibration makes the sensor accurate about its own axes. It says nothing about where those axes point.
+
+The IMU is soldered to a board, the board is bolted into a printed frame, and the frame is bonded into the airframe. Each of those interfaces contributes a fraction of a degree, and the accumulated result is that the sensor's X axis is not the vehicle's roll axis. No amount of scale and bias correction finds this, because from the sensor's point of view nothing is wrong.
+
+It matters for the reason the [GNC page opens with](/projects/aeolus/gnc#state-estimation): a constant attitude error $\theta$ leaks $g\theta$ of false acceleration into the estimate, and unlike noise, a constant error does not average away.
+
+Measuring it takes one reading. Set the vehicle on a level surface and record gravity. With a perfectly aligned X-up sensor it should read $(1000, 0, 0)$ mg. It read:
+
+$$
+\mathbf{g}_B = (999.50,\; 20.78,\; 20.64)~\text{mg}
+$$
+
+Roughly 21 mg on each of two axes that should be reading zero.
+
+Recovering the angles is the direction cosine matrix run backwards. Gravity in the earth frame is $\mathbf{g}_E = (g, 0, 0)$, so the inverse DCM — which for a rotation matrix is just the transpose — maps it into the body frame as
+
+$$
+g_x = g\cos\beta\cos\gamma \qquad g_y = -g\sin\gamma\cos\beta \qquad g_z = g\sin\beta
+$$
+
+Three equations, and the pitch and yaw misalignments fall straight out:
+
+$$
+\beta = \arcsin\left(\frac{g_z}{\sqrt{g_x^2 + g_y^2 + g_z^2}}\right) \qquad\qquad \gamma = \arctan\left(-\frac{g_y}{g_x}\right)
+$$
+
+For the measured vector, $\beta = 1.18^\circ$ and $\gamma = -1.19^\circ$ — a total tilt of **1.68°** between the sensor's roll axis and the vehicle's. Left uncorrected that is $0.29~\text{m/s}^2$ of permanent false acceleration: 2.9 m/s of velocity error and over 14 m of position error in ten seconds, from a mounting error too small to see.
+
+The third angle, $\alpha$, is not recoverable. Gravity is a single vector, and rotating the sensor about the gravity direction leaves it unchanged — the same blind spot that leaves [heading unobservable](/projects/aeolus/gnc#heading-is-the-open-problem) without a magnetometer. Setting $\alpha = 0$ collapses the general DCM into the correction matrix:
+
+$$
+C = \begin{bmatrix}
+\cos\beta\cos\gamma & -\sin\gamma\cos\beta & \sin\beta \\
+\sin\gamma & \cos\gamma & 0 \\
+-\sin\beta\cos\gamma & \sin\beta\sin\gamma & \cos\beta
+\end{bmatrix}
+$$
+
+That choice is not a loss. The unobservable rotation is about the vehicle's own roll axis, which is precisely the axis where a small offset does the least harm — it does not tilt the gravity vector, so it produces no $g\theta$ leakage at all.
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/avionics/imu-alignment.webp" alt="Handwritten derivation of the IMU mounting misalignment correction matrix from a single gravity reading" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1913" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Recovering two misalignment angles from one level gravity reading, and the resulting correction matrix.</figcaption>
+</figure>
+
+$C$ is built once at startup from that level reading, and then applied to the accelerometer, the gyroscope, and the magnetometer before any of the three reaches the estimator. It is a rotation, so it costs three multiplies and three adds per vector and introduces no scaling of its own.
+
+```cpp
+// values are raw gravity readings from placing the vehicle on a flat surface
+stateEstimator.buildCorrectionMatrix(999.50f, 20.78f, 20.64f);
+```
+
 ## A Bug Hiding in a Convention
 
 For a long time the Y and Z IMU axes appeared inverted, and the flight code carried a sign flip to compensate.
@@ -286,7 +342,9 @@ The magnetometer sits about 12 cm from the nearest motor wiring, which carries u
 
 Modelling the wire as an infinite straight conductor:
 
-$$B = \frac{\mu_0 I}{2\pi d} = \frac{(4\pi\times10^{-7})(30)}{2\pi(0.12)} \approx 50~\mu\mathrm{T}$$
+$$
+B = \frac{\mu_0 I}{2\pi d} = \frac{(4\pi\times10^{-7})(30)}{2\pi(0.12)} \approx 50~\mu\mathrm{T}
+$$
 
 That is the same magnitude as the Earth's field at this location. If true, heading would be unusable at any appreciable throttle.
 
@@ -294,7 +352,9 @@ Measured data showed almost no interference at all. Comparing magnetometer readi
 
 The prediction was wrong because the model was wrong. The motor wiring does not run as one long straight conductor past the sensor — it doubles back, forming a roughly triangular loop only about 1.5 cm across. At 12 cm away that is $R \ll d$, which is the dipole limit, not the infinite-wire limit. Outgoing and return currents very nearly cancel, and the field falls off as $1/d^3$ rather than $1/d$:
 
-$$B = \frac{\mu_0 I R^2}{2 d^3} \approx 2.5~\mu\mathrm{T}$$
+$$
+B = \frac{\mu_0 I R^2}{2 d^3} \approx 2.5~\mu\mathrm{T}
+$$
 
 Twenty times smaller, and squarely in line with what was observed.
 

@@ -26,13 +26,55 @@ Aeolus uses an **X-up body frame**: the roll axis, X, points along the vehicle's
 
 This is the natural choice for a rocket — the axis of symmetry is the axis you care about, and it keeps the roll axis first — but it is not the convention most reference implementations assume, and that had consequences downstream.
 
+## Rotating Between Frames
+
+Every accelerometer and gyro sample arrives in the body frame. Velocity, position, and every guidance target live in the earth frame. The bridge between them is a rotation, and it was derived from scratch rather than lifted, because the X-up convention above changes which terms survive.
+
+Going from body axes back to earth axes means undoing three elementary rotations in order — yaw $\gamma$, then pitch $\beta$, then roll $\alpha$:
+
+$$
+\begin{bmatrix} x \\ y \\ z \end{bmatrix} =
+\begin{bmatrix} 1 & 0 & 0 \\ 0 & \cos\alpha & -\sin\alpha \\ 0 & \sin\alpha & \cos\alpha \end{bmatrix}
+\begin{bmatrix} \cos\beta & 0 & \sin\beta \\ 0 & 1 & 0 \\ -\sin\beta & 0 & \cos\beta \end{bmatrix}
+\begin{bmatrix} \cos\gamma & -\sin\gamma & 0 \\ \sin\gamma & \cos\gamma & 0 \\ 0 & 0 & 1 \end{bmatrix}
+\begin{bmatrix} x' \\ y' \\ z' \end{bmatrix}
+$$
+
+Multiplying the three out gives the direction cosine matrix, body to earth:
+
+$$
+R = \begin{bmatrix}
+\cos\beta\cos\gamma & -\sin\gamma\cos\beta & \sin\beta \\
+\sin\alpha\sin\beta\cos\gamma + \cos\alpha\sin\gamma & -\sin\alpha\sin\beta\sin\gamma + \cos\alpha\cos\gamma & -\sin\alpha\cos\beta \\
+-\cos\alpha\sin\beta\cos\gamma + \sin\alpha\sin\gamma & \cos\alpha\sin\beta\sin\gamma + \sin\alpha\cos\gamma & \cos\alpha\cos\beta
+\end{bmatrix}
+$$
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/gnc/dcm-derivation.webp" alt="Handwritten derivation of the body-to-earth direction cosine matrix by composing three elementary rotations" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1940" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Composing yaw, pitch and roll into the body-to-earth DCM.</figcaption>
+</figure>
+
+The flight code does not build this matrix in the fast path. Rotating a vector by a quaternion directly is cheaper — nine multiplies and no trigonometry at all — and it avoids the gimbal singularity that the Euler parameterisation carries at $\beta = 90^\circ$, which for an X-up rocket is a horizontal attitude rather than an exotic one:
+
+```cpp
+// t = 2 * cross(q_vec, v);  v_earth = v + qw*t + cross(q_vec, t)
+float tx = 2.0f * (qy*vz - qz*vy);
+...
+v_earth[0] = vx + qw*tx + (qy*tz - qz*ty);
+```
+
+The DCM still earns its place. It is the form in which a rotation can be *read* — each entry is the cosine of the angle between one body axis and one earth axis — and that is what makes it the right tool for a fixed, small, measured rotation. It is used directly to correct the [IMU's mounting misalignment](/projects/aeolus/avionics#mounting-misalignment).
+
 ## Madgwick Filter
 
 Integrating the gyro alone gives orientation, but only briefly. Gyro bias is never exactly zero, so integration accumulates it without bound and the estimate walks away. The accelerometer provides an absolute reference — gravity always points down — but it is useless on its own, because it cannot tell gravity from the vehicle's own acceleration and it is drowned in vibration from a fan spinning at 35,000 rpm.
 
 Madgwick's filter fuses the two by treating attitude correction as an optimisation. It defines an objective function measuring the mismatch between the gravity direction the accelerometer reports and the gravity direction the current attitude estimate predicts:
 
-$$f(\mathbf{q}, \mathbf{a}) = R(\mathbf{q})\,\hat{\mathbf{g}} - \hat{\mathbf{a}}$$
+$$
+f(\mathbf{q}, \mathbf{a}) = R(\mathbf{q})\,\hat{\mathbf{g}} - \hat{\mathbf{a}}
+$$
 
 then takes a single gradient-descent step against that error each cycle, blending it with the gyro integration. The gain $\beta$ sets how hard it leans on the accelerometer versus the gyro.
 
@@ -62,6 +104,51 @@ return 1.0f / sqrtf(x);
 ```
 
 Every call site passes a sum of squares, so $x$ is non-negative by construction and the only dangerous input is zero. In the gradient-normalisation call, a near-zero gradient magnitude means the filter has converged — the estimate already matches the measurement. Returning zero there is not a safe fallback papering over a division by zero; it is the *physically correct* answer, because the correct correction to apply is none.
+
+## Integrating the Rates
+
+With attitude known and gravity removed, what remains is earth-frame acceleration — and the states the controller actually needs are velocity and position. Getting from one to the other is integration, performed 200 times a second on a signal that never stops changing.
+
+The obvious approach holds acceleration constant across the timestep. It is also wrong in a way that does not average out: the accelerometer reports a value at the *end* of each step, so treating that value as if it applied across the whole step systematically credits the vehicle with acceleration it had not yet reached.
+
+Assuming instead that acceleration varies linearly between samples — the previous reading $a'$ and the current one $a$ — gives
+
+$$
+a(t) = a' + \left(\frac{a - a'}{\Delta t}\right)t
+$$
+
+Integrating once returns the trapezoidal sum, which is the familiar result:
+
+$$
+v = v' + \int_0^{\Delta t}\left[a' + \frac{a-a'}{\Delta t}t\right]dt = v' + \left(\frac{a' + a}{2}\right)\Delta t
+$$
+
+Integrating a second time is where it gets interesting:
+
+$$
+x = x' + \int_0^{\Delta t}\left[v' + a't + \frac{a-a'}{2\Delta t}t^2\right]dt = x' + v'\Delta t + \tfrac{1}{2}a'\Delta t^2 + \frac{a-a'}{6}\Delta t^2
+$$
+
+$$
+x = x' + v'\Delta t + \tfrac{1}{6}\left(2a' + a\right)\Delta t^2
+$$
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/gnc/rate-integration.webp" alt="Handwritten derivation of trapezoidal velocity and constant-jerk position integration" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1537" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Trapezoidal velocity, and the position term that does not follow from it.</figcaption>
+</figure>
+
+That last coefficient is the point of doing the derivation rather than assembling the answer from parts. The tempting shortcut is to take the trapezoidal average acceleration $\bar{a} = (a'+a)/2$, drop it into the constant-acceleration formula $x = x' + v'\Delta t + \tfrac{1}{2}\bar{a}\Delta t^2$, and get $\tfrac{1}{4}(a'+a)\Delta t^2$ — which weights the two samples equally. The correct term weights the old sample **twice** as heavily as the new one, because under linearly changing acceleration the vehicle spends the whole step near $a'$ and only reaches $a$ at the final instant. Averaging first and integrating second is not the same operation as integrating.
+
+```cpp
+// x = x' + v'*dt + 1/6*(a + 2a')*dt^2
+state.position_m[0] += vx_old*dt + (1.0f/6.0f)*(state.accel_ms2[0] + 2.0f*ax_old)*dt*dt;
+
+// v = v' + 1/2*(a + a')*dt
+state.velocity_ms[0] += 0.5f*(state.accel_ms2[0] + ax_old)*dt;
+```
+
+Neither correction is large in a single 5 ms step. Both matter because of what the [error analysis above](#state-estimation) established: dead reckoning has no memory of being wrong, so anything that biases a step in a consistent direction integrates into real drift. A first-order method is biased whenever acceleration is changing, and on a vehicle under active control acceleration is always changing. Trapezoidal integration removes that bias for the cost of keeping one previous sample in memory.
 
 ---
 
@@ -121,7 +208,9 @@ acceleration    →  tilt + bearing  →  target quaternion
 
 A tilted vehicle accelerates horizontally because its thrust vector tips. So a commanded horizontal acceleration becomes a commanded tilt:
 
-$$\text{tilt} = \arcsin\left(\frac{|\mathbf{a}_{cmd}|}{T/m}\right)$$
+$$
+\text{tilt} = \arcsin\left(\frac{|\mathbf{a}_{cmd}|}{T/m}\right)
+$$
 
 with the argument clamped to $[-1, 1]$ before the `arcsin` rather than trusting the loop above to produce something physical, and the whole thing skipped when thrust is too low to lean on at all. The bearing comes from `atan2` of the two acceleration components, and the pair are composed into a target quaternion.
 
@@ -172,13 +261,17 @@ The interesting state is the one that gets skipped.
 
 `COAST_DOWN` drops the fan to idle and lets the vehicle fall ballistically, which is the whole point of a drop test. Restarting from idle is not instant: the fan takes about 1.5 s to spool, the vehicle keeps accelerating downward the entire time, and only then does braking begin. So before entering the coast the machine solves for the altitude at which it would have to relight:
 
-$$h_{relight} = \underbrace{v_d t + \tfrac{t^2}{2}\left(g - \tfrac{T_{idle}}{m}\right) - \tfrac{t^2 (T_{max}-T_{idle})}{6m}}_{\text{fall during spool}} \;+\; \underbrace{\frac{v_{end}^2}{2 a_{dec}}}_{\text{braking}} \;+\; 2\,\mathrm{m}$$
+$$
+h_{relight} = \underbrace{v_d t + \tfrac{t^2}{2}\left(g - \tfrac{T_{idle}}{m}\right) - \tfrac{t^2 (T_{max}-T_{idle})}{6m}}_{\text{fall during spool}} \;+\; \underbrace{\frac{v_{end}^2}{2 a_{dec}}}_{\text{braking}} \;+\; 2\,\mathrm{m}
+$$
 
 The first group integrates a linear thrust ramp from idle to maximum over the spool time; the second is the distance needed to arrest the speed that ramp leaves you with. If that number is larger than the current altitude, there is no coast budget and `COAST_DOWN` is skipped entirely — the fan stays under the governor and the vehicle flies a powered descent instead. In practice that threshold sits near 19 m, so every flight below it descends under power whether or not a drop was requested.
 
 The arrest curve itself is computed in energy form rather than as a fixed rate, so the descent speed limit falls smoothly to the landing rate exactly at the handover altitude instead of collapsing to zero and relying on a floor to catch it:
 
-$$v_{cap} = \min\left(\sqrt{v_{land}^2 + 2 a_{dec} h},\; 12~\mathrm{m/s}\right)$$
+$$
+v_{cap} = \min\left(\sqrt{v_{land}^2 + 2 a_{dec} h},\; 12~\mathrm{m/s}\right)
+$$
 
 ## Idle That Cannot Windmill
 
@@ -186,7 +279,9 @@ $$v_{cap} = \min\left(\sqrt{v_{land}^2 + 2 a_{dec} h},\; 12~\mathrm{m/s}\right)$
 
 If the fan produces less thrust than the oncoming air's momentum flux, the flow through the duct reverses and the rotor windmills backwards. An ESC asked to restart a rotor that is already spinning the wrong way does so slowly and unreliably — which is exactly the wrong behaviour to discover at the bottom of a relight solve that assumed 1.5 s. So idle thrust is set to keep the duct flowing forward with margin:
 
-$$T_{idle} = \min\left(T_{hover},\; \max\left(T_{min},\; 1.5 \cdot 2 \rho A v^2\right)\right)$$
+$$
+T_{idle} = \min\left(T_{hover},\; \max\left(T_{min},\; 1.5 \cdot 2 \rho A v^2\right)\right)
+$$
 
 floored at the ESC's minimum stable speed and capped at hover, since anything above hover would not be a coast.
 

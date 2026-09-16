@@ -42,7 +42,9 @@ Aeolus is a thrust-vectored electric ducted fan (EDF) rocket built to hover and 
 
 At hover, airspeed is zero. Fins need airflow to generate a restoring moment, so below a few meters per second they do nothing at all. That is why I also included vanes in the exhaust. The angle of both the external fins and the internal vanes can be steered, enabling active control. This system generates a control moment from two sources:
 
-$$\frac{\tau}{\text{deg}} \;=\; \underbrace{K_{vane} \cdot T}_{\text{exhaust thrust vectoring}} \;+\; \underbrace{K_{fin} \cdot \bar{q}}_{\text{fins in freestream air}}$$
+$$
+\frac{\tau}{\text{deg}} \;=\; \underbrace{K_{vane} \cdot T}_{\text{exhaust thrust vectoring}} \;+\; \underbrace{K_{fin} \cdot \bar{q}}_{\text{fins in freestream air}}
+$$
 
 The vanes work whenever the fan is spinning. The fins work whenever the vehicle is moving. Between them there is *almost* no part of the envelope — hover, climb, or unpowered fall — where the vehicle has nothing to steer with. The only exception is engine relight in base-first descent-the exhaust flow and external airflow are opposed, so the vanes and fins sharing a shaft will produce opposing control moments. The [allocator](/projects/aeolus/control#control-allocation) has to decide which effector is winning before it can decide which way to deflect.
 
@@ -109,8 +111,6 @@ Aeolus is a solo project. I designed it, built it, wrote the software, and flew 
   </ol>
 
 </div>
-
-The vehicle is 1.444 kg and about a metre long. Everything above the intake is payload in the sense that it does no work in flight — it is there to be carried, and because it sits furthest from the centre of mass it is the mass that costs the most to rotate. Everything below the intake does the flying.
 
 
 <Dropdown title="Full specifications">
@@ -246,11 +246,9 @@ The vehicle is 1.444 kg and about a metre long. Everything above the intake is p
 
 **6. [Simulation](/projects/aeolus/simulation)** — Airflow simulation and a six-degree-of-freedom flight model, used to simulate software settings before real flight. Predicts what the vehicle will behave like before actually flying.
 
-**7. [Communications](/projects/aeolus/communications)** — Radio link, command protocol, flight recorder, and the browser dashboard I fly from. How adding two fields to the log record made the flight computer hard fault on every single write.
+**7. [Communications](/projects/aeolus/communications)** — Radio link, command protocol, flight recorder, and the browser dashboard I fly from.
 
-**8. [Testing](/projects/aeolus/testing)** — Every test and every flight, failures included and documented as thoroughly as the successes — including a 3 Hz roll oscillation that only appears untethered.
-
----
+**8. [Testing](/projects/aeolus/testing)** — Probably every test and every flight, failures, successes, and analysis documented.
 
 # Timeline
 
@@ -373,7 +371,7 @@ export const phases = [
 
 # Log
 
-relatively daily log
+relatively-daily log
 
 <div class="not-prose w-full overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
   <iframe 

@@ -18,7 +18,7 @@ The EDF itself was selected by trading thrust against mass, not just picking the
       src="/assets/aeolus/propulsion/edfjacket.webp" 
       alt="70 mm EDF unit" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async"  width="1118" height="1000" />
+      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="1118" height="1000" />
     <p class="fig-caption">The 70 mm EDF in its printed jacket. One moving part, and the only reason the vehicle can hover rather than arc.</p>
   </div>
   <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
@@ -26,7 +26,7 @@ The EDF itself was selected by trading thrust against mass, not just picking the
       src="/assets/aeolus/propulsion/edfshroud.webp" 
       alt="Aft shroud for aerodynamics and wire routing" 
       style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "mx-auto" loading="lazy" decoding="async"  width="649" height="1000" />
+      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="649" height="1000" />
     <p class="fig-caption">Aft shroud. It cleans up the base aerodynamically and carries the servo wiring aft, which is why it is not simply a cone.</p>
   </div>
 </div>
@@ -133,7 +133,9 @@ Two things fall out of this data.
 
 A ducted fan's thrust scales with the square of its speed. The flight code inverts that relationship so the altitude controller can command a *thrust* and have the governor chase the corresponding *RPM*:
 
-$$\mathrm{RPM} = \sqrt{k\,T}, \qquad k = 8.61 \times 10^{7}$$
+$$
+\mathrm{RPM} = \sqrt{k\,T}, \qquad k = 8.61 \times 10^{7}
+$$
 
 Checking the square law against the bench sweep:
 
@@ -155,6 +157,74 @@ Checking the square law against the bench sweep:
 />
 
 The fit is tightest at high RPM and loosens toward idle — which is the right way round, since the vehicle spends its whole flight near hover and never operates down at 20% throttle. The vehicle spends its whole flight near hover, so the region where the fit is loosest is the one it never operates in.
+
+---
+
+# Motor Model
+
+Before controlling the fan it is worth knowing what the motor actually does. This is a steady-state analysis of a single phase — commutation averaged out, $\tau_m = \tau_{ext}$, $V$ and $I$ constant.
+
+The rotor turning through the stator field induces a back-EMF proportional to speed, since $d\Phi/dt = 2BLv \propto \omega$:
+
+$$
+\varepsilon_{back}(\omega) = K_e\,\omega
+$$
+
+Around the loop, $IR + L\,\frac{dI}{dt} + \varepsilon = V$, and at steady state the inductive term vanishes. So current falls linearly with speed:
+
+$$
+I(\omega) = \frac{V}{R} - \frac{K_e\,\omega}{R}
+$$
+
+Stall current is $V/R$; the motor free-runs at $\omega = V/K_e$, where back-EMF cancels the supply and no current flows. Since torque is $\tau = K_e I$, the torque–speed relationship is the same line:
+
+$$
+\tau(\omega) = \frac{K_e V}{R} - \frac{K_e^2\,\omega}{R}
+$$
+
+Inverting gives the result that matters most in practice — **current is a direct proxy for torque**, independent of speed and voltage:
+
+$$
+I(\tau) = \frac{\tau}{K_e}
+$$
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-3 my-6">
+  <figure class="m-0"><img src="/assets/aeolus/propulsion/bldc-derivation-1.webp" alt="Handwritten derivation: back-EMF, circuit equation and the current-speed line" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1884" /></figure>
+  <figure class="m-0"><img src="/assets/aeolus/propulsion/bldc-derivation-2.webp" alt="Handwritten derivation: torque-speed line, current versus torque, output power" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1940" /></figure>
+  <figure class="m-0"><img src="/assets/aeolus/propulsion/bldc-derivation-3.webp" alt="Handwritten derivation: resistive loss and efficiency against torque" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="881" /></figure>
+</div>
+
+## Power and Efficiency
+
+Mechanical output is supply power less resistive loss, $P_{out} = \tau\omega = IV - I^2R$. Written against torque:
+
+$$
+P_{out}(\tau) = \tau\left(\frac{V}{K_e} - \frac{R}{K_e^2}\tau\right)
+$$
+
+which is a downward parabola peaking at half the stall torque, with a maximum that depends on nothing but supply voltage and winding resistance:
+
+$$
+P_{max} = \frac{V^2}{4R}
+$$
+
+Loss and efficiency follow directly:
+
+$$
+P_{loss}(\tau) = \frac{\tau^2 R}{K_e^2} \qquad\qquad \eta(\tau) = 1 - \frac{R}{K_e V}\,\tau
+$$
+
+Efficiency is highest at *zero* torque and falls linearly as you load the motor — the opposite of the intuition that a motor has some efficient operating point in the middle. It also means the vehicle is least efficient exactly where it spends its whole flight, because hover thrust-to-weight is 1.01 and the motor is working near the top of its useful range the entire time.
+
+## What This Justifies
+
+Two consequences run through the rest of the propulsion design.
+
+**Voltage moves the whole line.** Both intercepts of $\tau(\omega)$ scale with $V$, so as the pack sags from 24.6 V to 21.5 V under load the entire torque–speed characteristic translates downward. The same throttle command therefore produces a different speed, and thrust scales with $\omega^2$ — which is precisely why [closed-loop RPM](#rpm-governor) beats commanding throttle, and why both the governor's feedforward and its proportional gain are scaled by $V_{ref}/V$.
+
+**The model also says where it stops.** It predicts torque, and therefore thrust, should keep rising with applied voltage right up to stall. The [bench sweep](#thrust-characterization) shows thrust flattening above 80% throttle with current pinned at 53 A. Nothing in this model produces a plateau — which is how you know the limit is the ESC's current ceiling rather than the motor or the fan.
+
+Being a single-phase steady-state model, it ignores commutation loss, iron loss, and the ESC's own dynamics. It captures the first-order behaviour — the linear torque–speed line and its voltage dependence — and that is what the governor is built on.
 
 ---
 
@@ -202,7 +272,9 @@ That gate has its own failure mode, and it is guarded too. If the stored referen
 
 **3. An exponential filter with a recomputed coefficient.** Rather than a fixed smoothing constant, $\alpha$ is derived from the actual elapsed time each cycle:
 
-$$\alpha = 1 - e^{-\Delta t/\tau}, \qquad \tau = 15~\mathrm{ms}$$
+$$
+\alpha = 1 - e^{-\Delta t/\tau}, \qquad \tau = 15~\mathrm{ms}
+$$
 
 A fixed $\alpha$ silently changes the filter's time constant whenever loop timing jitters, which on a system also running attitude estimation at 200 Hz it does. Deriving $\alpha$ from measured $\Delta t$ holds the time constant at 15 ms regardless.
 
