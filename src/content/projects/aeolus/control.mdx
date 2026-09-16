@@ -99,7 +99,9 @@ The bench gives a static number under an idealised load. The vehicle in flight g
 
 Commanded vane deflection and measured angular acceleration are both already in the telemetry log. Fitting one against the other with RANSAC — chosen because logged flight data has outliers that would drag an ordinary least-squares line — gives a slope in rad/s² per degree. Multiplying by the [measured inertia](/projects/aeolus/vehicle#moment-of-inertia-testing) converts it straight to torque:
 
-$$\frac{\tau}{\mathrm{deg}} = I \cdot \frac{d\alpha}{d\delta}$$
+$$
+\frac{\tau}{\mathrm{deg}} = I \cdot \frac{d\alpha}{d\delta}
+$$
 
 For roll, a slope of about 1.5 deg⁻¹s⁻² against $I_{xx} = 0.00165$ gives 0.0025 N·m/deg. For pitch and yaw, 0.1 deg⁻¹s⁻² against $I_{yy} = 0.065$ gives 0.0065 N·m/deg. Both are the v1 figures in the table above.
 
@@ -129,19 +131,86 @@ This is the part I would point at first.
 
 Because the inertia had been measured on a [bifilar pendulum](/projects/aeolus/vehicle#moment-of-inertia-testing) and the vane torque measured two independent ways — [on the thrust stand](#static--thrust-stand) and [from flight data](#dynamic--from-flight-data) — there was no need to tune the attitude loop by trial and error. Each axis is a rotational mass with a restoring term and a damping term — a damped harmonic oscillator:
 
-$$I\ddot{\theta} + K_d\dot{\theta} + K_p\theta = 0$$
-
-which is a second-order system with natural frequency and damping ratio
-
-$$\omega = \sqrt{K_p/I}, \qquad \zeta = \frac{K_d}{2\sqrt{I K_p}}$$
+$$
+I\ddot{\theta} + K_d\dot{\theta} + K_p\theta = 0
+$$
 
 So rather than guessing gains and watching what happens, you choose the *response you want* — how fast it should correct, and how much it should overshoot — and solve backwards for the gains that produce it.
+
+## Solving the Oscillator
+
+That equation is standard, but the two quantities the whole method rests on — $\omega$ and $\zeta$ — are not free definitions. They fall out of solving it, and the solve is worth showing because it is where the design knobs come from.
+
+Substituting the ansatz $\theta(t) = Ae^{i\omega t}$ and dividing through by the exponential leaves a quadratic in $\omega$:
+
+$$
+K_p + K_D\,i\omega - I\omega^2 = 0 \qquad \Longrightarrow \qquad \omega = \frac{iK_D}{2I} \pm \sqrt{\frac{K_p}{I} - \left(\frac{K_D}{2I}\right)^2}
+$$
+
+The root has a fixed imaginary part and a square root that may be either real or imaginary. Writing the general solution as a combination of both roots separates the two behaviours:
+
+$$
+\theta(t) = e^{-\gamma t}\left(Ae^{i\Omega t} + Be^{-i\Omega t}\right), \qquad \gamma = \frac{K_D}{2I}, \qquad \Omega = \sqrt{\frac{K_p}{I} - \left(\frac{K_D}{2I}\right)^2}
+$$
+
+$\gamma$ is the decay envelope and $\Omega$ is what happens inside it. The interesting case is the boundary where $\Omega = 0$ — critical damping, the fastest return with no overshoot, which occurs when
+
+$$
+K_p = \frac{K_D^2}{4I}
+$$
+
+That boundary is what makes the damping ratio a natural variable rather than an invented one. Defining
+
+$$
+\zeta^2 = \frac{K_D^2}{4IK_p}, \qquad \omega = \sqrt{\frac{K_p}{I}}
+$$
+
+puts critical damping at exactly $\zeta = 1$, so $\zeta$ measures damping *as a fraction of critical* — and $\omega$, the undamped natural frequency, sets the timescale. Inverting the two definitions gives the gains in terms of the response:
+
+$$
+K_p = I\omega^2, \qquad K_D = 2\zeta I\omega
+$$
+
+Two measurable quantities go in and two design choices come out. $\zeta$ is chosen for the damping shape wanted; $\omega$ is chosen for how fast the vehicle can actually correct, which is bounded by [control authority](#measuring-control-authority). Settling time follows from the same substitution — the envelope decays with time constant
+
+$$
+\tau \sim \frac{1}{\gamma} = \frac{2I}{K_D} = \frac{1}{\zeta\omega}
+$$
+
+so knowing $I$ from the bifilar pendulum and picking a settling time fully determines the dynamics before anything is flown.
+
+### The Step Response
+
+Solving for the constants completes the picture. Releasing the vehicle from an initial offset with zero rate — $\theta(0) = \theta_0$, $\dot\theta(0) = 0$ — gives $A + B = \theta_0$ and $-\gamma\theta_0 + i\Omega(A - B) = 0$, and the complex exponentials collapse back into real trigonometric functions:
+
+$$
+\theta(t) = \theta_0\,e^{-\gamma t}\left(\cos\Omega t + \frac{\gamma}{\Omega}\sin\Omega t\right)
+$$
+
+In terms of the design variables, $\gamma = \zeta\omega$ and $\Omega = \omega\sqrt{1-\zeta^2}$, so the ratio in front of the sine is just $\zeta/\sqrt{1-\zeta^2}$. Everything the vehicle will do after a disturbance is contained in those two numbers.
+
+<div class="not-prose my-6">
+  <div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-white">
+    <iframe src="https://www.desmos.com/calculator/hf3jioods9" width="100%" height="560" frameborder="0" loading="lazy" title="PD step response with adjustable damping ratio" allowfullscreen></iframe>
+  </div>
+  <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">
+    The step response above, live — drag <span class="font-mono">ζ</span> through 1 to watch overshoot appear.
+    <a href="https://www.desmos.com/calculator/hf3jioods9" target="_blank" rel="noopener" class="underline">Open in Desmos</a>
+  </p>
+</div>
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-3 my-6">
+  <figure class="m-0"><img src="/assets/aeolus/control/gain-derivation-1.webp" alt="Handwritten derivation: characteristic equation, general solution, critical damping, and the gains in terms of natural frequency and damping ratio" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1940" /></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/gain-derivation-2.webp" alt="Handwritten derivation: settling time and the step response solved from initial conditions" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1911" /></figure>
+</div>
 
 ## The Gains Are the Design Targets
 
 There is an implementation choice that makes this unusually clean. The attitude PID does not output a torque or a vane angle. It outputs an **angular acceleration**, which is converted to vane deflection afterwards using the measured torque per degree. Because $\alpha = \tau/I$, the inertia divides out of the gain expressions entirely, and they collapse to:
 
-$$K_p = \omega^2, \qquad K_d = 2\zeta\omega$$
+$$
+K_p = \omega^2, \qquad K_d = 2\zeta\omega
+$$
 
 The consequence is that the flight code's gain table is readable as design intent rather than as tuning residue. Reading `config.h` backwards:
 
@@ -167,7 +236,9 @@ All three axes are deliberately placed at $\zeta \approx 0.83$ — slightly unde
 
 The output limits come from the same measurements. The most angular acceleration the vanes can produce is the deflection budget allocated to an axis, times the torque per degree, divided by the inertia:
 
-$$\alpha_{max} = \frac{\delta_{max}\cdot(\tau/\mathrm{deg})}{I}$$
+$$
+\alpha_{max} = \frac{\delta_{max}\cdot(\tau/\mathrm{deg})}{I}
+$$
 
 which in the flight code is written out literally as `(servo deg × τ/deg) / MOI`. Roll gets 6° of the 27° available and reaches 12 rad/s²; pitch and yaw get 17° each and reach 3.4 rad/s². The controller therefore cannot command an acceleration the vehicle is incapable of producing — the saturation limit *is* the physical control authority, not an arbitrary clamp.
 
@@ -189,13 +260,19 @@ Pitch and yaw were tuned the same way to the same target and came out slightly *
 
 ## Knowing When Not To Use It
 
-The velocity loop was tuned by a different method, deliberately. There, the controller commands acceleration and the controlled variable is velocity — so the output is the *first* derivative of the state, not the second. The system is first-order, and the governing equation is not the one above:
+The velocity loop was tuned by a different method, deliberately. There, the controller takes velocity error and **outputs acceleration** — so the controller's output is the *first* derivative of the controlled variable, not the second. Writing the PD loop out makes the difference explicit:
 
-$$K_p v + (K_d + 1)\dot{v} = 0 \quad \Longrightarrow \quad v = v_0 e^{-t/\tau}, \qquad \tau = \frac{K_d + 1}{K_p}$$
+$$
+K_p v - K_d\dot{v} = \dot{v} \quad \Longrightarrow \quad K_p v + (K_d + 1)\dot{v} = 0
+$$
 
-There is no oscillation to damp and no natural frequency to place — the response is a pure exponential decay. Asking for a damping ratio would be meaningless. The gain came from a target 2% settling time of one second instead, which is roughly $4\tau$.
+The commanded acceleration *is* $\dot{v}$, so the loop closes one derivative lower than the attitude loop does, and there is no $\ddot{v}$ term for a mass to resist. This is a first-order equation, and a first-order equation cannot oscillate. There is no natural frequency to place and no damping ratio to choose; the solution is a pure exponential decay:
 
-I tried the second-order method on the velocity loop first and it gave nonsense, which is how I noticed the loop was first-order at all.
+$$
+v(t) = v_0 e^{-t/\tau}, \qquad \tau = \frac{K_d + 1}{K_p}
+$$
+
+So the target was a settling time instead. A 2% settling time of one second is roughly $4\tau$, which set the starting gains at $K_p = 4.0$ with $K_d = 0$ — no derivative term at all, because with nothing to damp, $K_d$ only slows the response down.
 
 ## What It Rests On
 
@@ -342,7 +419,9 @@ The attitude controller asks for a torque. Something has to turn that into four 
 
 Both effectors on a shaft contribute, from different physics:
 
-$$k_{net} = \underbrace{K_{vane} \cdot \text{(vane drive)}}_{\propto\ \text{thrust}} \;+\; \underbrace{K_{aero} \cdot \bar{q} \cdot \text{flow sign}}_{\propto\ \text{airspeed}^2}$$
+$$
+k_{net} = \underbrace{K_{vane} \cdot \text{(vane drive)}}_{\propto\ \text{thrust}} \;+\; \underbrace{K_{aero} \cdot \bar{q} \cdot \text{flow sign}}_{\propto\ \text{airspeed}^2}
+$$
 
 The vane term scales with thrust, which moves with throttle, battery voltage and how far through a spool-up the fan happens to be. The aero term scales with dynamic pressure, which moves with speed. So the deflection needed to produce a given torque is different at every moment, and the allocator computes $k_{net}$ fresh each cycle before dividing the demanded torque by it.
 

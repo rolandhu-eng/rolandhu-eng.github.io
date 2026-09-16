@@ -23,6 +23,21 @@ The ground station consisted of an ESP32 for processing, an RFM95W radio, and LE
 rocket  <- - - - - radio - - - - - ->  ground station <-USB-> computer dashboard
 ```
 
+## The Ground-Side Radio
+
+The ground station is an **ESP32-S3** and an **RFM95W** hand-soldered onto perfboard. The ESP32 sits in headers on the top side; the radio and its helical wire antenna are underneath, wired to the S3's SPI bus with status LEDs and a buzzer for audible link and event cues — useful when you are watching the vehicle rather than the screen.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-3 my-6">
+  <figure class="m-0"><img src="/assets/aeolus/communications/gs-radio-underside.webp" alt="Underside of the ground station: RFM95W LoRa breakout hand-soldered to perfboard with a helical wire antenna" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="947" height="1511" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Underside — RFM95W and the helical antenna.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/communications/gs-esp32-top.webp" alt="Top side of the ground station: ESP32-S3 DevKitC seated in headers on the perfboard carrier" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1100" height="1811" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Top — ESP32-S3 in headers, USB-C to the laptop.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/communications/gs-stack-edge.webp" alt="Edge view of the ground station showing the ESP32 board stacked above the radio on the perfboard carrier" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="975" height="1736" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Edge on — the whole stack is two boards deep.</figcaption></figure>
+</div>
+
+Socketing the ESP32 rather than soldering it down was deliberate: the radio wiring is the part that took effort, and the microcontroller is the part most likely to be swapped or bricked. The link runs at the fastest LoRa setting available — 500 kHz bandwidth, 4/5 coding, spreading factor 7 — trading range for latency, which is the right trade when the vehicle stays within sight and the loop needs to close at 10 Hz.
+
+Transmit power is set to **6 dBm**, well below the module's maximum. Higher settings proved unreliable in a way that appeared to depend on SPI clock configuration rather than on the radio itself, and the cause was never fully pinned down. It is left low because the achieved range is already far beyond anything these flights need, and because 6 dBm is the same power the [GPS self-interference test](/projects/aeolus/avionics#testing-its-own-interference) was run at.
+
+
 ---
 
 # Protocol Design
@@ -91,6 +106,30 @@ The fix was to drop `packed` and let members sit at natural alignment. Which pro
 Natural alignment reintroduces padding, including trailing padding at the end of the struct — and the checksum routine computed its XOR over every byte up to the last one, on the assumption that the checksum field *was* the last byte. With padding after it, the routine was folding uninitialised bytes into the comparison and reporting perfectly good records as `[CORRUPT]`. Correcting it to XOR only up to `offsetof(T, checksum)` fixed it.
 
 The cost was accounted for rather than waved away: **+14 bytes per record**, about 250 KB across a full 7.5 MB buffer, and older logs written under the packed layout are no longer readable, since both the record size and the checksum convention changed.
+
+## Two Links, Not One
+
+Retrieving those logs is a different problem from flying, and it gets a different transport.
+
+The radio link runs at 500 kHz bandwidth, 4/5 coding, spreading factor 7 — about **21.9 kbps** at the line rate. That is comfortable for 10 Hz telemetry and hopeless for a log file. A full 7.5 MB buffer at that rate is roughly **46 minutes** of continuous transfer assuming perfect conditions, no protocol overhead, and no half-duplex turnaround, none of which are true. Over USB the same file takes seconds.
+
+So the dashboard speaks over two independent connections at once. `SYS.port` stays dedicated to the ground ESP32 and the radio; a second connection talks **direct USB-CDC to the flight computer** for the flash file browser. They are different physical ports on the laptop, which matters because Web Serial grants exclusive access to a port — one connection per port, no sharing. The two read loops are kept strictly separate, and the radio loop is explicitly barred from feeding lines into the file-browser parser even if something on the link happened to look like a response.
+
+The on-board protocol is deliberately dull: `LIST` returns the files, `GET <filename>` dumps one, both as plain newline-terminated serial. There was no reason to invent anything more when the transport is already reliable and ordered.
+
+The interesting part is the interlock. That command handler is gated to run **only in `IDLE`**:
+
+```cpp
+// IDLE ONLY. readStringUntil() blocks for its 1 s timeout on a partial line,
+// and LIST/GET dump whole files -- either one stalls the control loop while the
+// ESC and servos hold their last command. Never enable this in flight.
+logger.pollSerialCommands(flightState == FlightState::IDLE);
+```
+
+`readStringUntil()` blocks for a full second on a partial line, and dumping a file blocks for far longer. Either would stall a loop with a 5 ms deadline — and a stalled loop does not fail loudly, it simply stops updating while the ESC and servos continue holding whatever command they last received. A debugging convenience that is harmless on the bench becomes a way to lose the vehicle, so it is interlocked against flight state rather than left to discipline.
+
+The ground side carries the matching guard: a five-second watchdog clears the browser state if a file operation stops producing lines, so a USB cable pulled mid-download leaves the dashboard idle rather than wedged.
+
 
 ---
 
