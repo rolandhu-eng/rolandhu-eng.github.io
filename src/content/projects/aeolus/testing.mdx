@@ -109,11 +109,19 @@ Pitch and yaw followed the same way, disturbed by hand and left to recover. They
 
 The most useful result was not the flight itself but a comparison: measured thrust in free flight matched the [Simulink prediction](/projects/aeolus/simulation#validated-again-in-free-flight) almost exactly, which validates a model chain running all the way back to the static thrust sweep in June.
 
-<div class="not-prose my-6 mx-auto max-w-sm">
-  <video controls loop playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
-    <source src="/assets/aeolus/free-flight.mp4" type="video/mp4" />
-  </video>
-  <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Untethered flight, August 2026.</p>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 mx-auto max-w-2xl">
+  <figure class="m-0">
+    <video controls loop playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/free-flight.mp4" type="video/mp4" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Untethered flight, August 2026.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video controls loop playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/flight-impulse.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Position-loop impulse test, 27 August. The vehicle is pushed off station by hand mid-hover and the position loop brings it back.</figcaption>
+  </figure>
 </div>
 
 

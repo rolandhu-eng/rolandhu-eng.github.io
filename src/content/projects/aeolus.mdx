@@ -16,7 +16,7 @@ import Dropdown from '../../components/Dropdown.astro';
 import Table from '../../components/Table.astro';
 
 
-<div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-4 my-8 max-w-5xl mx-auto">
+<div class="not-prose grid grid-cols-2 lg:grid-cols-4 gap-4 my-8 max-w-6xl mx-auto">
   <figure class="m-0">
     <img src="/assets/aeolus/vehicle/rocket-night.webp" alt="Aeolus on its launch legs with the outer shell and nose cone removed, avionics lit" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async"  width="933" height="1800" />
     <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The vehicle with its shell and nose cone off — avionics stack, wiring run, EDF section and fins.</figcaption>
@@ -26,6 +26,12 @@ import Table from '../../components/Table.astro';
       <source src="/assets/aeolus/free-flight.mp4" type="video/mp4" />
     </video>
     <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">First untethered flight — 22 August 2026. Holding a stationary hover with vane control.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video controls loop playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/flight-impulse.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Position-loop impulse test — 27 August 2026. Knocked off station by hand mid-hover; the position loop brings it back.</figcaption>
   </figure>
   <figure class="m-0">
     <video controls loop playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="608" height="1080">

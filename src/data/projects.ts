@@ -16,8 +16,10 @@ export interface SubpageItem {
  */
 export const projectOrder = [
   'aeolus',
+  'athletics-tracker',
   'wind-tunnel',
   'quadruped-robot',
+  'vex-robotics',
   'penny-hockey',
   'schlieren-imaging',
   'ship-model',

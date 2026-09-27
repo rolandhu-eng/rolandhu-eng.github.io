@@ -1,7 +1,7 @@
 ---
 title: "Schlieren Imaging"
 description: "Visualizing invisible airflow and density gradients with a DIY schlieren setup."
-dateRange: "In Progress"
+dateRange: "November 2024"
 tags: ["Optics", "CAD", "Fabrication"]
 cover: "/assets/images/sunrise.webp"
 coverAlt: "Schlieren imaging project placeholder"
@@ -18,13 +18,55 @@ Most fascinating airflow phenomena are invisible to the naked eye. Schlieren ima
 
 A point light source reflects off a concave mirror and ideally focuses back into a point image. If air in front of the mirror has different densities, the changing index of refraction bends some light away from that focal point. Placing a filter or small cutoff near the focus turns that missing light into visible dark regions in the image.
 
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/schlieren/optical-layout.webp" alt="Single-mirror schlieren layout: spherical mirror, test area, and at distance R = 2f the LED, diffuser, pinhole, light block and video camera" class="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white p-4" loading="lazy" decoding="async" width="1069" height="415" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Single-mirror layout. The pinhole source and the light block sit at the mirror's centre of curvature, R = 2f, so light crosses the test area twice.</figcaption>
+</figure>
+
 ---
 
 # 03. Setup
 
 The setup used a 114 mm diameter spherical telescope mirror with a 900 mm focal length. For the light source and camera, an iPhone flashlight and camera can be used. Longer focal lengths generally improve sensitivity.
 
+<div class="not-prose grid grid-cols-1 sm:grid-cols-[58fr_74fr] gap-4 my-8">
+  <figure class="m-0">
+    <img src="/assets/schlieren/mirror.webp" alt="The 114 mm spherical mirror seated in its printed cell, with the dust cover open" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1158" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">114 mm spherical mirror in its cell, with the dust cover.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/schlieren/camera.webp" alt="Foil mask at the focus with the point light source and the camera hole circled" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1484" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Foil mask at the focus — point light source above, camera hole below.</figcaption>
+  </figure>
+</div>
+
 Alignment was the main challenge, so a 3D-printed kinematic mount was designed. A central pivot allows angular motion, while three screws provide fine adjustment. The tradeoff is that linear adjustments still require moving the full setup, and horizontal adjustment can require turning two screws together.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-[8fr_7fr] gap-4 my-8">
+  <figure class="m-0">
+    <img src="/assets/schlieren/cad-front.webp" alt="CAD render of the kinematic mirror mount from the front, with the dust cover" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1442" height="1240" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Mount CAD, front — mirror cell and dust cover.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/schlieren/cad-back.webp" alt="CAD render of the kinematic mirror mount from the back, showing the pivot plate and three adjustment screws" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1326" height="1306" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Mount CAD, back — pivot plate and the three adjustment screws.</figcaption>
+  </figure>
+</div>
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-[11fr_10fr_20fr] gap-4 my-8">
+  <figure class="m-0">
+    <img src="/assets/schlieren/front.webp" alt="Printed kinematic mount holding the mirror, front view" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1465" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The printed mount with the mirror installed.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/schlieren/side.webp" alt="Printed kinematic mount, side view showing the pivot plate and screws" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1383" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Side view — the mirror cell tilts on the pivot plate.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/schlieren/back.webp" alt="Back of the mirror cell with three threaded inserts around a central pivot" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1500" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Back of the cell: three threaded inserts around the central pivot.</figcaption>
+  </figure>
+</div>
 
 ---
 
