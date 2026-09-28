@@ -44,6 +44,6 @@ reference for new or updated content.
   `<figcaption>` in the shared caption style — copy an existing figure from an
   Aeolus page. Group related figures in a `not-prose grid`.
 - **Video.** `.webm` (VP9, audio stripped unless it matters), in a `<figure>`
-  with `controls loop playsinline preload="metadata"` and its dimensions set.
+  with `controls playsinline preload="metadata"` (no `loop`) and its dimensions set.
 - **Components.** `Dropdown`, `Table` and `Chart` in `src/components/` are
   imported at the top of the `.mdx` file that uses them.

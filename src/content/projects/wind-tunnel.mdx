@@ -9,6 +9,10 @@ isVideo: true
 showHero: true
 ---
 
+import Chart from '../../components/Chart.astro';
+
+This started as an engineering class project in my freshman year, where I led a team of three to design and build the tunnel. I later rebuilt it for the [ionic wind research](#ionic-wind-research) below.
+
 <section id="video">
   <div class="w-full rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900 shadow-sm aspect-video">
     <iframe width="100%" height="100%" src="https://www.youtube.com/embed/CyA2bT-weZY?si=hkfePSx6LSkGiCMR"
@@ -37,17 +41,6 @@ Overall, I learned many things throughout this project. I learned how to use loa
 
 ---
 
-# Build & Fabrication
-
-The tunnel was constructed using 3/4" plywood for the outer shell and acrylic panels for the test section viewing windows. Honeycomb flow straighteners and screens were installed upstream of the contraction to reduce turbulence.
-
-* Laser-cut plywood components for precise geometry
-* Custom-designed 3D-printed corners and mounting brackets
-* Pressure-tapped test section for aerodynamic measurements
-* Variable-speed motor controller for flow control
-
----
-
 # Materials Bill of Quantities
 
 <div class="rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900/40 p-1">
@@ -57,13 +50,62 @@ The tunnel was constructed using 3/4" plywood for the outer shell and acrylic pa
 
 ---
 
-# Results & Testing
+# Ionic Wind Research
 
-Initial calibration tests showed excellent flow uniformity with velocity variation under 3% across the test section. The tunnel has been successfully used to test airfoil models and measure lift/drag coefficients.
+{/* TODO: add recognition (IJAS, the ISEF-affiliated fair, the JEI submission) and a link to the paper once you decide what to state publicly. */}
+
+I later rebuilt the tunnel for a research project: can a wing be made more efficient with no moving parts? An electroaerodynamic actuator uses a high-voltage corona discharge to push air along the wing's surface — an "ionic wind" that speeds up the slow air right at the surface. Most published work shows the effect with smoke; I measured it, as lift and drag on a 3D-printed NACA 4412 wing with the actuator on and off, from 0° to 24°.
+
+A thin copper wire near the leading edge is held at up to 40 kV, which ionizes the air around it — the purple glow. The ions are pulled toward a grounded brass tube further back and drag neutral air along with them.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-[2000fr_1649fr] gap-4 my-8">
+  <figure class="m-0">
+    <img src="/assets/wind-tunnel/actuator.webp" alt="The printed wing with the copper emitter wire near the leading edge and the brass collector tube further back" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1572" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The printed NACA 4412 with the emitter wire and brass collector.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/wind-tunnel/corona-top.webp" alt="Top view in the dark of the corona discharge glowing purple along the emitter wire" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1649" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The corona discharge, running the full span.</figcaption>
+  </figure>
+</div>
+
+For the research the tunnel gained an ESP32-S3 in place of the Arduino — reading the load cells, driving the servo, and serving a web page that plots lift and drag live and logs every run. A U-tube manometer measured the airspeed at 11 m/s, the mount's own forces were measured and subtracted, and the electrodes are fed through magnetic contacts on the walls so no wiring pulls on the load cells.
+
+<figure class="not-prose my-6">
+  <img src="/assets/wind-tunnel/tunnel.webp" alt="The rebuilt wind tunnel from the side: contraction, straw flow straighteners, lit acrylic test section with the wing inside, and the fan" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="679" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The rebuilt tunnel, with the wing mounted in the test section.</figcaption>
+</figure>
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-[2000fr_751fr] gap-4 my-8">
+  <figure class="m-0">
+    <img src="/assets/wind-tunnel/web-interface.webp" alt="The tunnel's web interface: angle and logging controls, a live plot of lift and drag, and a data log" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="894" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The ESP32's web interface — live forces, servo control and logging.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/wind-tunnel/u-tube.webp" alt="U-tube manometer beside the test section, with the water level difference marked" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1675" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The U-tube manometer.</figcaption>
+  </figure>
+</div>
+
+<Chart
+  labels={[0, 4, 8, 12, 16, 18, 20, 24]}
+  xLabel="Angle of attack (°)"
+  yLabel="Lift / drag"
+  yMin={0}
+  ariaLabel="Lift to drag ratio versus angle of attack. With the actuator on the ratio is higher at every angle, peaking at 8.9 at 4 degrees against the unpowered peak of 6.5 at 8 degrees."
+  series={[
+    { label: 'Actuator off', data: [{ x: 0, y: 3.96 }, { x: 4, y: 6.09 }, { x: 8, y: 6.52 }, { x: 12, y: 6.09 }, { x: 16, y: 5.68 }, { x: 18, y: 5.43 }, { x: 20, y: 3.53 }, { x: 24, y: 2.08 }], color: 'stone', dashed: true },
+    { label: 'Actuator on', data: [{ x: 0, y: 7.67 }, { x: 4, y: 8.93 }, { x: 8, y: 8.14 }, { x: 12, y: 7.68 }, { x: 16, y: 6.74 }, { x: 18, y: 6.03 }, { x: 20, y: 4.04 }, { x: 24, y: 2.3 }], color: 'emerald' },
+  ]}
+/>
+
+**The result:** lift up 5–13% at every angle, and drag down most at shallow angles, where it matters for cruise — 43% at 0°. At 8°, where the unpowered wing is most efficient, lift-to-drag rose 25%.
+
+It did not delay stall, which stayed at 18–20° either way. The ionic wind carries too little momentum to hold the flow attached near stall, and as the angle increases the point where the flow separates moves forward of the actuator. More power, or actuators closer to the leading edge, are the next things to try.
 
 ---
 
-# Engineering Run Logs
+# Daily Log
 
 <div class="rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900/40 p-1">
   <iframe src="https://docs.google.com/document/d/e/2PACX-1vSGw2yi7sChjvjG2loJxZCY8sUeYMAXFgMUzfUqK-Z9sTLhJNcg4Zj-k8Y-8c9jMAMgP_qzP8eu917h/pub?embedded=true"
