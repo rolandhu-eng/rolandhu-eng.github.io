@@ -6,6 +6,7 @@ import Layout from '../layouts/Layout.astro';
 const primaryProject = await getProject('aeolus');
 const shipModel = await getProject('ship-model');
 const featuredGrid = (await Promise.all([
+  getProject('athletics-tracker'),
   getProject('wind-tunnel'),
   getProject('quadruped-robot'),
   getProject('schlieren-imaging'),
@@ -121,7 +122,7 @@ const featuredGrid = (await Promise.all([
 
       {primaryProject && <ProjectCard project={primaryProject} size="large" />}
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {featuredGrid.map((project) => (
           <ProjectCard project={project} />
         ))}

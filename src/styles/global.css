@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* Nothing in these uses classes. Scanning public/ reads the 3.4 MB .glb model as
+   text (~30 s), enough to time out the dev server's CSS request. */
+@source not "../../public";
+@source not "../../.claude";
 @import "katex/dist/katex.min.css";
 @plugin "@tailwindcss/typography";
 

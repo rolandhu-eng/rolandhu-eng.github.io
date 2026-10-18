@@ -1,108 +1,224 @@
 ---
 title: "Athletics Tracker"
-description: "A self-contained wearable that measures sprint, long jump and pole vault run-ups from two shoe-mounted IMUs — for under $100."
+description: "A self-contained wearable that measures sprint, long jump, and pole vault data from two shoe-mounted IMUs"
 dateRange: "Sep 2026 - Present"
-tags: ["C++", "Python", "Sensor Fusion", "Embedded"]
-hidden: true
-showHero: false
-statusLabel: "Bench Testing"
+tags: ["C++", "Python", "Swift", "Sensor Fusion", "PCB Design"]
+cover: "/assets/athletics-tracker/spike-side.webp"
+coverAlt: "A shoe unit laced onto a track spike"
+showHero: true
+statusLabel: "Track Testing"
 statusDot: true
 ---
+import Dropdown from '../../components/Dropdown.astro';
 
-{/* TODO: add a photo of the two shoe units (in their boxes, next to a ruler or a coin) as `cover`, then set showHero: true. */}
+A pair of small sensors that lace onto my spikes and measure how I run down the runway in pole vault, sprints and long jump: speed, stride length, split times, and how long each foot is on the ground. Nothing is set up around the track. There are no timing gates, cones or cameras, and no GPS. After each run the results appear on my phone.
 
-A wearable tracker for pole vault, sprints and long jump that measures how I move down the runway — step timing, contact time, speed over the last strides — using nothing but sensors I wear. No timing gates, cones, phone or GPS set up around the track. The target is a working system, a season of my own training data, and an accuracy report with measured numbers by July 2027, for about $93 in parts.
+The goal, by January 2027, is a working system ready to collect a season of my training data and to share with teammates.
 
-# The Problem
+# How It Works
 
-An IMU measures acceleration well. Everything after that goes wrong fast: speed is acceleration added up over time, position is speed added up again, and every small error is added up with it. On an early test rig, standing still for 17 seconds produced a "speed" of 95 m/s and a "position" 1,123 m away.
+Each unit contains an IMU, a motion sensor that measures acceleration and rotation. In principle, adding up acceleration gives speed, and adding up speed gives distance. In practice, every tiny sensor error gets added up too: an early test sensor sitting perfectly still "travelled" over a kilometre in 17 seconds.
 
-With nothing outside the body to correct it, every correction has to come from the body itself:
+The fix comes from the body itself. **A planted foot stops moving for a split second on every step.** That gives a known zero, so the error can be wiped clean each time the foot lands. This is why the sensors go on the feet:
 
-- **Foot-stop resets.** A planted foot is briefly stationary, so the speed error can be zeroed on every step. This is the one that makes the whole approach work, and the reason the sensors are on the feet.
-- **A sensor on both feet** gives a reset every step instead of every other step, and a constraint that the feet can never be further apart than one stride.
-- **Five seconds standing still** before each run measures each gyro's bias for that run.
-- **The runway is straight and flat**, which pins down sideways and vertical drift.
-- **Jumps are described backward from takeoff** — "your last four steps" — so the tracker never needs to know where the board or the box is.
+- **Every stride is measured on its own**, from one foot plant to the next, so an error can't carry over into the rest of the run.
+- **Each stride is checked** against what any real stride on flat ground must do. A stride that fails is flagged rather than trusted.
+- **Both feet are tracked**, so they can check each other, and one foot can fill in a stride the other couldn't measure.
+- **Two seconds standing still** before each run lets each sensor measure its own drift for that run.
+
+<Dropdown title="Why an IMU drifts">
+
+The accelerometer measures specific force: acceleration minus gravity, in the sensor's own frame. To get motion, the gyroscope's rotation rate is integrated to track which way the sensor points, gravity is subtracted, and the remainder is integrated twice. A constant accelerometer bias $b$ becomes a position error of
+
+$$
+\Delta x(t) = \tfrac{1}{2}\,b\,t^2
+$$
+
+so 0.01 g of bias is already 14 m of error after 17 s. A tilt error is worse: an error $\delta\theta$ in the estimated "down" leaks $g\,\delta\theta$ of gravity into the horizontal, so 1° behaves like a 17 mg bias. Commercial foot-mounted systems solve this with zero-velocity updates, resetting the speed whenever the foot is planted. This project does the same, but treats each stride as a separate problem instead of running one long filter.
+
+</Dropdown>
+
+<Dropdown title="How a stride is measured">
+
+A **stride** is one foot's travel between two moments it is planted, $t_0$ and $t_1$. It is worked out from the raw readings between those two moments alone, and nothing is carried into the next stride. Integration on its own would drift, so each stride is made to satisfy three conditions that hold for any real stride on flat ground:
+
+1. **Speed.** The foot starts and ends planted: $v(t_0) = v(t_1) = 0$.
+2. **Height.** It returns to the ground it left: $z(t_1) = z(t_0)$.
+3. **Scale.** Over the whole stride, the upward force the sensor felt balances gravity: $\int_{t_0}^{t_1} f_\uparrow\,dt = g\,(t_1 - t_0)$. This one doesn't depend on orientation.
+
+**Separating tilt error from landing error.** Two things leave a stride with leftover speed at its end, and they need opposite corrections. A *tilt error* leaks gravity sideways for the whole stride, so it changes the distance by about $\tfrac12\,\Delta v\,T$. A *landing error* — the accelerometer hitting its limit, or the impact shaking the sensor faster than it can follow — arrives all at once just before the foot plants, and barely changes the distance. Speed alone can't tell them apart, but height can: a tilt of $\delta\theta$ also tilts the stride's whole path, so a stride of length $L$ ends $L\,\delta\theta$ above or below the floor. The tilt is chosen to bring the height back to zero, and whatever speed error remains is assigned to the landing. That is what lets the ±16 g shoe, which clips on every landing, measure strides almost as well as the ±320 g shoe.
+
+**"Planted" isn't "still".** The sensor sits on the laces, about 6 cm above the part of the sole that's on the ground, and the foot rolls heel to toe while planted. So a planted sensor still moves at $\boldsymbol\omega \times \mathbf r$. The lever $\mathbf r$ is measured from the running itself, by fitting the change in velocity against the change in turn rate just after each landing: 5.8–6.1 cm on both shoes, with no distance reference. Each centimetre is worth 0.2–0.5% of distance.
+
+**Choosing the planted moments.** Candidates come from quiet stretches and from the stillest instant just after each landing stops ringing. Neither is proof: a foot coasting mid-swing reads 1 g and isn't turning either. So candidates are chosen as a **set**, the one whose strides all satisfy the three conditions and agree with their neighbours about which way is up. Each candidate stride gets a misfit score; a real stride scores under 5, and a foot moving at 3 m/s scores in the hundreds. The sums behind each stride are differences of running totals over the whole file, so testing a stride between any two instants is cheap, and the best set is found exactly rather than greedily.
+
+**Two feet.** Both shoes are put on one clock, and the code checks that footfalls alternate and that each foot lands where the other implies. It then fills in only the strides one shoe couldn't measure. A measured stride is never moved.
+
+<figure class="not-prose my-4">
+  <img src="/assets/athletics-tracker/hall-jogs-strides.webp" alt="Two jogs down a 7.02 m hallway, both feet: distance at each planted moment with stride lengths labelled, foot speed returning to zero at every planted moment, and impacts" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1035" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Two jogs down the taped 7.02 m hallway, both feet (blue: left, ±320 g; orange: right, ±16 g). Left: distance at each planted moment, with stride lengths. Middle: foot speed, which must return to zero at every tick. Right: impacts, with a planted moment after each one.</figcaption>
+</figure>
+
+**Every stride reports on itself.** Each one is marked trusted or not, with a plain-language reason: it doesn't close, the shoe chattered on the ground, it disagrees with the stride before about which way is up, or the accelerometer was saturated at push-off as well as at landing.
+
+</Dropdown>
+
+<Dropdown title="How the method was validated">
+
+| Check | Result |
+|---|---|
+| A simulated foot with known strides | 12.700 m read as 12.700 m; unaffected by sensor mounting angle, noise, or a 0.5 °/s gyro bias |
+| The ±16 g channel against the ±320 g channel on the same strides | −0.07% mean, 0.62% spread, over 25 strides |
+| All 21 tuning constants halved and doubled | The mean error over the hallway runs moved by 0.5% at most |
+| Each stride's "up" against the accelerometer once the foot has stopped | Agrees to 0.3–0.7° |
+| Recordings never looked at during development | 7.08 m and 7.01 m against a taped 7.02 m |
+| The same code on the iPhone and the Mac | Every input nudged in its 13th significant figure: no planted moment or trust flag may change. Results identical on every attempt compared |
+
+</Dropdown>
 
 # Hardware
 
-Two shoe units, each a Seeed XIAO ESP32-S3 with a motion sensor and a 150 mAh cell in a printed box. They record each run into memory at around 1,660 samples a second and write it out afterwards. The two feet deliberately carry different sensors:
+Each unit is a Seeed XIAO ESP32-S3 microcontroller, a motion sensor and a small 150 mAh battery in a 3D-printed box, laced onto the shoe. Each weighs under 20 g. The units start recording by themselves when a run begins, at around 1,700 to 2,000 readings a second, and save each attempt as its own file.
 
-| Foot | Sensor | Why |
-|---|---|---|
-| Takeoff foot | LSM6DSV320X | A second accelerometer channel reaching ±320 g, so hard foot strikes never clip |
-| Other foot | ISM330DHCX | Clips at ±16 g. Comparing the two feet measures what that clipping costs |
+The two feet carry different sensors on purpose. The takeoff foot's sensor can read impacts up to 320 g, so even the hardest foot strikes register in full. The other foot's tops out at 16 g, which shows how much a cheaper sensor loses.
 
-Both measure rotation up to ±4,000 °/s, above the 2,400 °/s that a published sprint foot-tracking study found necessary. The boxed units weigh **19.1 g** and **19.7 g** against a 30 g limit, and nothing inside moved under 27 g drop tests.
-
-The units only capture: raw sensor counts, timestamps and markers. All the estimation happens afterwards on a laptop, so every run ever recorded can be reprocessed as the software improves.
-
-# Calibration
-
-A consumer IMU's errors are small but they compound, so each sensor is characterized before any of its data is trusted. Overnight still recordings give the noise and drift behaviour through Allan deviation — the numbers that tune the filter, rather than guesses.
-
-<figure class="not-prose my-6">
-  <img src="/assets/athletics-tracker/allan-dsv.webp" alt="Allan deviation of the takeoff-foot sensor's accelerometer, gyroscope and 320 g channel from an overnight still recording" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="595" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Allan deviation of the takeoff-foot sensor from a 9.45 h overnight recording — accelerometer, gyroscope and the ±320 g channel.</figcaption>
+<figure class="not-prose my-6 mx-auto max-w-md">
+  <img src="/assets/athletics-tracker/unit-inside.webp" alt="A shoe unit with its lid open: the XIAO ESP32-S3 board, battery and wiring inside the printed box, with the flat antenna stuck inside the lid" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1834" height="2000" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Inside a unit: the XIAO board on top of the sensor, the battery beside it, and the antenna in the lid.</figcaption>
 </figure>
 
-On the first sensor:
-
-- **Accelerometer:** fitted across 43 orientations, taking the error in measured gravity from 18 mg to 1.4 mg.
-- **Gyro scale:** twelve counted turn tests found all three axes reading 0.8–1.1% high, repeatable to ±0.03%.
-- **Gyro alignment:** the gyro sits 0.97° off the accelerometer. Correcting it took the tilt error on a recording the fit never saw from 1.07° to 0.15°, and the same fit independently re-measured the gyro scale to within 0.06% of the turn tests.
-
-# First Tests
-
-The early tests used the bench rig's sensor laced to a shoe. A filter with backward smoothing integrates between foot-stop resets, then carries each reset's correction back across the swing that caused it. It returned a synthetic 21.40 m walk exactly, and a hallway walk that was never used for tuning found all ten landings and ended 0.06 m from its start — 0.4% of the distance walked.
-
-Jogging broke it. The step detector looked for the foot being still, and a jogging foot never is: right after landing it is still turning at 20–70 °/s. It found none of the landings, so the filter ran 3.4 s each way with no reset. The fix is a second search that only runs inside long stretches with no contact: find each landing strike, then take the 30 ms after it where the foot turns slowest.
-
-<figure class="not-prose my-6">
-  <img src="/assets/athletics-tracker/walk-hall.webp" alt="Hallway jog: the path seen from above out to a far mark and back, beside foot speed and foot height over time with foot-down periods shaded" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1152" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The hallway jog after the fix: eight quick contacts, and it ended 0.12 m from its start (0.9%). Speed returns to zero at every contact.</figcaption>
-</figure>
-
-<div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4 my-8">
+<div class="not-prose grid grid-cols-1 md:grid-cols-[1.385fr_0.82fr] gap-4 my-8">
   <figure class="m-0">
-    <img src="/assets/athletics-tracker/foot-contacts.webp" alt="Foot contacts detected in the hallway jog, with rotation rate and acceleration and the landings numbered" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1033" />
-    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Contacts found in the jog, numbered.</figcaption>
+    <img src="/assets/athletics-tracker/spike-side.webp" alt="Side view of a track spike with the shoe unit laced on top of the laces near the toe" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1444" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">A unit laced onto a spike, from the side.</figcaption>
   </figure>
   <figure class="m-0">
-    <img src="/assets/athletics-tracker/box-drops.webp" alt="Six box drops, each showing the accelerometer reading falling to near zero g during free fall and spiking at landing" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1100" />
-    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Box drops check time-in-the-air against free fall, t = √(2h/g).</figcaption>
+    <img src="/assets/athletics-tracker/spike-top.webp" alt="Top view of the track spike with the shoe unit sitting on the laces" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1639" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">From above: the unit sits on the laces.</figcaption>
   </figure>
 </div>
 
-Standing still for a minute with no resets at all drifted 39 m — which is exactly why the resets exist. The box drops read time in the air 6–15 ms long depending on the trigger threshold, against a 10 ms target.
+<Dropdown title="Parts and firmware">
 
-# The ±4000 °/s Bug
+| | Takeoff foot | Other foot |
+|---|---|---|
+| Sensor | ST LSM6DSV320X | ST ISM330DHCX |
+| Accelerometer | ±16 g, plus a second ±320 g channel | ±16 g |
+| Gyroscope | ±4,000 °/s | ±4,000 °/s |
+| Sample rate | ~1,950 Hz | ~1,726 Hz |
+| Boxed weight | 19.7 g | 19.1 g |
 
-The takeoff-foot sensor was configured for its ±4,000 °/s range. It accepted the setting, reported it back when read, and passed every register check — while actually measuring at ±2,000 °/s. Every angle came out at twice its real size.
+<figure class="not-prose my-4">
+  <img src="/assets/athletics-tracker/impact-16g-vs-320g.webp" alt="One hard foot impact recorded by both accelerometer channels: the ±320 g channel shows a true peak of 132 g while the ±16 g channel saturates at 27.8 g" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1233" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Why the takeoff foot has a ±320 g channel. On one hard landing, the ±320 g channel reads the true 132 g peak, while the ±16 g channel saturates on all three axes and reports 27.8 g, losing 79% of the peak.</figcaption>
+</figure>
 
-The cause was a firmware helper that wrote whole bytes to the sensor while only checking some of the bits, clearing a bit in a control register that must always be 1. No automated check caught it. Counting a turn by hand did.
+- **Why ±4,000 °/s:** a published sprint foot-tracking study found the foot turns at up to about 2,400 °/s, and a saturated gyro reads low, which looks exactly like a scale error.
+- **Sampling.** The sensor talks to the ESP32-S3 over SPI at 10 MHz and buffers readings in its own FIFO, and an interrupt wakes the processor to drain it. Each reading is timestamped, and the true sample rate is measured from the timestamps rather than assumed. The sensor's clock was 0.03% off its nominal rate.
+- **Recording.** The unit keeps a rolling two-second buffer in RAM, so the start of a run is never cut off. A recording starts when the accelerometer spends enough time above 12 g within one second, and ends 1.5 s after the last running footfall. Each attempt is written to 6.4 MB of on-board flash as one file: raw sensor counts, timestamps, battery and temperature.
+- **Same setup code everywhere.** The calibration rig and the shoe configure each sensor with the same code, because a calibration only holds at the settings it was made at.
+- **Mechanical.** The antenna sits in the lid, and the box has handles the laces pass through. Nothing inside moved in 27 g drop tests.
 
-{/* TODO: a sentence on what changed because of it, e.g. every range change is now confirmed with a physical turn test, not a register read. */}
+</Dropdown>
 
-# Radio
+# Calibration
 
-The plan was always to record on the shoe and send the run afterwards, on the assumption that the body would block a 2.4 GHz link too badly to stream. Measuring it overturned that: at 24 Mb/s the link carried 422 KB/s through a body, and a 0.71 MB recording arrived byte-identical. Two units boxed and 2 m apart lost nothing after resends in 4,000 pings.
+A cheap IMU's errors are small but they compound, so every sensor was characterized before any of its data was trusted: how noisy it is, how its zero drifts, whether it reads high or low, and whether its axes line up. Afterwards, the corrections are applied to every recording.
 
-Recording first still wins, for a different reason — battery. Streaming keeps the radio awake at ~90–100 mA, which would flatten a 150 mAh shoe cell in about 1.2 hours. Sending a finished run takes about a second of radio time.
+<Dropdown title="Noise and drift: Allan deviation">
+
+Each sensor was left perfectly still overnight. Allan deviation splits its error into white noise, which averages away, and slow bias wander, which doesn't. Those numbers set how much the method trusts each sensor, instead of guesses. On the first sensor, the gyro noise was 2.2–3.0 mdps at 1 s, and bias instability was 2.4–4.9 °/h.
+
+<figure class="not-prose my-4">
+  <img src="/assets/athletics-tracker/allan-dsv.webp" alt="Allan deviation of the takeoff-foot sensor's accelerometer, gyroscope and 320 g channel from an overnight still recording" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="595" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Allan deviation of the takeoff-foot sensor from a 9.45 h overnight recording: accelerometer, gyroscope and the ±320 g channel.</figcaption>
+</figure>
+
+</Dropdown>
+
+<Dropdown title="Accelerometer, gyroscope and alignment">
+
+- **Accelerometer: offset and scale per axis.** The sensor was held still in 43 orientations, and a fit made the measured gravity the same magnitude in all of them. The typical error in measured gravity fell from 18 mg to **1.4 mg**. Refitting 1,000 times on resampled points moved the offsets by under 0.6 mg. Scale error goes straight into distance (1% of scale is about 1.2% of distance), so this is the calibration everything else rests on.
+- **Gyroscope scale.** Counted turns on a turntable, 10 turns per run, both directions, on all three axes. The axes read 0.8–1.1% high, repeatable to ±0.03%.
+- **Gyro-to-accelerometer alignment.** The gyro sits 0.97° off the accelerometer. Correcting it cut the tilt error on a held-out recording from 1.07° to **0.15°**. The same fit independently re-measured the gyro scale to within 0.06% of the turn tests.
+- **The ±320 g channel** was cross-calibrated against the ±16 g channel from a shake session, and its zero is re-aligned in every recording.
+- **After every rebuild**, a quick six-face check confirms the accelerometer calibration still holds (worst face 3.2 mg).
+- **Every run**, the two seconds standing still measure that day's gyro bias.
+
+</Dropdown>
+
+# The App
+
+After every attempt, each shoe sends its recording to an iPhone app I wrote, over Bluetooth, in about two seconds. A shoe only deletes its copy once the app confirms the file arrived intact, so a run is never lost. The two shoes also sync their clocks by radio, to well under a millisecond.
+
+The app runs the same measuring code as my laptop, so every attempt gets its results at the track: top speed, distance, time, and a graph of speed along the run for each foot.
+
+<figure class="not-prose my-6 mx-auto max-w-xs">
+  <img src="/assets/athletics-tracker/app-attempt.webp" alt="The iPhone app's attempt screen for a pole run, with a graph of speed against distance for both feet" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="924" height="2000" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">A pole-vault run-up in the app: top speed, distance and time, and speed along the run for each foot.</figcaption>
+</figure>
+
+<Dropdown title="Bluetooth, clock sync and on-phone measuring">
+
+- **Record first, send after.** Streaming live would keep the radio awake at 90–100 mA, which would flatten a 150 mAh cell in about 1.2 hours. Sending a finished run takes about a second of radio time.
+- **Bluetooth LE file transfer.** Each shoe runs a small file service. The measured link speed is 75 KB/s, the iPhone's ceiling. Recordings are packed losslessly 2.3–3.1× smaller before sending.
+- **Nothing is deleted until it's verified.** The app checks that every packet arrived in order, then the fingerprint the shoe sent, then the recording's own fingerprint after unpacking, and it writes the file to storage. Only then may the shoe delete its copy. Files sent by phone were byte-identical to the same files read over USB.
+- **Clock sync between the shoes** uses a direct ESP32 radio link (ESP-NOW) and a two-way timestamp exchange:
+
+  $$
+  \theta = \frac{(t_2 - t_1) + (t_3 - t_4)}{2}
+  $$
+
+  Here $t_1$ and $t_4$ are when one shoe sent and received, and $t_2$ and $t_3$ are the other shoe's receive and reply times. The radio delay cancels as long as it's the same in both directions. Syncs before and after each attempt fit both offset and drift. The clocks drift 2–4 parts per million, and four independent ways of computing the shift agree to 0.36 ms.
+- **Python on the phone.** The app embeds a Python runtime and runs the laptop's measuring code unchanged, after it was rewritten to need only NumPy. Results on the phone and the Mac have been identical on every attempt compared.
+
+</Dropdown>
+
+# Results So Far
+
+| Test | Result |
+|---|---|
+| Jogging a taped 7.02 m hallway, 8 runs per shoe | Within **0.5–0.6%** of the tape on average |
+| Sprint in spikes on an indoor track |
+| Ground contact at full speed |
+| Standing vertical jump & pogo hops |
+
+<figure class="not-prose my-6">
+  <img src="/assets/athletics-tracker/sprint-spikes.webp" alt="The 8.89 m/s sprint in spikes, both feet: distance at each planted moment with stride lengths, foot speed returning to zero at every planted moment, and impacts" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="576" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Sprint on an indoor track, both feet. Left: distance from the start at each foot plant. Middle: foot speed, peaking as each foot swings forward and returning to zero at every plant. Right: foot impacts.</figcaption>
+</figure>
+
+The sprint numbers haven't been checked against timing gates yet. That check is the next big step.
+
+<Dropdown title="How jumps are measured">
+
+Jump height comes from time in the air, not from integrating acceleration. Takeoff and landing are found in each shoe's readings, and for a jump that lands at the same height it took off from:
+
+$$
+h = \frac{g\,t_{\text{air}}^2}{8}
+$$
+
+<figure class="not-prose my-4">
+  <img src="/assets/athletics-tracker/jump-flight.webp" alt="Accelerometer reading through one standing jump on a log scale: the push-off peak, flight shaded, and the landing spike" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="861" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">One standing jump: takeoff is the last push-off peak, and touchdown is where the reading first climbs steeply.</figcaption>
+</figure>
+
+Against slow-motion video, flight time read 10 ms short and ground contact time 17 ms long. Ground contact time feeds reactive strength (jump height over contact time), the headline number for hops.
+
+</Dropdown>
 
 # What's Next
 
-The boxed shoe units haven't been worn yet, and the quick-contact settings were chosen on a single jog, so every accuracy figure below is still an estimate. Next come measured walks with the new units, then a jog, then 10 m sprints, and Phase 1 ends with the hardest test: ten 60 m sprints from a painted line to a marked stop.
+- **Graded sprints.** Taped runs at every pace in spikes, then ten 60 m sprints to a marked line, before the outdoor track closes for winter.
+- **Timing gates.** Three sessions against borrowed timing gates. The first may be used to tune the calibration; the last two are held back, and their numbers go into the accuracy report.
+- **A custom circuit board.** The hand-wired units will be replaced by a sealed pod of about 8 g, with the high-impact sensor on both feet.
 
-| Measurement | Expected 95% range |
-|---|---|
-| Flying 10 m time, one run | ±0.03 s |
-| Standing vertical jump | ±2 cm |
-| Speed over the last 2 strides, average of 8 jumps | ±0.13 m/s |
-| Foot contact time, average of 8 | ±6 ms |
-| Distance over a 40 m approach | ±2.6% |
+<Dropdown title="The custom board">
 
-Accuracy is then checked in three sessions against borrowed timing gates. The first may be used to tune the calibration; the other two are held back and never used for tuning, and their numbers are the ones that go in the accuracy report.
+- **Processor:** Fanstel BM20M module (Nordic nRF54LM20A), with Bluetooth and 512 KB of RAM: enough for the two-second pre-roll, while DMA streams readings straight to storage.
+- **Sensor:** ST LSM6DSK320X, which has the same ±320 g channel and a gyroscope redesigned against shock (the current LSM6DSV320X fits the same pads).
+- **Also on the board:** an 8 MB flash chip, an nPM1300 charger and regulator with a battery thermistor, an RGB status light, a button, and charging contacts underneath for a dock.
+- **Board:** 18 × 25 mm, six layers, in KiCad 10. The circuit has been checked part by part against the manufacturers' datasheets three times.
+- **Compatibility:** the file format and phone protocol stay the same, so the measuring code and the app need no changes. Before ordering, the chip has to pass six steps on development boards: toolchain, sensor sampling, recording in the current file format, Bluetooth to the app, clock sync, and current draw.
 
-{/* TODO: link the repository here if it goes public. */}
+</Dropdown>

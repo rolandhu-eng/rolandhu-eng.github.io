@@ -40,3 +40,6 @@ unpublished/
 
 
 .code-workspace
+
+# Claude Code local settings and worktrees
+.claude/
