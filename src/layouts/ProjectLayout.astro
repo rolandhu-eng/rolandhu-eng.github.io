@@ -54,6 +54,8 @@ interface Props {
   statusLabel?: string;
   /** If true, shows an animated green dot next to the status label */
   statusDot?: boolean;
+  /** One-line plain-language summary shown under a subpage's title */
+  subtitle?: string;
 }
 
 const { 
@@ -72,7 +74,8 @@ const {
   sidebarTitle = "On This Page",
   projectName,
   statusLabel = "Project Documentation",
-  statusDot = false
+  statusDot = false,
+  subtitle
 } = Astro.props;
 
 const hasSubpages = subpages && subpages.length > 0;
@@ -96,7 +99,7 @@ const prevPage = currentIndex > 0 ? flatPages[currentIndex - 1] : undefined;
 const nextPage = (currentIndex !== -1 && currentIndex < flatPages.length - 1) ? flatPages[currentIndex + 1] : undefined;
 ---
 
-<Layout title={`${title} | Roland Hu`} description={description} image={ogImage}>
+<Layout title={`${title} | Roland Hu`} description={description} image={ogImage} wide>
   <!-- HERO -->
   {showHero && (
     <section class="relative w-full h-[50vh] min-h-[400px] flex items-center overflow-hidden border-b border-slate-200 dark:border-slate-800">
@@ -145,7 +148,7 @@ const nextPage = (currentIndex !== -1 && currentIndex < flatPages.length - 1) ? 
   )}
 
   <!-- MAIN SECTION -->
-  <main class={`max-w-screen-2xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow lg:grid lg:grid-cols-[200px_minmax(0,1fr)_200px] lg:gap-12 items-start ${!showHero ? 'mt-6' : ''}`}>
+  <main class={`max-w-screen-2xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow lg:grid ${hasSubpages ? 'lg:grid-cols-[200px_minmax(0,1fr)] xl:grid-cols-[200px_minmax(0,1fr)_200px]' : 'lg:grid-cols-[200px_minmax(0,1fr)]'} lg:gap-12 items-start ${!showHero ? 'mt-6' : ''}`}>
     
     <!-- ProjectLayout.astro sidebar -->
     <aside class="hidden lg:block sticky top-28 self-start w-full">
@@ -212,10 +215,15 @@ const nextPage = (currentIndex !== -1 && currentIndex < flatPages.length - 1) ? 
       {/* Subpage header when hero is hidden */}
       {!showHero && projectName && (
         <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
-          <p class="font-mono text-[10px] text-blue-600 dark:text-blue-500 uppercase tracking-widest mb-1">{projectName}</p>
+          <a href={subpages?.[0]?.href ?? "/projects"} class="inline-block font-mono text-[10px] text-blue-600 dark:text-blue-500 uppercase tracking-widest mb-1 no-underline hover:underline">← {projectName}</a>
           <h1 class="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">
             {title}
           </h1>
+          {subtitle && (
+            <p class="mt-3 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-400">
+              {subtitle}
+            </p>
+          )}
         </div>
       )}
 
@@ -262,7 +270,27 @@ const nextPage = (currentIndex !== -1 && currentIndex < flatPages.length - 1) ? 
       </div>
     </div>
 
-    <div class="hidden lg:block"></div>
+    {/* Right rail, wide screens only: this page's sections. On multi-page projects
+        the left rail lists the pages, so the two never repeat each other. */}
+    {hasSubpages && toc.length > 0 && (
+      <aside class="hidden xl:block sticky top-28 self-start w-full">
+        <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-400 dark:text-slate-600 mb-4 px-1">
+          On this page
+        </p>
+        <nav class="relative flex flex-col gap-0.5 border-l border-stone-300/50 dark:border-slate-700/60 pl-2">
+          {toc.map((item) => (
+            <a
+              href={`#${item.id}`}
+              class="toc-link rounded-md px-3 py-1.5 font-mono text-[11px] leading-snug transition-colors duration-150 block text-stone-500 dark:text-slate-400 bg-transparent hover:bg-stone-150/60 dark:hover:bg-white/[0.05] hover:text-stone-800 dark:hover:text-slate-200"
+              data-active-classes="bg-blue-100/70 dark:bg-blue-500/10 text-blue-800 dark:text-blue-300 font-medium"
+              data-inactive-classes="text-stone-500 dark:text-slate-400 bg-transparent hover:bg-stone-150/60 dark:hover:bg-white/[0.05] hover:text-stone-800 dark:hover:text-slate-200"
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      </aside>
+    )}
   </main>
   
 <script>

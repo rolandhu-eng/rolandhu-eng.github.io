@@ -6,6 +6,8 @@ interface Props {
   description?: string;
   /** Social/link-preview image. Root-relative path; resolved against `site`. */
   image?: string;
+  /** Project pages use a wider page container; header and footer follow it. */
+  wide?: boolean;
 }
 
 const DEFAULT_OG_IMAGE = '/assets/aeolus/avionics/av_bay.webp';
@@ -14,7 +16,18 @@ const {
   title = "Roland Hu | Engineering Portfolio",
   description = "Roland Hu - Engineering Portfolio",
   image = DEFAULT_OG_IMAGE,
+  wide = false,
 } = Astro.props;
+
+// Header and footer use one width on every page, so the logo never moves between
+// pages. It matches the project-page layout, the widest content on the site.
+const container = 'max-w-screen-2xl px-4 sm:px-6 lg:px-8';
+const path = Astro.url.pathname;
+const navItems = [
+  { href: '/#about', label: 'About', active: false },
+  { href: '/projects', label: 'Projects', active: path.startsWith('/projects') },
+  { href: '/#contact', label: 'Contact', active: false },
+];
 
 // Astro.site is set in astro.config.mjs; fall back to a relative URL in dev.
 const year = new Date().getFullYear();
@@ -114,16 +127,16 @@ const ogImage = new URL(image, Astro.site ?? Astro.url.origin);
 
     <!-- HEADER -->
     <header id="site-header" class="sticky top-0 z-50 w-full border-b bg-[#f5f3ef]/90 dark:bg-[#020817]/90 border-slate-200 dark:border-slate-800 backdrop-blur-sm">
-      <div class="max-w-5xl mx-auto px-4 py-3">
+      <div class={`${container} mx-auto py-3`}>
         <nav class="flex justify-between items-center">
           <a href="/" class="font-mono text-sm font-bold text-slate-900 dark:text-white tracking-tight hover:text-blue-600 dark:hover:text-blue-400 no-underline">
             Roland Hu
           </a>
           <div class="flex items-center gap-4">
             <ul class="hidden sm:flex items-center gap-6 font-mono text-xs list-none m-0 p-0">
-              <li><a href="/#about" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">About</a></li>
-              <li><a href="/projects" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Projects</a></li>
-              <li><a href="/#contact" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Contact</a></li>
+              {navItems.map((item) => (
+                <li><a href={item.href} aria-current={item.active ? 'page' : undefined} class={item.active ? 'text-slate-900 dark:text-white font-semibold no-underline' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline'}>{item.label}</a></li>
+              ))}
             </ul>
             
             <!-- Updated Toggle Button -->
@@ -148,9 +161,9 @@ const ogImage = new URL(image, Astro.site ?? Astro.url.origin);
           </div>
         </nav>
         <ul id="nav-links" class="hidden flex-col gap-3 font-mono text-xs list-none m-0 p-0 border-t border-slate-200 dark:border-slate-800 mt-3 pt-3 pb-1">
-          <li><a href="/#about" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">About</a></li>
-          <li><a href="/projects" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Projects</a></li>
-          <li><a href="/#contact" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline">Contact</a></li>
+          {navItems.map((item) => (
+            <li><a href={item.href} aria-current={item.active ? 'page' : undefined} class={item.active ? 'text-slate-900 dark:text-white font-semibold no-underline' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white no-underline'}>{item.label}</a></li>
+          ))}
         </ul>
       </div>
     </header>
@@ -169,9 +182,38 @@ const ogImage = new URL(image, Astro.site ?? Astro.url.origin);
     <slot />
 
     <!-- FOOTER -->
-    <footer class="max-w-5xl w-full mx-auto px-4 py-6 border-t border-slate-200 dark:border-slate-800 text-center font-mono text-xs text-slate-400 dark:text-slate-600">
-      Designed & Built by Roland Hu | © {year}
+    <footer class={`${container} w-full mx-auto py-6 border-t border-slate-200 dark:border-slate-800 text-center font-mono text-xs text-slate-400 dark:text-slate-600`}>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+        <span>Designed & Built by Roland Hu | © {year}</span>
+        <span class="flex gap-4">
+          <a href="mailto:rhu2718@gmail.com" class="no-underline hover:text-slate-700 dark:hover:text-slate-300">Email</a>
+          <a href="https://linkedin.com/in/hu-roland" target="_blank" rel="noopener" class="no-underline hover:text-slate-700 dark:hover:text-slate-300">LinkedIn</a>
+          <a href="/projects" class="no-underline hover:text-slate-700 dark:hover:text-slate-300">Projects</a>
+        </span>
+      </div>
     </footer>
+
+    <!-- Back to top: appears once the reader is well into a long page. -->
+    <a href="#top" id="to-top" aria-label="Back to top"
+       class="fixed bottom-5 right-5 z-40 flex items-center justify-center w-10 h-10 rounded-full border border-slate-300 dark:border-slate-700 bg-[#f5f3ef]/90 dark:bg-[#020817]/90 backdrop-blur-sm text-slate-600 dark:text-slate-300 shadow-sm no-underline opacity-0 pointer-events-none transition-opacity duration-200 hover:text-blue-600 dark:hover:text-blue-400">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15" /></svg>
+    </a>
+    <script>
+      const toTop = document.getElementById('to-top');
+      if (toTop) {
+        const update = () => {
+          const show = window.scrollY > 1200;
+          toTop.classList.toggle('opacity-0', !show);
+          toTop.classList.toggle('pointer-events-none', !show);
+        };
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+        toTop.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+    </script>
 
     <script>
       function setHeaderHeightVar() {

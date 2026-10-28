@@ -3,6 +3,7 @@ title: "Propulsion"
 order: 2
 navLabel: "Propulsion"
 showHero: false
+description: "The fan that lifts it: what it really produces on a test stand, and the software that holds it at a set speed so thrust stays the same as the battery drains."
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 import Table from '../../../components/Table.astro';
@@ -10,25 +11,17 @@ import Chart from '../../../components/Chart.astro';
 
 Aeolus uses a 70mm electric ducted fan (EDF) rather than a rocket motor — the defining constraint of the whole project. A throttleable EDF makes controlled ascent and hover possible without the field clearance and irreversibility of a rocket motor, but it also means propulsion isn't a fixed impulse curve: thrust has to be actively controlled throughout flight.
 
-The EDF itself was selected by trading thrust against mass, not just picking the highest static thrust available (see [EDF Selection](#edf-selection)). Delivering that thrust reliably meant characterizing the motor's actual behavior on a test stand — thrust and current draw were measured across the throttle range, revealing real limitations like a thrust plateau above 70% throttle from unconfigured ESC timing, and voltage sag under peak load severe enough to motivate a battery chemistry change (see [Thrust Characterization](#thrust-characterization)). And because open-loop throttle doesn't track motor RPM directly — voltage sag, ESC nonlinearity, and load all shift the throttle-to-RPM relationship — closed-loop RPM control was necessary to hold a commanded thrust setpoint consistently (see [RPM Governor](#rpm-governor)).
+The EDF itself was selected by trading thrust against mass, not just picking the highest static thrust available (see [EDF Selection](#edf-selection)). Delivering that thrust reliably meant characterizing the motor's actual behavior on a test stand — thrust and current draw were measured across the throttle range, revealing real limitations like a thrust plateau above 80% throttle set by the ESC's current limit, and voltage sag under peak load severe enough to motivate a battery chemistry change (see [Thrust Characterization](#thrust-characterization)). And because open-loop throttle doesn't track motor RPM directly — voltage sag, ESC nonlinearity, and load all shift the throttle-to-RPM relationship — closed-loop RPM control was necessary to hold a commanded thrust setpoint consistently (see [RPM Governor](#rpm-governor)).
 
-<div style={{ display: 'flex', gap: '0px', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/propulsion/edfjacket.webp" 
-      alt="70 mm EDF unit" 
-      style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="1118" height="1000" />
-    <p class="fig-caption">The 70 mm EDF in its printed jacket. One moving part, and the only reason the vehicle can hover rather than arc.</p>
-  </div>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/propulsion/edfshroud.webp" 
-      alt="Aft shroud for aerodynamics and wire routing" 
-      style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="649" height="1000" />
-    <p class="fig-caption">Aft shroud. It cleans up the base aerodynamically and carries the servo wiring aft, which is why it is not simply a cone.</p>
-  </div>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8 items-end">
+  <figure class="m-0">
+    <img src="/assets/aeolus/propulsion/edfjacket.webp" alt="70 mm EDF unit in its printed jacket" class="w-full max-h-[400px] object-contain rounded-lg" loading="lazy" decoding="async" width="1118" height="1000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The 70 mm EDF in its printed jacket. One moving part, and the only reason the vehicle can hover rather than arc.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/propulsion/edfshroud.webp" alt="Aft shroud for aerodynamics and wire routing" class="w-full max-h-[400px] object-contain rounded-lg" loading="lazy" decoding="async" width="649" height="1000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Aft shroud. It cleans up the base aerodynamically and carries the servo wiring aft, which is why it is not simply a cone.</figcaption>
+  </figure>
 </div>
 
 ---
@@ -80,7 +73,7 @@ The propulsion battery needed to sustain the EDF's peak current draw without exc
 
 Initial testing with a standard 6S LiPo showed significant voltage sag under load — 24.6V to 21.5V at 55A draw, delivering only 1800g thrust, only 70% of its rated static thrust. This may be due to the significant voltage sag or poor intake geometry. The LiHV pack was selected for future versions to hopefully reduce this sag for better sustained voltage under load.
 
-The avionics bus is powered independently from a separate 2S LiPo (Ovonic, 800mAh, $22.99), decoupling flight computer and telemetry power from ESC/servo current draw — this preserves telemetry even in the event of an ESC or servo stall event on the main bus.
+The avionics bus is powered independently from a separate 2S LiPo (Ovonic, 800mAh, \$22.99), decoupling flight computer and telemetry power from ESC/servo current draw — this preserves telemetry even in the event of an ESC or servo stall event on the main bus.
 
 ---
 # Thrust Characterization
@@ -127,6 +120,25 @@ Two things fall out of this data.
 
 **The plateau is an ESC limit, not an aerodynamic one.** Thrust stops rising above 80% throttle — 1775 g at 80%, 1774 at 90%, 1776 at 100% — and RPM flattens with it near 38,600. Current sits at 53 A across all three. The last fifth of throttle travel does nothing whatsoever, which means the usable command range is 0–80%, not 0–100%.
 
+The sweep was run at two ESC timing settings, 3.75° and 15°, to check whether timing was the limit. It was not: the plateau moved by under 2% and current stayed pinned at 53–56 A at both settings.
+
+<Table
+  maxWidth="max-w-xl"
+  note="Median over the steady part of each run, from the test stand logs. The table above is the 3.75° run."
+  columns={[
+    { key: 'thr', label: 'Throttle (%)', align: 'right' },
+    { key: 'a', label: 'Thrust, 3.75° (g)', align: 'right' },
+    { key: 'b', label: 'Thrust, 15° (g)', align: 'right' },
+    { key: 'i', label: 'Current, 15° (A)', align: 'right' },
+  ]}
+  rows={[
+    { thr: 70, a: '1,694', b: '1,714', i: '51.7' },
+    { thr: 80, a: '1,762', b: '1,802', i: '56.0' },
+    { thr: 90, a: '1,758', b: '1,791', i: '54.8' },
+    { thr: 100, a: '1,763', b: '1,785', i: '54.5' },
+  ]}
+/>
+
 **Thrust-to-weight is 1.23.** Peak measured thrust is 1776 g against a 1444 g vehicle. Hover therefore sits near 64% throttle and roughly 34,900 rpm — about 90% of the achievable RPM. That leaves only 0.23 g of upward acceleration authority in reserve, and it is the single number that most constrains how aggressively the altitude loop can be tuned. It is also why the plateau matters: the margin that exists is entirely below the point where the ESC saturates.
 
 ## Thrust from RPM
@@ -156,7 +168,7 @@ Checking the square law against the bench sweep:
   note="Square-law thrust model against measured RPM."
 />
 
-The fit is tightest at high RPM and loosens toward idle — which is the right way round, since the vehicle spends its whole flight near hover and never operates down at 20% throttle. The vehicle spends its whole flight near hover, so the region where the fit is loosest is the one it never operates in.
+The fit is tightest at high RPM and loosens toward idle — which is the right way round, since the vehicle spends its whole flight near hover and never operates down at 20% throttle.
 
 ---
 
@@ -214,7 +226,7 @@ $$
 P_{loss}(\tau) = \frac{\tau^2 R}{K_e^2} \qquad\qquad \eta(\tau) = 1 - \frac{R}{K_e V}\,\tau
 $$
 
-Efficiency is highest at *zero* torque and falls linearly as you load the motor — the opposite of the intuition that a motor has some efficient operating point in the middle. It also means the vehicle is least efficient exactly where it spends its whole flight, because hover thrust-to-weight is 1.01 and the motor is working near the top of its useful range the entire time.
+Efficiency is highest at *zero* torque and falls linearly as you load the motor — the opposite of the intuition that a motor has some efficient operating point in the middle. It also means the vehicle is least efficient exactly where it spends its whole flight, because hover takes about 64% throttle and 90% of the achievable RPM, so the motor is working near the top of its useful range the entire time.
 
 ## What This Justifies
 
@@ -300,14 +312,10 @@ The governor started as a full PID. The derivative term was removed, and the rea
 
 The integral term is gated rather than merely clamped: `Ki` is active only when the error is under 1500 RPM. During spool-up the error is enormous and persistent, which is exactly the condition that winds an integrator into saturation. Switching it off until the error is small means it never accumulates during the transient it cannot help with, and only engages for the steady-state offset it is actually there to remove.
 
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/propulsion/rpm_governor.webp" 
-    alt="Measured RPM governor step response" 
-    style={{ maxWidth: '100%'}}
-    class="mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async"  width="1200" height="800" />
-  <p class="fig-caption">EDF governor response plotted with Python (matplotlib)</p>
-</div>
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/propulsion/rpm_governor.webp" alt="Measured RPM governor step response" class="w-full rounded-lg dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" width="1200" height="800" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">EDF governor response, plotted with Python (matplotlib).</figcaption>
+</figure>
 
 Steady-state error settles within **±500 RPM**, roughly 1.5% at hover speed. That is small enough to produce no visible motion or hover instability, which was the bar — the governor exists to make thrust repeatable, not to be precise for its own sake.
 

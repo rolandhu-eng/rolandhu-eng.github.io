@@ -70,6 +70,7 @@ const activePageId = findActiveId(currentNav, entry.id) || slugParts[slugParts.l
   statusDot={entry.data.statusDot}
   sidebarTitle={root?.data.sidebarTitle}
   projectName={root?.data.title}
+  subtitle={entry.id.includes('/') ? entry.data.description : undefined}
 >
   <section id="md" class="markdown-wrapper space-y-4">
     <div class="prose dark:prose-invert max-w-none">

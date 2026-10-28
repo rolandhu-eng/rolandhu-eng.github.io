@@ -3,6 +3,7 @@ title: "Simulation"
 order: 6
 navLabel: "Simulation"
 showHero: false
+description: "Computer models of the airflow and of the whole vehicle in flight, used to predict its behaviour and choose settings before flying."
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 import Table from '../../../components/Table.astro';
@@ -19,50 +20,34 @@ What simulation was not used for is deciding whether the vehicle would work. Eve
 
 # CFD
 
-To obtain an accurate aerodynamic model for use in the full MATLAB/Simulink control simulation, aerodynamic coefficients were calculated in ANSYS Fluent. RAS Aero II was also initially used as a much less computationally expensive tool, but lacks the alpha sweep (0-15º only) and unique characteristics of Aeolus (EDF tube, complex intake geometry and airflow interactions). Missile DATCOM was also considered but it is unobtainable due to ITAR restrictions.
+To obtain an accurate aerodynamic model for use in the full MATLAB/Simulink control simulation, aerodynamic coefficients were calculated in ANSYS Fluent. RAS Aero II was also initially used as a much less computationally expensive tool, but lacks the alpha sweep (0-15º only) and unique characteristics of Aeolus (EDF tube, complex intake geometry and airflow interactions). Missile DATCOM was also considered, but it could not be obtained at the time due to ITAR restrictions.
 
 The geometry is the reason the cheap tools did not work. Standard rocket aero codes assume a body with fins in clean external flow. Aeolus has an intake partway up the airframe, an internal duct, and control surfaces sitting in the exhaust jet rather than in freestream — three interactions those codes have no representation for. A vane in a jet sees dynamic pressure set by the fan, not by airspeed, which is precisely why the vehicle has any control authority at hover at all.
 
-  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/simulation/cfd_parametric.webp" 
-      alt="Parametric CFD study across vane deflection angles" 
-        style={{maxWidth: '70%'}}
-      class = "mx-auto" loading="lazy" decoding="async"  width="1878" height="1118" />
-    <p class="fig-caption">Vane deflection swept against lateral force. The slope of this curve is the control authority every attitude gain is derived from.</p>
-  </div>
+  <figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/simulation/cfd_parametric.webp" alt="Parametric CFD study across vane deflection angles" class="w-full mx-auto" loading="lazy" decoding="async" width="1878" height="1118" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Vane deflection swept against lateral force. The slope of this curve is the control authority every attitude gain is derived from.</figcaption>
+</figure>
 
 
-<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/simulation/streamlines.webp" 
-      alt="Streamlines through the duct and around the vanes" 
-   
-      class = "mx-auto" loading="lazy" decoding="async"  width="900" height="897" />
-    <p class="fig-caption">Flow entering the intake partway up the body and turning into the duct — the interaction standard rocket aero codes have no way to represent.</p>
-  </div>
-  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/simulation/pres_contour.webp" 
-      alt="Pressure contour over the vehicle" 
-
-      class = "mx-auto" loading="lazy" decoding="async"  width="833" height="871" />
-    <p class="fig-caption">Pressure distribution over the airframe at angle of attack.</p>
-  </div>
-  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/simulation/vane_contour.webp" 
-      alt="Pressure contour and streamlines around a deflected vane" 
-   
-      class = "mx-auto" loading="lazy" decoding="async"  width="665" height="863" />
-    <p class="fig-caption">A deflected vane inside the jet. Its dynamic pressure comes from the fan rather than from airspeed, which is why it still produces a moment at zero airspeed.</p>
-  </div>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-4 my-8 items-end">
+  <figure class="m-0">
+    <img src="/assets/aeolus/simulation/streamlines.webp" alt="Streamlines through the duct and around the vanes" class="w-full rounded-lg" loading="lazy" decoding="async" width="900" height="897" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Flow entering the intake partway up the body and turning into the duct — the interaction standard rocket aero codes have no way to represent.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/simulation/pres_contour.webp" alt="Pressure contour over the vehicle" class="w-full rounded-lg" loading="lazy" decoding="async" width="833" height="871" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Pressure distribution over the airframe at angle of attack.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/simulation/vane_contour.webp" alt="Pressure contour and streamlines around a deflected vane" class="w-full rounded-lg" loading="lazy" decoding="async" width="665" height="863" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">A deflected vane inside the jet. Its dynamic pressure comes from the fan rather than from airspeed, which is why it still produces a moment at zero airspeed.</figcaption>
+  </figure>
 </div>
 
 The vane result is the one that fed the controller: sweeping deflection angle gives lateral force, and lateral force times moment arm gives the control authority the gains are [derived from](/projects/aeolus/control#deriving-the-gains).
 
-That number was later measured two more ways — on the [thrust stand](/projects/aeolus/control#static--thrust-stand) and from [flight data](/projects/aeolus/control#dynamic--from-flight-data). Having three independent estimates let me see which assumptions the number actually rested on — they disagree, and the disagreements are the informative part.
+That number was later measured two more ways — on the [thrust stand](/projects/aeolus/control#static--thrust-stand) and from [flight data](/projects/aeolus/control#dynamic--from-flight-data). The three estimates disagree: CFD and the stand match at 5°, while the flight fit is about 3.5× lower. They are compared side by side on the [control page](/projects/aeolus/control#comparing-the-three-estimates).
 
 <Dropdown title="Full CFD image set">
 <div class="not-prose grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -89,23 +74,18 @@ That number was later measured two more ways — on the [thrust stand](/projects
 
 The 6DOF model brings the pieces together: rigid-body dynamics driven by the vane aerodynamics from CFD, the [mass and inertia measured on the bifilar pendulum](/projects/aeolus/vehicle#moment-of-inertia-testing), and the same control law that runs on the vehicle.
 
-  <div style={{ flex: '1', minWidth: '300px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/simulation/simulink_model.webp" 
-      alt="Full Simulink 6DOF model" 
-        style={{maxWidth: '100%'}}
-      class = "mx-auto" loading="lazy" decoding="async"  width="2886" height="1194" />
-    <p class="fig-caption">The 6DOF model. CFD vane coefficients and pendulum-measured mass properties feed a rigid-body block running the same control law as the vehicle.</p>
-  </div>
+  <figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/simulation/simulink_model.webp" alt="Full Simulink 6DOF model" class="w-full mx-auto" loading="lazy" decoding="async" width="2886" height="1194" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The 6DOF model. CFD vane coefficients and pendulum-measured mass properties feed a rigid-body block running the same control law as the vehicle.</figcaption>
+</figure>
 
 ## Impulse Response — Flight Test vs. Simulink
 
-<div style={{ flex: '1', minWidth: '300px' }}>
-    <video controls width="100%" preload="metadata">
+<figure class="not-prose my-6">
+  <video poster="/assets/aeolus/simulation/simulink_impulse_comparison-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg" width="1920" height="1080">
     <source src="/assets/aeolus/simulation/simulink_impulse_comparison.webm" type="video/webm" />
-    Your browser does not support the video tag.
-    </video>
-</div>
+  </video>
+</figure>
 
 The vehicle was struck by hand while hovering on a tether and allowed to recover; the same disturbance was applied in the model. Overlaying the two is the only real test of whether the simulation describes the vehicle or merely something that resembles it.
 

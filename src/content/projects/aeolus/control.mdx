@@ -3,9 +3,11 @@ title: "Control"
 order: 5
 navLabel: "Control"
 showHero: false
+description: "How the rocket steers: four small vanes in the exhaust, and how I calculated the controller settings from measurements instead of by trial and error."
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 import Table from '../../../components/Table.astro';
+import DampingDemo from '../../../components/DampingDemo.astro';
 
 # Vane Design
 
@@ -51,9 +53,55 @@ It matters because roll authority is what the vane change was meant to fix. The 
 
 ---
 
+# Servos
+
+Vane actuation servos were compared on torque, slew speed, deadband, and cost across four units. Deadband was a key criterion since it directly bounds the minimum resolvable vane deflection in the attitude control loop.
+
+<Table
+  maxWidth="max-w-2xl"
+  columns={[
+    { key: 'c0', label: 'Servo', align: 'left' },
+    { key: 'c1', label: 'Torque (kg·cm)', align: 'center' },
+    { key: 'c2', label: 'Speed (s/60°)', align: 'center' },
+    { key: 'c3', label: 'Deadband', align: 'center' },
+    { key: 'c4', label: 'Cost (×4)', align: 'right' }
+  ]}
+  rows={[
+    { c0: 'HobbyPark 7.4V', c1: '4.6', c2: '0.08', c3: '—', c4: '$56' },
+    { c0: 'PTK 7462W MG', c1: '4.5', c2: '0.08', c3: '2µs', c4: '$28' },
+    { c0: 'PTK 7465', c1: '5.5', c2: '0.07', c3: '3µs', c4: '$34', highlight: true }
+  ]}
+/>
+
+Selected the PTK 7465 for its combination of the highest torque, fastest slew speed, and low cost among the compared units. The PTK 7462W MG's marginally tighter deadband was not enough to offset its lower torque margin and reported quality inconsistency, given actuator torque is the binding constraint for vane authority.
+
+## Per-Unit Calibration
+
+The four servos are not interchangeable, and the flight code does not pretend they are. Each carries its own two-point calibration measured on the bench:
+
+<Table
+  note="Measured pulse width at 45° and 135°, per unit. Nominal values would treat all four as identical."
+  columns={[
+    { key: 'servo', label: 'Servo', align: 'left' },
+    { key: 'lo', label: 'µs @ 45°', align: 'center' },
+    { key: 'hi', label: 'µs @ 135°', align: 'center' },
+    { key: 'scale', label: 'µs/deg', align: 'center' }
+  ]}
+  rows={[
+    { servo: '1', lo: '1004.3', hi: '1970.3', scale: '10.73' },
+    { servo: '2', lo: '1064.8', hi: '2066.8', scale: '11.13' },
+    { servo: '3', lo: '1029.8', hi: '2016.8', scale: '10.97' },
+    { servo: '4', lo: '1058.8', hi: '2052.8', scale: '11.04' }
+  ]}
+/>
+
+The spread is not small. At the same commanded 45°, the four units differ by 60 µs — about **5.6° of vane deflection**. Their scale factors differ by nearly 4% on top of that. Driving all four from one nominal mapping would have baked several degrees of asymmetry into the vehicle before the controller ever ran, and the trim analysis above would have been measuring servo tolerance rather than airframe asymmetry.
+
+---
+
 # Measuring Control Authority
 
-Two independent methods, which is the point — a bench number and a flight number that agree are worth far more than either alone.
+Control authority was estimated three ways: CFD, the thrust stand, and fits to flight data. They do not agree ([comparison below](#comparing-the-three-estimates)). The controller uses the flight fit, because it describes the vehicle as it actually flies.
 
 ## Static — Thrust Stand
 
@@ -64,34 +112,27 @@ Due to poor design, force was not spread evenly across each load cell when pure 
 
 A baseline test was run at 70% throttle to get baseline forces at 0 degree fin deflection (which were not spread evenly due to the issues above). A test was also run with 1 Nm pitching moment applied with hand-held force probe, again exhibiting same non-even force and cross talk issues.
 
-<div class="grid grid-cols-2 gap-4">
-  <figure>
-    <img src="/assets/aeolus/vane-moment-testing/Screenshot_2026-06-04_at_11.03.50_PM.png" alt="Forces on load cells" loading="lazy" decoding="async"  width="1990" height="986" />
-    <figcaption>Forces on each load cell at 70% throttle 0 fin deflection pure axial loading ~1550g thrust. Expected 387.5 g evenly across each load cell.</figcaption>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+  <figure class="m-0">
+    <img src="/assets/aeolus/vane-moment-testing/loadcells-axial.webp" alt="Forces on load cells" class="w-full rounded-lg" loading="lazy" decoding="async" width="1990" height="986" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Forces on each load cell at 70% throttle 0 fin deflection pure axial loading ~1550g thrust. Expected 387.5 g evenly across each load cell.</figcaption>
   </figure>
-  <figure>
-    <img src="/assets/aeolus/vane-moment-testing/Screenshot_2026-06-04_at_11.07.59_PM.png" alt="1 N-m moment testing" loading="lazy" decoding="async"  width="1486" height="916" />
-    <figcaption>1 N-m moment. Expected LC 1 & 4 to have same negative force, and LC 2 & 3 to have same positive force of same magnitude as 1 & 4.</figcaption>
+  <figure class="m-0">
+    <img src="/assets/aeolus/vane-moment-testing/loadcells-1nm.webp" alt="1 N-m moment testing" class="w-full rounded-lg" loading="lazy" decoding="async" width="1486" height="916" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">1 N-m moment. Expected LC 1 & 4 to have same negative force, and LC 2 & 3 to have same positive force of same magnitude as 1 & 4.</figcaption>
   </figure>
 </div>
 </Dropdown>
 
-The stand is a four-bar load cell cross; summing the cells gives axial thrust, and the differential between opposing pairs gives moment. In practice the rig was compromised. Uneven preload from imperfect levelling meant pure axial load did not distribute evenly, and the structures bent differently under different preloads, so the cells cross-talked.
-
-Rather than discard the run, the measurement was salvaged by referencing it against a known moment. A 1 N·m pitching moment was applied by hand with a force probe to establish the differential that a known load produces; every subsequent measurement was then read as a ratio against that reference. The absolute per-cell readings stay wrong, but the ratio of differentials is insensitive to the preload error that corrupts them.
+The rig was compromised by uneven preload and cross-talk between cells (details in the dropdown above). Rather than discard the run, the measurement was salvaged by referencing it against a known moment. A 1 N·m pitching moment was applied by hand with a force probe to establish the differential that a known load produces; every subsequent measurement was then read as a ratio against that reference. The absolute per-cell readings stay wrong, but the ratio of differentials is insensitive to the preload error that corrupts them.
 
 Surprisingly, the measured moments at 70% throttle correlated closely with published flat-plate $C_l$ data at comparable Reynolds number. The vane cross-section is a very thin airfoil, which turns out to be near enough to a flat plate.
 
-<figure class="w-1/2 mx-auto">
-  <img src="/assets/aeolus/vane-moment-testing/image.png" alt="Measured moment vs alpha" loading="lazy" decoding="async"  width="962" height="1246" />
-  <figcaption>Measured moment vs alpha (purple dots) and experimental flat plate data (red line). Overlaid flat plate data was scaled to fit the dots as I am only comparing the trend, not the numbers. Moment is directly proportional to force and thus Cl, matching the scaled flat plate Cl data nicely. ($C_l$ ≈ 0.5 @ $\alpha = 5\deg$, experimental data gives $C_l$ ≈ 0.6, very close given the vane geometry and thrust tube exit interaction)</figcaption>
+<figure class="not-prose my-6 mx-auto max-w-sm">
+  <img src="/assets/aeolus/vane-moment-testing/moment-vs-alpha.webp" alt="Measured moment vs alpha" class="w-full rounded-lg" loading="lazy" decoding="async" width="962" height="1246" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Measured moment vs alpha (purple dots) and experimental flat plate data (red line). Overlaid flat plate data was scaled to fit the dots as I am only comparing the trend, not the numbers. Moment is directly proportional to force and thus Cl, matching the scaled flat plate Cl data nicely. ($C_l$ ≈ 0.5 @ $\alpha = 5\deg$, experimental data gives $C_l$ ≈ 0.6, very close given the vane geometry and thrust tube exit interaction)</figcaption>
 </figure>
 
-| alpha [º] | moment [Nm] |
-| :--- | :--- |
-| 5 | 0.116 |
-| 10 | 0.168 |
-| 20 | 0.197 |
 
 ## Dynamic — From Flight Data
 
@@ -123,19 +164,41 @@ Physically it reflects small asymmetries: geometry that is not quite symmetric, 
 </div>
 
 
+## Comparing the Three Estimates
+
+All three were made with the original (v1) vanes, deflecting the two opposing vanes that produce a pitch moment.
+
+<Table
+  maxWidth="max-w-2xl"
+  note="CFD: ANSYS Fluent parametric study, vane pitch moment at M 0.01. Stand: ratio against the 1 N·m reference at 70% throttle. Flight: RANSAC slope of 0.0065 N·m/deg, applied linearly."
+  columns={[
+    { key: 'd', label: 'Deflection', align: 'center' },
+    { key: 'cfd', label: 'CFD (N·m)', align: 'center' },
+    { key: 'stand', label: 'Thrust stand (N·m)', align: 'center' },
+    { key: 'fl', label: 'Flight fit (N·m)', align: 'center' }
+  ]}
+  rows={[
+    { d: '5°', cfd: '0.114', stand: '0.116', fl: '0.033', highlight: true },
+    { d: '10°', cfd: '0.229', stand: '0.168', fl: '0.065' },
+    { d: '20°', cfd: '0.308', stand: '0.197', fl: '0.130' }
+  ]}
+/>
+
+CFD and the stand agree at 5° and separate at larger deflections. At 5°, both are about 3.5× the flight fit. The cause has not been pinned down yet.
+
 ---
 
 # Deriving the Gains
 
-This is the part I would point at first.
-
-Because the inertia had been measured on a [bifilar pendulum](/projects/aeolus/vehicle#moment-of-inertia-testing) and the vane torque measured two independent ways — [on the thrust stand](#static--thrust-stand) and [from flight data](#dynamic--from-flight-data) — there was no need to tune the attitude loop by trial and error. Each axis is a rotational mass with a restoring term and a damping term — a damped harmonic oscillator:
+Because the inertia had been measured on a [bifilar pendulum](/projects/aeolus/vehicle#moment-of-inertia-testing) and the vane torque fitted [from flight data](#dynamic--from-flight-data), there was no need to tune the attitude loop by trial and error. Each axis is a rotational mass with a restoring term and a damping term — a damped harmonic oscillator:
 
 $$
 I\ddot{\theta} + K_d\dot{\theta} + K_p\theta = 0
 $$
 
 So rather than guessing gains and watching what happens, you choose the *response you want* — how fast it should correct, and how much it should overshoot — and solve backwards for the gains that produce it.
+
+<DampingDemo />
 
 ## Solving the Oscillator
 
@@ -144,13 +207,13 @@ That equation is standard, but the two quantities the whole method rests on — 
 Substituting the ansatz $\theta(t) = Ae^{i\omega t}$ and dividing through by the exponential leaves a quadratic in $\omega$:
 
 $$
-K_p + K_D\,i\omega - I\omega^2 = 0 \qquad \Longrightarrow \qquad \omega = \frac{iK_D}{2I} \pm \sqrt{\frac{K_p}{I} - \left(\frac{K_D}{2I}\right)^2}
+\begin{gathered}K_p + K_D\,i\omega - I\omega^2 = 0 \\[4pt] \Longrightarrow \quad \omega = \frac{iK_D}{2I} \pm \sqrt{\frac{K_p}{I} - \left(\frac{K_D}{2I}\right)^2}\end{gathered}
 $$
 
 The root has a fixed imaginary part and a square root that may be either real or imaginary. Writing the general solution as a combination of both roots separates the two behaviours:
 
 $$
-\theta(t) = e^{-\gamma t}\left(Ae^{i\Omega t} + Be^{-i\Omega t}\right), \qquad \gamma = \frac{K_D}{2I}, \qquad \Omega = \sqrt{\frac{K_p}{I} - \left(\frac{K_D}{2I}\right)^2}
+\begin{gathered}\theta(t) = e^{-\gamma t}\left(Ae^{i\Omega t} + Be^{-i\Omega t}\right) \\[6pt] \gamma = \frac{K_D}{2I}, \qquad \Omega = \sqrt{\frac{K_p}{I} - \left(\frac{K_D}{2I}\right)^2}\end{gathered}
 $$
 
 $\gamma$ is the decay envelope and $\Omega$ is what happens inside it. The interesting case is the boundary where $\Omega = 0$ — critical damping, the fastest return with no overshoot, which occurs when
@@ -215,7 +278,7 @@ $$
 The consequence is that the flight code's gain table is readable as design intent rather than as tuning residue. Reading `config.h` backwards:
 
 <Table
-  note="Flown gains, and the second-order response they encode. Kp and Kd are in rad/s² per rad and per rad/s respectively."
+  note="Flown gains, and the second-order response they encode. Roll was retuned on 5 September; pitch and yaw are unchanged since August. Kp and Kd are in rad/s² per rad and per rad/s respectively."
   columns={[
     { key: 'axis', label: 'Axis', align: 'left' },
     { key: 'kp', label: 'Kp', align: 'center' },
@@ -224,13 +287,14 @@ The consequence is that the flight code's gain table is readable as design inten
     { key: 'z', label: 'ζ', align: 'center' }
   ]}
   rows={[
-    { axis: 'Roll', kp: '36.0', kd: '10.0', w: '6.00', z: '0.83', highlight: true },
+    { axis: 'Roll (Aug)', kp: '36.0', kd: '10.0', w: '6.00', z: '0.83' },
+    { axis: 'Roll (from 5 Sep)', kp: '16.0', kd: '6.5', w: '4.00', z: '0.81', highlight: true },
     { axis: 'Pitch', kp: '38.0', kd: '10.2', w: '6.16', z: '0.83' },
     { axis: 'Yaw', kp: '38.0', kd: '10.2', w: '6.16', z: '0.83' }
   ]}
 />
 
-All three axes are deliberately placed at $\zeta \approx 0.83$ — slightly under critical damping, which settles faster than $\zeta = 1$ at the cost of a small overshoot. Nothing in that table is a magic number.
+All three axes sit at $\zeta \approx 0.81$–$0.83$, slightly under critical damping, which settles faster than $\zeta = 1$ at the cost of a small overshoot. Nothing in that table is a magic number. The September roll retune came in with the [unwinding fix](/projects/aeolus/testing#the-unwinding-bug).
 
 ## Saturation Set by Physics
 
@@ -257,6 +321,8 @@ Pitch and yaw were tuned the same way to the same target and came out slightly *
 </div>
 <p class="text-[11px] text-slate-500 dark:text-slate-400 text-center">Flown response on each axis with the derived gains.</p>
 
+
+The tethered gain sweep and the pitch/yaw disturbance tests behind these results are on the [testing page](/projects/aeolus/testing#2224-july--one-axis-at-a-time).
 
 ## Knowing When Not To Use It
 
@@ -420,7 +486,7 @@ The attitude controller asks for a torque. Something has to turn that into four 
 Both effectors on a shaft contribute, from different physics:
 
 $$
-k_{net} = \underbrace{K_{vane} \cdot \text{(vane drive)}}_{\propto\ \text{thrust}} \;+\; \underbrace{K_{aero} \cdot \bar{q} \cdot \text{flow sign}}_{\propto\ \text{airspeed}^2}
+\begin{aligned}k_{net} = {} & \underbrace{K_{vane} \cdot \text{(vane drive)}}_{\propto\ \text{thrust}} \\ & + \underbrace{K_{aero} \cdot \bar{q} \cdot \text{flow sign}}_{\propto\ \text{airspeed}^2}\end{aligned}
 $$
 
 The vane term scales with thrust, which moves with throttle, battery voltage and how far through a spool-up the fan happens to be. The aero term scales with dynamic pressure, which moves with speed. So the deflection needed to produce a given torque is different at every moment, and the allocator computes $k_{net}$ fresh each cycle before dividing the demanded torque by it.
@@ -458,79 +524,3 @@ Instead the allocator finds the peak servo command and, if it exceeds the mechan
 Honest status: the aerodynamic half of this has barely been exercised. At the speeds flown so far the vane dominates so heavily that `K_AERO`, the flow-sign logic and the null guard have effectively never been tested in flight — the null guard has yet to arm at all.
 
 Two things make that tolerable. There is a written flight test plan with predicted values and stop criteria for exactly these signals, so the first flight that does exercise them will be instrumented for it. And in the hover regime that *has* been flown extensively, the allocator is arithmetically identical to the fixed-constant code it replaced — so the refactor provably reduces to previously validated behaviour everywhere the vehicle has actually been.
-
----
-
-# Servos
-
-Vane actuation servos were compared on torque, slew speed, deadband, and cost across four units. Deadband was a key criterion since it directly bounds the minimum resolvable vane deflection in the attitude control loop.
-
-| Servo | Torque (kg·cm) | Speed (s/60°) | Deadband | Cost ($\times$4) |
-|---|---|---|---|---|
-| HobbyPark 7.4V | 4.6 | 0.08 | — | $56 |
-| PTK 7462W MG | 4.5 | 0.08 | 2µs | $28 |
-| **PTK 7465** | **5.5** | **0.07** | **3µs** | **$34** |
-
-Selected the PTK 7465 for its combination of the highest torque, fastest slew speed, and lowest cost among the compared units. The PTK 7462W MG's marginally tighter deadband was not enough to offset its lower torque margin and reported quality inconsistency, given actuator torque is the binding constraint for vane authority.
-
-## Per-Unit Calibration
-
-The four servos are not interchangeable, and the flight code does not pretend they are. Each carries its own two-point calibration measured on the bench:
-
-<Table
-  note="Measured pulse width at 45° and 135°, per unit. Nominal values would treat all four as identical."
-  columns={[
-    { key: 'servo', label: 'Servo', align: 'left' },
-    { key: 'lo', label: 'µs @ 45°', align: 'center' },
-    { key: 'hi', label: 'µs @ 135°', align: 'center' },
-    { key: 'scale', label: 'µs/deg', align: 'center' }
-  ]}
-  rows={[
-    { servo: '1', lo: '1004.3', hi: '1970.3', scale: '10.73' },
-    { servo: '2', lo: '1064.8', hi: '2066.8', scale: '11.13' },
-    { servo: '3', lo: '1029.8', hi: '2016.8', scale: '10.97' },
-    { servo: '4', lo: '1058.8', hi: '2052.8', scale: '11.04' }
-  ]}
-/>
-
-The spread is not small. At the same commanded 45°, the four units differ by 60 µs — about **5.6° of vane deflection**. Their scale factors differ by nearly 4% on top of that. Driving all four from one nominal mapping would have baked several degrees of asymmetry into the vehicle before the controller ever ran, and the trim analysis above would have been measuring servo tolerance rather than airframe asymmetry.
-
----
-
-# Control Testing
-
-## Roll
-
-<div style={{ flex: '1', minWidth: '300px' }}>
-    <video controls width="100%">
-    <source src="/assets/aeolus/control/roll3_final.webm" type="video/webm" />
-    Your browser does not support the video tag.
-    </video>
-</div>
-
-Roll was tested first and in isolation, with the pitch and yaw outputs forced to zero, so that a single axis could be characterized without three controllers interacting. The gain sweep behaved the way the second-order model says it should: low damping produced sustained oscillation, and raising it three-fold produced a visibly overdamped, sluggish return. The values that flew sit between them.
-
-<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-  <figure class="m-0"><img src="/assets/aeolus/control/gain-underdamped.webp" alt="Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="899" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/control/gain-overdamped.webp" alt="Damping raised three-fold — overdamped and sluggish." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1216" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Damping raised three-fold — overdamped and sluggish.</figcaption></figure>
-</div>
-
-<figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/control/roll-tuned.webp" alt="Roll with the gains that flew." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="842" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll with the gains that flew.</figcaption>
-</figure>
-
-
-## Pitch and Yaw
-
-Pitch and yaw were tested by hand-disturbing the vehicle while it hovered on a slack tether and watching the impulse response. The first attempts recovered too slowly to be useful and could not reject small taps at all. After raising the gains, the vehicle recovered from a roughly 4° disturbance in about 0.8 seconds — adequate for holding vertical, though still slower than ideal.
-
-<div class="not-prose my-6 mx-auto max-w-xl">
-  <video controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="406">
-    <source src="/assets/aeolus/control/pitch-yaw-test.webm" type="video/webm" />
-  </video>
-  <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Tethered pitch/yaw disturbance rejection.</p>
-</div>
-
-
-That result is what motivated the [vane resize](#what-doubling-the-area-actually-bought): the limitation was not the controller but the authority available to it.

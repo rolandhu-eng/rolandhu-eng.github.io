@@ -3,6 +3,7 @@ title: "Vehicle"
 order: 1
 navLabel: "Vehicle"
 showHero: false
+description: "How the rocket is built, and how I measured how hard it is to rotate, which every control calculation depends on. Also a parachute system that was designed and tested on the bench but has not flown yet."
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 import Table from '../../../components/Table.astro';
@@ -20,16 +21,12 @@ import Table from '../../../components/Table.astro';
   </figure>
 </div>
 
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/vehicle/Subsystems.drawio.png" 
-    alt="Aeolus subsystem block diagram" 
-    style={{ maxWidth: '60%'}}
-    class="mx-auto invert dark:invert-0 hue-rotate-0 dark:hue-rotate-180" loading="lazy" decoding="async"  width="827" height="1011" />
-  <p class="fig-caption">Initial systems planning, January. Most of it survived — the parachute recovery path is the part that did not.</p>
-</div>
+<figure class="not-prose my-8 mx-auto max-w-sm">
+  <img src="/assets/aeolus/vehicle/subsystems-diagram.webp" alt="Aeolus subsystem block diagram" class="w-full invert dark:invert-0 hue-rotate-0 dark:hue-rotate-180" loading="lazy" decoding="async" width="827" height="1011" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Initial systems planning, January. Most of it survived — the parachute recovery path is the part that did not.</figcaption>
+</figure>
 
-<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8">
+<div class="max-w-2xl mx-auto not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8">
   <figure class="m-0"><img src="/assets/aeolus/vehicle/rocket-night.webp" alt="The assembled vehicle with its outer shell and nose cone removed" class="w-full rounded-lg" loading="lazy" decoding="async"  width="933" height="1800" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The real thing, shell and nose cone off — avionics stack, battery bay, EDF, and fins.</figcaption></figure>
   <figure class="m-0"><img src="/assets/aeolus/vehicle/rocket-intake-night.webp" alt="Intake end of the vehicle with internals exposed" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1132" height="1600" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Intake end, showing the wiring run between the avionics bay and the EDF section.</figcaption></figure>
 </div>
@@ -59,51 +56,245 @@ The structure got an unplanned test on 27 August, when a position-hold flight en
 
 ---
 
-# CAD & Mechanical Design
+# Moment of Inertia Testing
+## Inertia Tensor
 
-Two parts were designed rather than simply drawn: the fairing hinges, which were generated, and the shock cord attachment, which was simulated.
+The moment of inertia is the rotational analog to mass. It determines body dynamics, like how the angular velocity changes under a given moment. Thus, accurately knowing the moment of inertia is important for developing an accurate simulation to tune controller gains. The full moment of inertia is a tensor that is represented as a 3x3 matrix, not a simple scalar like mass. This is because the angular momentum and the angular velocity do not necessarily point in the same direction, unlike the linear analog where linear momentum points along the velocity.
 
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/vehicle/gen_design_dash.webp" 
-    alt="Generative design study for the fairing hinges" 
-    style={{ maxWidth: '100%'}}
-    class="mx-auto" loading="lazy" decoding="async"  width="2064" height="646" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Generative design study used to produce the <a href="#fairing-vid">fairing hinges</a>. Each point is a candidate geometry; the study sweeps mass against displacement so the trade is visible rather than guessed</figcaption>
+$$
+\begin{bmatrix}
+L_x \\
+L_y \\
+L_z
+\end{bmatrix}
+=
+\begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{yx} & I_{yy} & I_{yz} \\
+I_{zx} & I_{zy} & I_{zz}
+\end{bmatrix}
+\begin{bmatrix}
+\omega_x \\
+\omega_y \\
+\omega_z
+\end{bmatrix}
+$$
+
+However, for the rocket where the axes are along the symmetry lines, each component of angular momentum does point along the corresponding angular velocity component, and the calculations are greatly simplified.
+
+$$
+\begin{bmatrix}
+L_x \\
+L_y \\
+L_z
+\end{bmatrix}
+=
+\begin{bmatrix}
+I_{xx} & 0 & 0 \\
+0 & I_{yy} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix}
+\begin{bmatrix}
+\omega_x \\
+\omega_y \\
+\omega_z
+\end{bmatrix}
+$$
+
+$$
+\begin{gathered}
+L_x = I_{xx} \omega_x \\
+L_y = I_{yy} \omega_y \\
+L_z = I_{zz} \omega_z
+\end{gathered}
+$$
+
+Due to the approximate cylindrically symmetric mass distribution, the pitch and yaw moments of inertia are approximately equal, so only 2 measurements need to be taken: the roll moment of inertia, $I_{xx}$, and the pitch/yaw moment of inertia $I_{yy/zz}$.
+
+---
+
+## Bi-filar Pendulum Setup
+
+To measure the moments of inertia, a pendulum setup can be used. The most common way to do this is with a bi-filar pendulum setup, as it minimizes the propagated error [compared to something like a standard pendulum](#standard-pendulum-comparison).
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8 items-end">
+  <figure class="m-0">
+    <img src="/assets/aeolus/moi/setup-pitch-yaw.webp" alt="Pitch/yaw bifilar pendulum setup" class="w-full rounded-lg dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" width="980" height="880" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Pitch/yaw MOI measurement setup</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/moi/setup-roll.webp" alt="Roll bifilar pendulum setup" class="w-full rounded-lg dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" width="660" height="812" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll MOI measurement setup</figcaption>
+  </figure>
 </div>
 
-The hinge is a small part with an awkward job: it has to survive the deployment load, fit inside a curved keep-out volume, and add as little mass as possible at the very top of the vehicle, where mass is most expensive in pitch and yaw inertia. Rather than iterating by hand, the load cases and keep-out volumes were handed to a generative study and the resulting population of candidates compared directly.
+The rocket is suspended on two strings (length $l$) equidistant from the center of mass (distance $d$). The period of small rotational oscillations can be measured and used to calculate the MOI according to the formula given below.
 
-<figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/vehicle/gen-design-fairing.webp" alt="Generated fairing hinge geometry." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1365" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Generated fairing hinge geometry.</figcaption>
+$$
+I = \frac{T^2 m g d^2}{4 \pi^2 L}
+$$
+
+<Dropdown title="Newtonian Derivation">
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/moi/derivation-newtonian.webp" alt="Newtonian derivation of the bifilar pendulum period" class="w-full rounded-lg dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" width="2000" height="1530" />
+</figure>
+</Dropdown>
+
+<Dropdown title="Lagrangian Derivation">
+<figure class="not-prose my-6 mx-auto max-w-md">
+  <img src="/assets/aeolus/moi/derivation-lagrangian.webp" alt="Lagrangian derivation of the bifilar pendulum period" class="w-full rounded-lg dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" width="1350" height="1750" />
+</figure>
+</Dropdown>
+
+The measurement uncertainty in this setup $\delta I$ can be simply calculated by summing the relative uncertainties in $T, d, L$ in quadrature, approximating them as gaussian.
+
+$$
+\delta I = I \sqrt{(2 \delta d / d)^2 + (2 \delta T / T)^2 + (\delta L / L)^2}
+$$
+
+Compared to the standard pendulum method below, the propagated uncertainties in the variables are significantly smaller.
+
+<Dropdown title="Standard Pendulum">
+### Standard Pendulum
+
+<figure class="not-prose my-6 mx-auto max-w-xs">
+  <img src="/assets/aeolus/moi/standard-pendulum.webp" alt="Standard pendulum geometry diagram" class="w-full rounded-lg dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" width="820" height="932" />
 </figure>
 
+For a standard pendulum setup, the MOI about the CM is given below (from $T=2\pi\sqrt{I/mgd}$ and the parallel axis theorem).
 
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/vehicle/nose_struct_sim2.webp" 
-    alt="FEA of the nose cone shock cord attachment" 
-    style={{ maxWidth: '50%'}}
-    class="mx-auto" loading="lazy" decoding="async"  width="822" height="800" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">FEA of the shock cord attachment in the nose</figcaption>
+$$
+I = \frac{T^2 m g d}{4\pi^2} - m d^2
+$$
+
+The uncertainty can be calculated by taking partial derivatives w.r.t. to $T$ and $d$ and summing in quadrature.
+
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/moi/standard-pendulum-uncertainty.webp" alt="Uncertainty propagation for the standard pendulum" class="w-full rounded-lg dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" width="1994" height="602" />
+</figure>
+
+$$
+\delta I_{sp} = \sqrt{(I + m d^2)^2 (2\delta T/T)^2 + (I - m d^2)^2 (\delta d/d)^2}
+$$
+
+Since $m d^2 \gg I$ this is usually not a viable method to measure the MOI since propagated errors are huge. If instead $d$ was reduced, $T$ would decrease and $\delta T/T$ would increase; in short $\delta I$ cannot be made arbitrarily small.
+</Dropdown>
+
+---
+
+## Experimental Determination of $I_{xx}$ & $I_{yy/zz}$
+
+The MOI were measured in the configuration that has flown so far: the bare vehicle, without the parachute. $T$ was measured by analyzing video of multiple periods and averaging. $d$ and $L$ were measured with a caliper and a ruler respectively.
+
+**Videos:**
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8 max-w-2xl mx-auto items-end">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/moi/ixx-2-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg" width="1080" height="1920">
+      <source src="/assets/aeolus/moi/ixx-2.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll (Ixx)</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video poster="/assets/aeolus/moi/iyy-zz_2-2-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg" width="1080" height="1304">
+      <source src="/assets/aeolus/moi/iyy-zz_2-2.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Pitch/yaw (Iyy/Izz)</figcaption>
+  </figure>
 </div>
 
-The shock cord attachment was simulated because it is a single point of failure. The entire recovery load passes through one small feature, and if it snaps, the parachute stays attached to nothing and the vehicle comes down in a free fall. It is the one part of the airframe where a local failure loses the whole vehicle.
+<Table 
+  note="System mass = 1.434 kg. Measurements derived using bi-filar pendulum method."
+  columns={[
+    { key: 'param', label: 'Parameter', align: 'left' },
+    { key: 'roll', label: 'Ixx (Roll)', align: 'center' },
+    { key: 'pitch', label: 'Iyy/Izz (Pitch/Yaw)', align: 'center' }
+  ]}
+  rows={[
+    { param: 'L = string length (m)', roll: '0.82', pitch: '1.335' },
+    { param: 'd = dist. from CM (m)', roll: '0.046', pitch: '0.155' },
+    { param: 'T = period (s)', roll: '1.34', pitch: '3.19' },
+    { param: 'I (kg m²)', roll: '0.001651', pitch: '0.065256' },
+    { param: 'Uncertainty', roll: '0.000077', pitch: '0.001189' },
+    { param: 'Final I (kg m²)', roll: '0.00165 ± 0.00008', pitch: '0.065 ± 0.001', highlight: true },
+    { param: 'Scientific', roll: '(1.65±0.08)e-3', pitch: '(6.5±0.1)e-2' }
+  ]}
+/>
+
+<Dropdown title="Standard Pendulum Comparison">
+  ### Standard Pendulum Comparison
+  
+  **Videos:**
+  <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 max-w-2xl mx-auto">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/moi/pitch-yaw_single_pendulum-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg" width="1080" height="1920">
+      <source src="/assets/aeolus/moi/pitch-yaw_single_pendulum.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Single pendulum, pitch/yaw</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video poster="/assets/aeolus/moi/roll_single_pendulum-2-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg" width="1080" height="1920">
+      <source src="/assets/aeolus/moi/roll_single_pendulum-2.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Single pendulum, roll (<em>very very bad</em>)</figcaption>
+  </figure>
+  </div>
+
+  <Table 
+    note="Single pendulum method produced straight trash."
+    columns={[
+      { key: 'param', label: 'Parameter', align: 'left' },
+      { key: 'roll', label: 'Single Pendulum (Roll)', align: 'center' },
+      { key: 'pitch', label: 'Single Pendulum (Pitch/Yaw)', align: 'center' }
+    ]}
+    rows={[
+      { param: 'dist from CM (d)', roll: '1.385', pitch: '1.275' },
+      { param: 'T = period (s)', roll: '2.38', pitch: '2.30' },
+      { param: 'I (kg m²)', roll: '0.044782', pitch: '0.072244', highlight: true },
+      { param: 'Uncertainty', roll: '0.045944', pitch: '0.054775', highlight: true},
+
+    ]}
+  />
+  The uncertainties are around the same size as the actual measurements, total unusable \:\<
+</Dropdown>
+
+---
+
+## EDF Rotor Inertia, Without Measuring It
+
+The bifilar pendulum measures the MOI of the entire vehicle. However, the MOI of the EDF rotor is useful as it determines the gyroscopic moments induced during pitching maneuvers and the roll moment during startup/spindown.
+
+When the EDF spins up while the vehicle hangs freely on the tether, there is no significant external torque about the roll axis, so angular momentum about that axis conserved. The rotor accelerates one way and the airframe rotates the other. Since $I_{edf} \ll I_{rkt}$:
+
+$$
+I_{rkt}\,\omega_{rkt} = I_{edf}\,\omega_{edf}
+$$
+
+During roll testing the airframe reached roughly $11~\mathrm{rad/s}$ while the EDF peaked near $29{,}000$ rpm, or about $3040~\mathrm{rad/s}$. With $I_{xx}$ already measured:
+
+$$
+I_{edf} \approx \frac{I_{rkt}\,\omega_{rkt}}{\omega_{edf}} \approx \boxed{6\times10^{-6}~\mathrm{kg\,m^2}}
+$$
+
+This is a rough estimate. The biggest issue is that $\omega_{rkt}$ was only estimated, as the vanes were producing torque in the opposite direction throughout the entire spin-up.
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/vehicle/edf-spinup-roll.webp" alt="Airframe roll rate during EDF spin-up" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="533" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Airframe roll rate during EDF spin-up. The counter-rotation here is what the rotor inertia is derived from.</figcaption>
+</figure>
 
 ---
 
 # Recovery System
 
-The parachute is designed, sized, and characterized, but not currently flown. The nose fairing carries it, and the [generatively designed hinges](#cad--mechanical-design) above exist for it.
+The parachute is designed, sized, and characterized, but not currently flown. The nose fairing carries it, and the [generatively designed hinges](#fairing-hinges-and-cord-attachment) below exist for it.
 
-<div style={{ flex: '1', minWidth: '300px',  textAlign: 'center' }} id='fairing-vid'>
-  <video controls width="50%" class="mx-auto">
+<figure class="not-prose my-6 mx-auto max-w-xs" id="fairing-vid">
+  <video poster="/assets/aeolus/vehicle/fairing_deploy-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg" width="1080" height="1920">
     <source src="/assets/aeolus/vehicle/fairing_deploy.webm" type="video/webm" />
-    Your browser does not support the video tag.
   </video>
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Nose fairing deployment. The hinges are the generatively designed parts above.</figcaption>
-</div>
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Nose fairing deployment. The hinges are the generatively designed parts below.</figcaption>
+</figure>
 
 ## Canopy Sizing
 
@@ -137,9 +328,10 @@ A 0.7 m toroid reaches 5.44 m/s on 0.37 m² of canopy. A flat octagon needs roug
 
 The fabric column is left blank for the toroid deliberately: projected area sets drag, but a toroidal canopy is a three-dimensional surface whose *total* fabric area is meaningfully larger than its projection, so multiplying through by areal density would understate it. The pattern generator reports both numbers separately for exactly this reason.
 
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <figure class="mx-auto"><img src="/assets/aeolus/vehicle/parachute-gores.webp" alt="Openchute" class="w-full rounded-lg mx-auto" style={{maxWidth: "70%"}} loading="lazy" decoding="async"  width="1400" height="856" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Toroidal parachute designed in Openchute</figcaption></figure>
-</div>
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/vehicle/parachute-gores.webp" alt="Toroidal parachute gore pattern in openchute" class="w-full rounded-lg" loading="lazy" decoding="async" width="1400" height="856" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Toroidal parachute designed in openchute.</figcaption>
+</figure>
 
 
 The final canopy is a **12-gore toroidal design**. The gore pattern was generated in openchute, an open-source parachute pattern tool, which outputs a DXF for laser cutting.
@@ -161,7 +353,7 @@ $$
 $$
 
 $$
-F_{max} = k\,\Delta l = mg\left(1 + \sqrt{1 + \frac{k v_0^2}{mg^2}}\right) \qquad\qquad a_{max} = \frac{F_{max}}{m} - g = \sqrt{1 + \frac{k v_0^2}{mg^2}}\;g
+\begin{gathered}F_{max} = k\,\Delta l = mg\left(1 + \sqrt{1 + \frac{k v_0^2}{mg^2}}\right) \\[6pt] a_{max} = \frac{F_{max}}{m} - g = \sqrt{1 + \frac{k v_0^2}{mg^2}}\;g\end{gathered}
 $$
 
 The acceleration result is the useful form: it is independent of mass except through the ratio inside the root, and it says the deceleration is set by how much stiffer the cord is than the vehicle's weight can accommodate.
@@ -212,13 +404,13 @@ Peak cord tension is what sizes the shock cord attachment, and it cannot be read
 Replacing the linear spring with the measured curve means the energy balance no longer closes in closed form. Writing $x = L/L_0$ for the extension ratio, so $\Delta l = L_0(x-1)$ and $d(\Delta l) = L_0\,dx$:
 
 $$
-\tfrac{1}{2}mv_0^2 + mgL_0(x-1) = \int_0^x F\big(L_0(x-1)\big)\,L_0\,dx \;+\; mgL_0
+\begin{aligned}\tfrac{1}{2}mv_0^2 + mgL_0(x-1) &= \int_0^x F\big(L_0(x-1)\big)\,L_0\,dx \\ &\quad + mgL_0\end{aligned}
 $$
 
 and the vehicle and canopy have to be carried as two bodies rather than one, since the canopy has its own drag and its own inertia:
 
 $$
-\alpha \dot{y}_p^{\,2} - T = m_{eff}\,\ddot{y}_p \qquad T - mg = m\,\ddot{y}_r \qquad x = \frac{y_p - y_r}{L_0} \qquad T = F(x)
+\begin{gathered}\alpha \dot{y}_p^{\,2} - T = m_{eff}\,\ddot{y}_p \qquad T - mg = m\,\ddot{y}_r \\[4pt] x = \frac{y_p - y_r}{L_0} \qquad T = F(x)\end{gathered}
 $$
 
 That coupled pair is what gets integrated numerically below. The measured cord data enters as a fitted force law, slack below $\lambda = 1$ and asymptotic at maximum extension:
@@ -276,248 +468,30 @@ $$
 
 For this canopy that comes to 0.646 kg against 50 g of fabric, so the entrained air is roughly **fourteen times** the mass of the parachute itself. Leave it out and the opening load is underpredicted by a factor of three.
 
-For the sizing case — a 1.6 kg vehicle deploying at 20 m/s — the model returns a peak cord tension of **330 N** and a peak vehicle deceleration of **20 g**, both about 120 ms after the cord goes taut. That peak tension is the load case behind the [shock cord attachment FEA](#cad--mechanical-design) above, which closes the loop: bench measurement feeds the material model, the material model feeds the deployment simulation, and the simulation sets the load the part is designed against.
+For the sizing case — a 1.6 kg vehicle deploying at 20 m/s — the model returns a peak cord tension of **330 N** and a peak vehicle deceleration of **20 g**, both about 120 ms after the cord goes taut. That peak tension is the load case behind the [shock cord attachment FEA](#fairing-hinges-and-cord-attachment) below, which closes the loop: bench measurement feeds the material model, the material model feeds the deployment simulation, and the simulation sets the load the part is designed against.
 
 That number carries an honest caveat. At peak load the cord reaches $\lambda = 2.72$, past the highest point on the bench (2.6) and deep into the region where the asymptotic term dominates and nothing has been measured. The design load is therefore an extrapolation, not an interpolation. Pulling the cord to $\lambda \approx 2.75$ — close to failure, on a sample that can be sacrificed — is the single measurement that would most improve confidence in the recovery system, and it is the next thing to do if the parachute is reinstated.
 
----
-# Moment of Inertia Testing
-## Inertia Tensor
+## Fairing Hinges and Cord Attachment
 
-The moment of inertia is the rotational analog to mass. It determines body dynamics, like how the angular velocity changes under a given moment. Thus, accurately knowing the moment of inertia is important for developing an accurate simulation to tune controller gains. The full moment of inertia is a tensor that is represented as a 3x3 matrix, not a simple scalar like mass. This is because the angular momentum and the angular velocity do not necessarily point in the same direction, unlike the linear analog where linear momentum points along the velocity.
+Two recovery parts were designed rather than simply drawn: the fairing hinges, which were generated, and the shock cord attachment, which was simulated against the 330 N load from the opening shock model above.
 
-$$
-\begin{bmatrix}
-L_x \\
-L_y \\
-L_z
-\end{bmatrix}
-=
-\begin{bmatrix}
-I_{xx} & I_{xy} & I_{xz} \\
-I_{yx} & I_{yy} & I_{yz} \\
-I_{zx} & I_{zy} & I_{zz}
-\end{bmatrix}
-\begin{bmatrix}
-\omega_x \\
-\omega_y \\
-\omega_z
-\end{bmatrix}
-$$
+<figure class="not-prose my-6 mx-auto max-w-4xl">
+  <img src="/assets/aeolus/vehicle/gen_design_dash.webp" alt="Generative design study for the fairing hinges" class="w-full rounded-lg" loading="lazy" decoding="async" width="2064" height="646" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Generative design study used to produce the <a href="#fairing-vid">fairing hinges</a>. Each point is a candidate geometry; the study sweeps mass against displacement so the trade is visible rather than guessed</figcaption>
+</figure>
 
-However, for the rocket where the axes are along the symmetry lines, each component of angular momentum does point along the corresponding angular velocity component, and the calculations are greatly simplified.
-
-$$
-\begin{bmatrix}
-L_x \\
-L_y \\
-L_z
-\end{bmatrix}
-=
-\begin{bmatrix}
-I_{xx} & 0 & 0 \\
-0 & I_{yy} & 0 \\
-0 & 0 & I_{zz}
-\end{bmatrix}
-\begin{bmatrix}
-\omega_x \\
-\omega_y \\
-\omega_z
-\end{bmatrix}
-$$
-
-$$
-L_x = I_{xx} \omega_x \\
-L_y = I_{yy} \omega_y \\
-L_z = I_{zz} \omega_z
-$$
-
-Due to the approximate cylindrically symmetric mass distribution, the pitch and yaw moments of inertia are approximately equal, so only 2 measurements need to be taken: the roll moment of inertia, $I_{xx}$, and the pitch/yaw moment of inertia $I_{yy/zz}$.
-
----
-
-## Bi-filar Pendulum Setup
-
-To measure the moments of inertia, a pendulum setup can be used. The most common way to do this is with a bi-filar pendulum setup, as it minimizes the propagated error [compared to something like a standard pendulum](#standard-pendulum-comparison).
-
-<div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.17_PM.png" 
-      alt="Roll-axis bifilar pendulum setup" 
-      style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="980" height="880" />
-    <p class="fig-caption">Pitch/Yaw MOI measurement setup</p>
-  </div>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.01.28_PM.png" 
-      alt="Roll MOI measurement setup" 
-      style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="660" height="812" />
-    <p class="fig-caption">Roll MOI measurement setup</p>
-  </div>
-</div>
-
-The rocket is suspended on two strings (length $l$) equidistant from the center of mass (distance $d$). The period of small rotational oscillations can be measured and used to calculate the MOI according to the formula given below.
-
-$$
-I = \frac{T^2 m g d^2}{4 \pi^2 L}
-$$
-
-<Dropdown title="Newtonian Derivation">
-    <img 
-      src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.08.59_PM.png" 
-      alt="Newtonian Derivation" 
-      style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="2008" height="1536" />
-</Dropdown>
-
-<Dropdown title="Lagrangian Derivation">
-    <img 
-      src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.11.40_PM.png" 
-      alt="Lagrangian Derivation" 
-      style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="1350" height="1750" />
-</Dropdown>
-
-The measurement uncertainty in this setup $\delta I$ can be simply calculated by summing the relative uncertainties in $T, d, L$ in quadrature, approximating them as gaussian.
-
-$$
-\delta I = I \sqrt{(2 \delta d / d)^2 + (2 \delta T / T)^2 + (\delta L / L)^2}
-$$
-
-Compared to the standard pendulum method below, the propagated uncertainties in the variables are significantly smaller.
-
-<Dropdown title="Standard Pendulum">
-### Standard Pendulum
-
-<img src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.19.02_PM.png" alt="Standard pendulum geometry diagram" width="40%" class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async" />
-
-For a standard pendulum setup, the MOI about the CM is given below (from $T=2\pi\sqrt{I/mgd}$ and the parallel axis theorem).
-
-$$
-I = \frac{T^2 m g d}{4\pi^2} - m d^2
-$$
-
-The uncertainty can be calculated by taking partial derivatives w.r.t. to $T$ and $d$ and summing in quadrature.
-
-<img 
-    src="/assets/aeolus/moi/Screenshot_2026-06-10_at_4.39.55_PM.png" 
-    alt="Uncertainty Propogation" 
-    style={{ maxWidth: '70%', borderRadius: '8px' }}
-    class = "mx-auto dark:invert brightness-105 dark:brightness-100" loading="lazy" decoding="async"  width="1994" height="602" />
-
-$$
-\delta I_{sp} = \sqrt{(I + m d^2)^2 \left( \frac{2 \delta T}{T} \right)^2 + (I - m d^2)^2 \left( \frac{\delta d}{d} \right)^2}
-$$
-
-Since $m d^2 \gg I$ this is usually not a viable method to measure the MOI since propagated errors are huge. If instead $d$ was reduced, $T$ would decrease and $\delta T/T$ would increase; in short $\delta I$ cannot be made arbitrarily small.
-</Dropdown>
-
----
-
-## Experimental Determination of $I_{xx}$ & $I_{yy/zz}$
-
-Since the first flight test will be done with a bare rocket just for control verification, the MOI were measured in this configuration. $T$ was measured by analyzing video of multiple periods and averaging. $d$ and $L$ were measured with a caliper and a ruler respectively.
-
-**Videos:**
-
-<div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ flex: '1', minWidth: '300px' }}>
-    <h4>Roll (Ixx)</h4>
-    <video controls width="100%">
-      <source src="/assets/aeolus/moi/ixx-2.mov" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-  </div>
-  <div style={{ flex: '1', minWidth: '300px' }}>
-    <h4>Pitch/Yaw (Iyy/Izz)</h4>
-    <video controls width="100%">
-      <source src="/assets/aeolus/moi/iyy-zz_2-2.mov" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-  </div>
-</div>
-
-<Table 
-  note="System mass = 1.434 kg. Measurements derived using bi-filar pendulum method."
-  columns={[
-    { key: 'param', label: 'Parameter', align: 'left' },
-    { key: 'roll', label: 'Ixx (Roll)', align: 'center' },
-    { key: 'pitch', label: 'Iyy/Izz (Pitch/Yaw)', align: 'center' }
-  ]}
-  rows={[
-    { param: 'L = string length (m)', roll: '0.82', pitch: '1.335' },
-    { param: 'd = dist. from CM (m)', roll: '0.046', pitch: '0.155' },
-    { param: 'T = period (s)', roll: '1.34', pitch: '3.19' },
-    { param: 'I (kg m²)', roll: '0.001651', pitch: '0.065256' },
-    { param: 'Uncertainty', roll: '0.000077', pitch: '0.001189' },
-    { param: 'Final I (kg m²)', roll: '0.00165 ± 0.00008', pitch: '0.065 ± 0.001', highlight: true },
-    { param: 'Scientific', roll: '(1.65±0.08)e-3', pitch: '(6.5±0.1)e-2' }
-  ]}
-/>
-
-<Dropdown title="Standard Pendulum Comparison">
-  ### Standard Pendulum Comparison
-  
-  **Videos:**
-  <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-    <div style={{ flex: '1', minWidth: '300px' }}>
-      <h4>Single Pendulum - Pitch/Yaw</h4>
-      <video controls width="100%">
-        <source src="/assets/aeolus/moi/pitch-yaw_single_pendulum.mov" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    </div>
-    <div style={{ flex: '1', minWidth: '300px' }}>
-      <h4>Single Pendulum - Roll (<em>very very bad</em>)</h4>
-      <video controls width="100%">
-        <source src="/assets/aeolus/moi/roll_single_pendulum-2.mov" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    </div>
-  </div>
-
-  <Table 
-    note="Single pendulum method produced straight trash."
-    columns={[
-      { key: 'param', label: 'Parameter', align: 'left' },
-      { key: 'roll', label: 'Single Pendulum (Roll)', align: 'center' },
-      { key: 'pitch', label: 'Single Pendulum (Pitch/Yaw)', align: 'center' }
-    ]}
-    rows={[
-      { param: 'dist from CM (d)', roll: '1.385', pitch: '1.275' },
-      { param: 'T = period (s)', roll: '2.38', pitch: '2.30' },
-      { param: 'I (kg m²)', roll: '0.044782', pitch: '0.072244', highlight: true },
-      { param: 'Uncertainty', roll: '0.045944', pitch: '0.054775', highlight: true},
-
-    ]}
-  />
-  The uncertainties are around the same size as the actual measurements, total unusable \:\<
-</Dropdown>
-
----
-
-## EDF Rotor Inertia, Without Measuring It
-
-The bifilar pendulum measures the MOI of the entire vehicle. However, the MOI of the EDF rotor is useful as it determines the gyroscopic moments induced during pitching maneuvers and the roll moment during startup/spindown.
-
-When the EDF spins up while the vehicle hangs freely on the tether, there is no significant external torque about the roll axis, so angular momentum about that axis conserved. The rotor accelerates one way and the airframe rotates the other. Since $I_{edf} \ll I_{rkt}$:
-
-$$
-I_{rkt}\,\omega_{rkt} = I_{edf}\,\omega_{edf}
-$$
-
-During roll testing the airframe reached roughly $11~\mathrm{rad/s}$ while the EDF peaked near $29{,}000$ rpm, or about $3040~\mathrm{rad/s}$. With $I_{xx}$ already measured:
-
-$$
-I_{edf} \approx \frac{I_{rkt}\,\omega_{rkt}}{\omega_{edf}} \approx \boxed{6\times10^{-6}~\mathrm{kg\,m^2}}
-$$
-
-This is a rough estimate. The biggest issue is that $\omega_{rkt}$ was only estimated, as the vanes were producing torque in the opposite direction throught the entire spinup.
+The hinge is a small part with an awkward job: it has to survive the deployment load, fit inside a curved keep-out volume, and add as little mass as possible at the very top of the vehicle, where mass is most expensive in pitch and yaw inertia. Rather than iterating by hand, the load cases and keep-out volumes were handed to a generative study and the resulting population of candidates compared directly.
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/vehicle/edf-spinup-roll.webp" alt="Airframe roll rate during EDF spin-up" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="533" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Airframe roll rate during EDF spin-up. The counter-rotation here is what the rotor inertia is derived from.</figcaption>
+  <img src="/assets/aeolus/vehicle/gen-design-fairing.webp" alt="Generated fairing hinge geometry." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1365" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Generated fairing hinge geometry.</figcaption>
 </figure>
+
+
+<figure class="not-prose my-6 mx-auto max-w-sm">
+  <img src="/assets/aeolus/vehicle/nose_struct_sim2.webp" alt="FEA of the nose cone shock cord attachment" class="w-full rounded-lg" loading="lazy" decoding="async" width="822" height="800" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">FEA of the shock cord attachment in the nose, loaded with the 330 N design case.</figcaption>
+</figure>
+
+The shock cord attachment was simulated because it is a single point of failure. The entire recovery load passes through one small feature, and if it snaps, the parachute stays attached to nothing and the vehicle comes down in a free fall. It is the one part of the airframe where a local failure loses the whole vehicle.

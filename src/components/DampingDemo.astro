@@ -1,0 +1,166 @@
+---
+// Interactive damped-oscillator demo: push the rocket off vertical and watch the
+// controller bring it back. Solves  θ'' + 2ζω θ' + ω² θ = 0  in the browser.
+interface Props {
+  zeta?: number;
+  omega?: number;
+}
+const { zeta = 0.83, omega = 6 } = Astro.props;
+---
+<figure class="not-prose my-8 max-w-3xl mx-auto rounded-lg border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 p-4 sm:p-5" data-damping-demo data-zeta={zeta} data-omega={omega}>
+  <div class="grid grid-cols-1 sm:grid-cols-[120px_minmax(0,1fr)] gap-2 sm:gap-4 items-center">
+    <!-- Rocket, rotated about its centre by the current angle -->
+    <svg viewBox="-60 -70 120 140" class="w-20 sm:w-full h-auto mx-auto" role="img" aria-label="Rocket tilting and returning upright">
+      <line x1="0" y1="-66" x2="0" y2="66" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1" stroke-dasharray="3 3" />
+      <g data-rocket>
+        <path d="M0,-58 L7,-42 L7,38 L-7,38 L-7,-42 Z" class="fill-slate-200 dark:fill-slate-700 stroke-slate-500 dark:stroke-slate-400" stroke-width="1.5" />
+        <path d="M-7,24 L-16,40 L-7,36 Z M7,24 L16,40 L7,36 Z" class="fill-slate-400 dark:fill-slate-500" />
+        <path d="M-5,38 L0,50 L5,38 Z" class="fill-amber-400" />
+        <circle cx="0" cy="-10" r="2.2" class="fill-blue-600 dark:fill-blue-400" />
+      </g>
+    </svg>
+
+    <!-- Angle against time -->
+    <svg viewBox="0 0 400 170" class="w-full h-auto" role="img" aria-label="Tilt angle over four seconds after the push">
+      <g class="stroke-slate-200 dark:stroke-slate-800" stroke-width="1">
+        <line x1="36" y1="85" x2="392" y2="85" />
+        <line x1="36" y1="10" x2="36" y2="160" />
+      </g>
+      <g class="fill-slate-400 dark:fill-slate-500" font-size="11" font-family="ui-monospace, monospace">
+        <text x="30" y="18" text-anchor="end">+15°</text>
+        <text x="30" y="88" text-anchor="end">0°</text>
+        <text x="30" y="158" text-anchor="end">−15°</text>
+        <text x="36" y="170" text-anchor="middle">0 s</text>
+        <text x="214" y="170" text-anchor="middle">2 s</text>
+        <text x="392" y="170" text-anchor="end">4 s</text>
+      </g>
+      <polyline data-trace fill="none" class="stroke-blue-600 dark:stroke-blue-400" stroke-width="2" stroke-linejoin="round" points="" />
+    </svg>
+  </div>
+
+  <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+    <label class="block">
+      <span class="flex justify-between font-mono text-[11px] text-slate-500 dark:text-slate-400">
+        <span>Damping ratio ζ</span><span data-zeta-out></span>
+      </span>
+      <input type="range" min="0.1" max="2" step="0.01" data-zeta-in class="w-full accent-blue-600" />
+    </label>
+    <label class="block">
+      <span class="flex justify-between font-mono text-[11px] text-slate-500 dark:text-slate-400">
+        <span>Natural frequency ω</span><span data-omega-out></span>
+      </span>
+      <input type="range" min="2" max="12" step="0.1" data-omega-in class="w-full accent-blue-600" />
+    </label>
+  </div>
+
+  <div class="mt-3 flex flex-wrap items-center gap-2">
+    <button type="button" data-push class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 font-mono text-xs text-slate-700 dark:text-slate-200 hover:border-blue-500">Push it again</button>
+    <button type="button" data-reset class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 font-mono text-xs text-slate-700 dark:text-slate-200 hover:border-blue-500">Use Aeolus's values</button>
+    <span class="font-mono text-[11px] text-slate-500 dark:text-slate-400 sm:ml-auto" data-readout aria-live="polite"></span>
+  </div>
+
+  <figcaption class="mt-3 text-[12px] leading-relaxed text-slate-500 dark:text-slate-400">
+    The controller's whole job in one picture: after a 15° push, how quickly and how smoothly the rocket gets back upright. Low damping overshoots and wobbles; high damping creeps back slowly. Aeolus's gains were calculated to sit at ζ ≈ 0.83, just under the point where overshoot disappears.
+  </figcaption>
+</figure>
+
+<script>
+  const T_END = 4;          // seconds shown
+  const DT = 1 / 240;       // integration step
+  const THETA0 = 15;        // degrees
+  const X0 = 36, X1 = 392, YMID = 85, YAMP = 75;
+
+  function simulate(zeta: number, omega: number) {
+    const out: number[] = [];
+    let th = THETA0, v = 0;
+    for (let t = 0; t <= T_END + 1e-9; t += DT) {
+      out.push(th);
+      const a = -omega * omega * th - 2 * zeta * omega * v;
+      v += a * DT;        // semi-implicit Euler: stable for these step sizes
+      th += v * DT;
+    }
+    return out;
+  }
+
+  function stats(series: number[]) {
+    let minTh = 0, lastOut = 0;
+    series.forEach((th, i) => {
+      if (th < minTh) minTh = th;
+      if (Math.abs(th) > 0.02 * THETA0) lastOut = i;
+    });
+    const overshoot = Math.max(0, -minTh / THETA0 * 100);
+    const settle = lastOut >= series.length - 1 ? null : (lastOut + 1) * DT;
+    return { overshoot, settle };
+  }
+
+  function points(series: number[], upTo: number) {
+    const n = series.length - 1;
+    const pts: string[] = [];
+    for (let i = 0; i <= upTo; i += 2) {
+      const x = X0 + (X1 - X0) * (i / n);
+      const y = YMID - (series[i] / THETA0) * YAMP;
+      pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+    }
+    return pts.join(' ');
+  }
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLElement>('[data-damping-demo]').forEach((root) => {
+    const defaults = { zeta: Number(root.dataset.zeta), omega: Number(root.dataset.omega) };
+    const zIn = root.querySelector<HTMLInputElement>('[data-zeta-in]')!;
+    const wIn = root.querySelector<HTMLInputElement>('[data-omega-in]')!;
+    const zOut = root.querySelector<HTMLElement>('[data-zeta-out]')!;
+    const wOut = root.querySelector<HTMLElement>('[data-omega-out]')!;
+    const trace = root.querySelector<SVGPolylineElement>('[data-trace]')!;
+    const rocket = root.querySelector<SVGGElement>('[data-rocket]')!;
+    const readout = root.querySelector<HTMLElement>('[data-readout]')!;
+    let raf = 0;
+
+    function run() {
+      cancelAnimationFrame(raf);
+      const zeta = Number(zIn.value), omega = Number(wIn.value);
+      zOut.textContent = zeta.toFixed(2);
+      wOut.textContent = omega.toFixed(1) + ' rad/s';
+      const series = simulate(zeta, omega);
+      const s = stats(series);
+      readout.textContent =
+        `overshoot ${s.overshoot.toFixed(0)}% · ` +
+        (s.settle === null ? 'still moving after 4 s' : `settles in ${s.settle.toFixed(2)} s`);
+
+      if (reduceMotion) {
+        trace.setAttribute('points', points(series, series.length - 1));
+        rocket.setAttribute('transform', 'rotate(0)');
+        return;
+      }
+      const start = performance.now();
+      const step = (now: number) => {
+        const i = Math.min(series.length - 1, Math.floor((now - start) / 1000 / DT));
+        trace.setAttribute('points', points(series, i));
+        rocket.setAttribute('transform', `rotate(${series[i].toFixed(2)})`);
+        if (i < series.length - 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }
+
+    function reset() {
+      zIn.value = String(defaults.zeta);
+      wIn.value = String(defaults.omega);
+      run();
+    }
+
+    zIn.addEventListener('input', run);
+    wIn.addEventListener('input', run);
+    root.querySelector('[data-push]')!.addEventListener('click', run);
+    root.querySelector('[data-reset]')!.addEventListener('click', reset);
+
+    // Start the first push only once the demo scrolls into view, so it is not
+    // already over by the time a reader gets there.
+    zIn.value = String(defaults.zeta);
+    wIn.value = String(defaults.omega);
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0.4 });
+    io.observe(root);
+  });
+</script>

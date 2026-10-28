@@ -20,6 +20,14 @@
   overflow-y: hidden;
   padding-block-end: 0.5rem;
 }
+
+/* Phones: shrink display math slightly so most equations fit the column
+   without sideways scrolling. */
+@media (max-width: 480px) {
+  .katex-display {
+    font-size: 0.9em;
+  }
+}
 .katex * {
   color: inherit !important;
   fill: currentColor !important;

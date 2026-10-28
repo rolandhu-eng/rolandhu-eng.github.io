@@ -1,0 +1,20 @@
+---
+// One month of the build log: a date column and that day's notes.
+interface Entry { date: string; items: string[] }
+interface Props { entries: Entry[] }
+const { entries } = Astro.props;
+---
+<ol class="not-prose list-none m-0 p-0 my-6 divide-y divide-slate-200 dark:divide-slate-800 border-y border-slate-200 dark:border-slate-800">
+  {entries.map((e) => (
+    <li class="grid grid-cols-1 sm:grid-cols-[9rem_minmax(0,1fr)] gap-x-6 gap-y-1 py-4">
+      <span class="font-mono text-[11px] uppercase tracking-wider text-blue-600 dark:text-blue-400 pt-0.5">{e.date}</span>
+      <ul class="list-none m-0 p-0 space-y-1.5">
+        {e.items.map((t) => (
+          <li class="text-sm leading-relaxed text-slate-700 dark:text-slate-300 pl-4 -indent-4">
+            <span class="text-slate-300 dark:text-slate-600 mr-2">—</span>{t}
+          </li>
+        ))}
+      </ul>
+    </li>
+  ))}
+</ol>

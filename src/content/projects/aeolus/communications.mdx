@@ -3,6 +3,7 @@ title: "Communications"
 order: 7
 navLabel: "Communications"
 showHero: false
+description: "The radio link between the rocket and my laptop, the flight recorder on board, and the dashboard I fly from."
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 import Table from '../../../components/Table.astro';
@@ -11,11 +12,18 @@ import Table from '../../../components/Table.astro';
 
 To communicate with Aeolus, a data link between the ground and the rocket must be established. RFM95W LoRa radio transceivers were used both on the rocket and on the ground. This allows for receiving and transmitting data (telemetry & commands) with a single piece of hardware.
 
-| Transceiver | Transmitter + Receiver |
-| --- | --- |
-| less mass | more mass |
-| transmit/receive cannot occur at same time | concurrent receive/transmit |
-| slower | faster |
+<Table
+  maxWidth="max-w-2xl"
+  columns={[
+    { key: 'c0', label: 'Transceiver', align: 'left' },
+    { key: 'c1', label: 'Transmitter + Receiver', align: 'left' }
+  ]}
+  rows={[
+    { c0: 'less mass', c1: 'more mass' },
+    { c0: 'transmit/receive cannot occur at same time', c1: 'concurrent receive/transmit' },
+    { c0: 'slower', c1: 'faster' }
+  ]}
+/>
 
 The ground station consisted of an ESP32 for processing, an RFM95W radio, and LEDs and a buzzer for indication. The ESP32 was connected to a computer via USB for communication over serial. A telemetry dashboard was displayed on the computer for monitoring and control.
 
@@ -29,7 +37,7 @@ The ground station is an **ESP32-S3** and an **RFM95W** hand-soldered onto perfb
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-3 my-6">
   <figure class="m-0"><img src="/assets/aeolus/communications/gs-radio-underside.webp" alt="Underside of the ground station: RFM95W LoRa breakout hand-soldered to perfboard with a helical wire antenna" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="947" height="1511" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Underside — RFM95W and the helical antenna.</figcaption></figure>
-  <figure class="m-0"><img src="/assets/aeolus/communications/gs-esp32-top.webp" alt="Top side of the ground station: ESP32-S3 DevKitC seated in headers on the perfboard carrier" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1100" height="1811" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Top — ESP32-S3 in headers, USB-C to the laptop.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/communications/gs-esp32-top.webp" alt="Top side of the ground station: ESP32-S3 DevKitC seated in headers on the perfboard carrier" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1129" height="1859" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Top — ESP32-S3 in headers, USB-C to the laptop.</figcaption></figure>
   <figure class="m-0"><img src="/assets/aeolus/communications/gs-stack-edge.webp" alt="Edge view of the ground station showing the ESP32 board stacked above the radio on the perfboard carrier" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="975" height="1736" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Edge on — the whole stack is two boards deep.</figcaption></figure>
 </div>
 
@@ -60,22 +68,32 @@ struct CommandPacket {
 };
 ```
 
-| **Hex** | **Command** | **Description** | **Valid state** |
-| --- | --- | --- | :--- |
-| `0x00` | `NONE` | Ping for telemetry | Any |
-| `0x0A` | `LAUNCH` | Triggers the automated launch sequence | Pre-flight |
-| `0xAA` | `ARM` | Arms flight controller systems | Pre-flight |
-| `0xAD` | `DISARM` | Safely disarms flight systems | Always |
-| `0xA1`–`0xA4` | `SET_SVR1`–`4` | Servo target angle (−40° to +40°) | In-flight |
-| `0xA5` | `SET_SVRN` | Nose servo angle (−40° to +40°) | In-flight |
-| `0xA6` | `SET_RPM` | Sets target motor RPM (0–30,000) | Test / in-flight |
-| `0xA7` | `SET_THR` | Sets raw throttle percentage (0–100) | Test / in-flight |
-| `0xB0` | `LOG_START` | Enables QSPI logging | Pre-flight |
-| `0xB1` | `LOG_STOP` | Disables QSPI logging | Any |
-| `0xB2` | `LS_FILES` | Requests flash file system index | Post-flight |
-| `0xB3` | `ERASE_ALL` | Wipes QSPI flash | Pre-flight |
-| `0xB4` | `GET_FILE` | Sends file data through serial | Post-flight |
-| `0xFF` | `ABORT` | Emergency kill; bypasses all logic | Always |
+<Table
+  maxWidth="max-w-3xl"
+  note="Each command is one byte; the valid-state column is enforced on the vehicle."
+  columns={[
+    { key: 'c0', label: 'Hex', align: 'left' },
+    { key: 'c1', label: 'Command', align: 'left' },
+    { key: 'c2', label: 'Description', align: 'left' },
+    { key: 'c3', label: 'Valid state', align: 'left' }
+  ]}
+  rows={[
+    { c0: '0x00', c1: 'NONE', c2: 'Ping for telemetry', c3: 'Any' },
+    { c0: '0x0A', c1: 'LAUNCH', c2: 'Triggers the automated launch sequence', c3: 'Pre-flight' },
+    { c0: '0xAA', c1: 'ARM', c2: 'Arms flight controller systems', c3: 'Pre-flight' },
+    { c0: '0xAD', c1: 'DISARM', c2: 'Safely disarms flight systems', c3: 'Always' },
+    { c0: '0xA1–0xA4', c1: 'SET_SVR1–4', c2: 'Servo target angle (−40° to +40°)', c3: 'In-flight' },
+    { c0: '0xA5', c1: 'SET_SVRN', c2: 'Nose servo angle (−40° to +40°)', c3: 'In-flight' },
+    { c0: '0xA6', c1: 'SET_RPM', c2: 'Sets target motor RPM (0–30,000)', c3: 'Test / in-flight' },
+    { c0: '0xA7', c1: 'SET_THR', c2: 'Sets raw throttle percentage (0–100)', c3: 'Test / in-flight' },
+    { c0: '0xB0', c1: 'LOG_START', c2: 'Enables QSPI logging', c3: 'Pre-flight' },
+    { c0: '0xB1', c1: 'LOG_STOP', c2: 'Disables QSPI logging', c3: 'Any' },
+    { c0: '0xB2', c1: 'LS_FILES', c2: 'Requests flash file system index', c3: 'Post-flight' },
+    { c0: '0xB3', c1: 'ERASE_ALL', c2: 'Wipes QSPI flash', c3: 'Pre-flight' },
+    { c0: '0xB4', c1: 'GET_FILE', c2: 'Sends file data through serial', c3: 'Post-flight' },
+    { c0: '0xFF', c1: 'ABORT', c2: 'Emergency kill; bypasses all logic', c3: 'Always' }
+  ]}
+/>
 
 The right-hand column is the part that matters. It is not documentation — it is an interlock. A command arriving in the wrong flight state is rejected, so a stale packet, a mis-click, or a corrupted byte that happens to survive the checksum cannot arm the vehicle mid-flight or erase the flash while it is being written to.
 
@@ -89,7 +107,11 @@ Telemetry is lossy and rate-limited — 10 Hz over a radio link is enough to wat
 
 Records buffer into PSRAM during flight and are flushed to QSPI flash, rather than being written straight to flash as they arrive. Flash writes block for unpredictable stretches while the device performs its own housekeeping, and a control loop that must not miss a 5 ms deadline cannot afford to wait on one. RAM absorbs the jitter.
 
-Every log opens with an [initialisation record](/projects/aeolus/gnc#self-describing-logs) capturing the startup calibration state, so a file remains interpretable long after the session that produced it.
+## Self-Describing Logs
+
+Every flight log opens with an initialisation record written before any data: gyro biases measured at startup, the initial gravity vector, local $g$, and the ground-level pressure reference.
+
+This costs a few dozen bytes and means a log can be re-analysed months later without hunting for the constants that were in effect when it was recorded. I added it after going back to an old log and realising I no longer knew what gyro bias had been in effect when it was written.
 
 ## A Struct That Grew and Crashed the Flight Computer
 
@@ -137,14 +159,22 @@ The ground side carries the matching guard: a five-second watchdog clears the br
 
 For the dashboard, two options exist: an HTML/JS-based design running on a browser or a python application.
 
-| **Feature** | **Web Dashboard (HTML/JS)** | **Python Desktop (PyQt/DearPyGui)** |
-| --- | --- | --- |
-| **Development Ease** | High (Edit and refresh) | Medium (Environment setup required) |
-| **Performance** | Good (Browser limitations) | Excellent (Native hardware speed) |
-| **UI Styling** | Easy (CSS/Tailwind) | Complex (Custom GUI frameworks) |
-| **Data Throughput** | Moderate (Web Serial latency) | High (Optimized serial libraries) |
-| **Real-time Logging** | Secondary (Web APIs) | Primary (High-speed file writing) |
-| Use Case | Prototyping, clean UI | performance, integrity |
+<Table
+  maxWidth="max-w-3xl"
+  columns={[
+    { key: 'c0', label: 'Feature', align: 'left' },
+    { key: 'c1', label: 'Web Dashboard (HTML/JS)', align: 'left' },
+    { key: 'c2', label: 'Python Desktop (PyQt/DearPyGui)', align: 'left' }
+  ]}
+  rows={[
+    { c0: 'Development Ease', c1: 'High (Edit and refresh)', c2: 'Medium (Environment setup required)' },
+    { c0: 'Performance', c1: 'Good (Browser limitations)', c2: 'Excellent (Native hardware speed)' },
+    { c0: 'UI Styling', c1: 'Easy (CSS/Tailwind)', c2: 'Complex (Custom GUI frameworks)' },
+    { c0: 'Data Throughput', c1: 'Moderate (Web Serial latency)', c2: 'High (Optimized serial libraries)' },
+    { c0: 'Real-time Logging', c1: 'Secondary (Web APIs)', c2: 'Primary (High-speed file writing)' },
+    { c0: 'Use Case', c1: 'Prototyping, clean UI', c2: 'performance, integrity' }
+  ]}
+/>
 
 A web dashboard was chosen for the simplicity. While performance is expected to be lower than a desktop application, the difference is not noticeable for my use case (~10 Hz data rate).
 

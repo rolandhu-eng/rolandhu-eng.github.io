@@ -3,33 +3,26 @@ title: "Avionics"
 order: 3
 navLabel: "Avionics"
 showHero: false
+description: "The electronics I designed and soldered, and how each sensor was calibrated and checked before I trusted it."
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 import Table from '../../../components/Table.astro';
 
-The avionics system handles sensing, control, and power distribution for Aeolus—reading orientation and altitude, driving the thrust-vane actuators, and keeping the flight computer isolated from the noise and current draw of the EDF. This page covers the hardware side: the flight computer, sensors, and custom PCBs. Control logic and the software architecture are covered separately.
+The avionics system handles sensing, control, and power distribution for Aeolus—reading orientation and altitude, driving the thrust-vane actuators, and keeping the flight computer isolated from the noise and current draw of the EDF. This page covers the hardware side (the flight computer, sensors, and custom PCBs) and how each sensor was calibrated and characterized. Control logic and the software architecture are covered separately.
 
-<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/avionics/Avionics.drawio.png" 
-    alt="Avionics system block diagram" 
-    style={{ maxHeight: '500px' }}
-    class="w-auto mx-auto dark:invert dark:hue-rotate-0" loading="lazy" decoding="async"  width="692" height="552" />
-  <p class="fig-caption">Initial avionics planning. Most of this survived; the GPS was added months later, once drift made it necessary.</p>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8 items-end">
+<figure class="m-0">
+  <img src="/assets/aeolus/avionics/avionics-block-diagram.webp" alt="Avionics system block diagram" class="max-h-[500px] w-auto mx-auto dark:invert dark:hue-rotate-0" loading="lazy" decoding="async" width="692" height="552" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Initial avionics planning. Most of this survived; the GPS was added months later, once drift made it necessary.</figcaption>
+</figure>
+
+<figure class="m-0">
+  <img src="/assets/aeolus/avionics/av_bay.webp" alt="Assembled avionics bay: flight computer and power distribution board" class="max-h-[500px] w-auto mx-auto rounded-lg" loading="lazy" decoding="async" width="695" height="1119" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Flight computer and power distribution board</figcaption>
+</figure>
 </div>
 
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/avionics/av_bay.webp" 
-    alt="Assembled avionics bay: flight computer and power distribution board" 
-    style={{ maxHeight: '500px', borderRadius: '8px' }}
-    class = "w-auto mx-auto" loading="lazy" decoding="async"  width="695" height="1119" />
-  <p class="fig-caption">Flight computer and power distribution board</p>
-</div>
-</div>
-
-<figure class="not-prose my-6 mx-auto max-w-xl">
+<figure class="not-prose my-6 mx-auto max-w-xs">
   <img src="/assets/aeolus/avionics/av-bay-night.webp" alt="Avionics stack installed in the vehicle, powered on" class="w-full rounded-lg" loading="lazy" decoding="async"  width="851" height="1600" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The stack installed and powered, with the outer shell removed.</figcaption>
 </figure>
@@ -68,23 +61,15 @@ Putting the power monitors on their own I2C bus is the deliberate part. A blocki
 
 The GPS is on a hardware UART for the same reason. Early bench testing with the u-blox library showed parsing occasionally blocking for up to 6000 µs — long enough to drop three full control cycles. Re-running the same test on a separate microcontroller as a diagnostic gave 38 µs mean with 1.7 µs standard deviation, which confirmed the spikes were a software and interface problem rather than the receiver being slow.
 
-<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/avionics/fc_front.webp" 
-      alt="FC front" 
-      style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="654" height="749" />
-    <p class="fig-caption">Flight computer, front. Teensy 4.1 stood vertically in the centre with sensor breakouts on the four faces around it.</p>
-  </div>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/avionics/fc_back.webp" 
-      alt="FC back" 
-      style={{ maxHeight: '400px', borderRadius: '8px' }}
-      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="732" height="770" />
-    <p class="fig-caption">Reverse side — the hand-wired runs between each sensor face and the Teensy.</p>
-  </div>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8 items-end">
+  <figure class="m-0">
+  <img src="/assets/aeolus/avionics/fc_front.webp" alt="FC front" class="max-h-[400px] w-auto mx-auto rounded-lg" loading="lazy" decoding="async" width="654" height="749" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Flight computer, front. Teensy 4.1 stood vertically in the centre with sensor breakouts on the four faces around it.</figcaption>
+</figure>
+  <figure class="m-0">
+  <img src="/assets/aeolus/avionics/fc_back.webp" alt="FC back" class="max-h-[400px] w-auto mx-auto rounded-lg" loading="lazy" decoding="async" width="732" height="770" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Reverse side — the hand-wired runs between each sensor face and the Teensy.</figcaption>
+</figure>
 </div>
 
 ---
@@ -92,60 +77,40 @@ The GPS is on a hardware UART for the same reason. Early bench testing with the 
 # PCB Design
 These were the first PCBs I've designed and my first opportunity to solder SMD components. I decided to make the PCBs out of the necessity for compact and reliable electronics as well as for the fun challenge and new skills. I made a power distribution board and a servo distribution board.
 
-Both PCBs were designed in EasyEDA for its interface with JLCPCB for manufacturing. 5 boards of each were ordered for a total of just $6. The 0805 metric was chosen for components as it is compact but large enough to be comfortably hand-soldered with a soldering iron. I used screw terminals and JST connectors for easy connection and disconnection of components.
+Both PCBs were designed in EasyEDA for its interface with JLCPCB for manufacturing. 5 boards of each were ordered for a total of just \$6. The 0805 metric was chosen for components as it is compact but large enough to be comfortably hand-soldered with a soldering iron. I used screw terminals and JST connectors for easy connection and disconnection of components.
 
 ## Power Distribution Board
 The avionics run on a dedicated 2S LiPo, entirely separate from the 6S LiPo powering the EDF. This split exists because the EDF motor draws high current under load, which would sag or inject noise onto a shared rail—putting the flight computer, IMU, and radio on their own isolated battery keeps sensor and logic power clean regardless of what the motor is doing.
 
 The power distribution board was designed to distribute and convert power from the 2S LiPo, serving as the common ground for all sensors, servos, and the flight computer. It included two LM2940 low dropout regulators to convert the 2S LiPo voltage to 5V and 3.3V for the flight computer and sensors. Two toggle switches were used since they are satisfying, one for all power and one for just the servos. An INA260 chip was used to monitor power consumption and battery voltage. 
 
-<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/avionics/pwrpcb.webp" 
-      alt="Power distribution board PCB layout" 
-      style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "w-auto mx-auto rotate-90" loading="lazy" decoding="async"  width="1604" height="1516" />
-    <p class="fig-caption">Power distribution board layout</p>
-  </div>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/avionics/pwr_front.webp" 
-      alt="PCB front" 
-      style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="790" height="744" />
-    <p class="fig-caption">Front</p>
-  </div>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/avionics/pwr_back.webp" 
-      alt="PCB back" 
-      style={{ maxHeight: '350px', borderRadius: '8px' }}
-      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="838" height="805" />
-    <p class="fig-caption">Back</p>
-  </div>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-4 my-8 items-end">
+  <figure class="m-0">
+  <img src="/assets/aeolus/avionics/pwrpcb.webp" alt="Power distribution board PCB layout" class="max-h-[350px] w-auto mx-auto rounded-lg rotate-90" loading="lazy" decoding="async" width="1604" height="1516" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Power distribution board layout</figcaption>
+</figure>
+  <figure class="m-0">
+  <img src="/assets/aeolus/avionics/pwr_front.webp" alt="PCB front" class="max-h-[350px] w-auto mx-auto rounded-lg" loading="lazy" decoding="async" width="790" height="744" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Front</figcaption>
+</figure>
+  <figure class="m-0">
+  <img src="/assets/aeolus/avionics/pwr_back.webp" alt="PCB back" class="max-h-[350px] w-auto mx-auto rounded-lg" loading="lazy" decoding="async" width="838" height="805" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Back</figcaption>
+</figure>
 </div>
 
 ## Servo Distribution Board
 The servo distribution board was simple as it just needed to distribute power and signals to each servo. The board was designed to be as compact as possible while still being hand-solderable with an iron. It included ground and power planes for better current handling (up to 5A worst case) and noise reduction, with a 470 $\mathrm{\mu F}$ low ESR capacitor to smooth the power delivery. I also included 10 $\mathrm{\mu F}$ capacitors on each servo's power line to reduce noise and 330 $\Omega$ resistors on each signal line for protection and to reduce ringing.
 
-<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', margin: '2rem 0' }}>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/avionics/svrpcb.webp" 
-      alt="Servo distribution board PCB layout" 
-      style={{ maxHeight: '500px', borderRadius: '8px' }}
-      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="686" height="1358" />
-    <p class="fig-caption">Servo distribution board layout</p>
-  </div>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/avionics/svr_board.jpeg" 
-      alt="Servo distribution board mounted in the vehicle" 
-      style={{ maxHeight: '500px', borderRadius: '8px' }}
-      class = "w-auto mx-auto" loading="lazy" decoding="async"  width="1831" height="2534" />
-    <p class="fig-caption">Servo distribution board mounted</p>
-  </div>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8 items-end">
+  <figure class="m-0">
+  <img src="/assets/aeolus/avionics/svrpcb.webp" alt="Servo distribution board PCB layout" class="max-h-[500px] w-auto mx-auto rounded-lg" loading="lazy" decoding="async" width="686" height="1358" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Servo distribution board layout</figcaption>
+</figure>
+  <figure class="m-0">
+  <img src="/assets/aeolus/avionics/svr-board.webp" alt="Servo distribution board mounted in the vehicle" class="max-h-[500px] w-auto mx-auto rounded-lg" loading="lazy" decoding="async" width="1445" height="2000" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Servo distribution board mounted</figcaption>
+</figure>
 </div>
 
 ---
@@ -188,7 +153,7 @@ The tangential term $\dot{\boldsymbol{\omega}} \times \mathbf{r}$ is *not* corre
 
 ---
 
-# Accel/Mag calibration
+# Sensor Calibration
 Plotting accelerometer and magnetometer readings in 3D as the sensor is rotated through all orientations should trace a sphere: radius 1 g for the accelerometer, ~50 µT (Earth's field at this location) for the magnetometer. In practice, sensor errors distort this sphere into an offset ellipsoid.
 
 Accelerometers require correction for scale (a constant multiplier), bias (a constant offset), and cross-axis sensitivity (each axis not being truly independent from the others). Magnetometers require correction for hard iron offsets (fixed fields from nearby magnetized materials) and soft iron distortions (caused by induced fields in nearby ferromagnetic materials). Because both error models for the accelerometer and magnetometer distort a sphere into an ellipsoid, both sensors can be corrected with the same equation:
@@ -200,7 +165,7 @@ where $\mathbf{M'}$ and $\mathbf{M}$ are the corrected and raw measurement vecto
 **Procedure:** The IMU was held stationary in several orientations spanning the full range of attitudes. Recorded data was filtered and downsampled to help mitigate orientation clustering from biasing the least-squares ellipsoid fit. MATLAB's `magcal` function then computed the best-fit ellipsoid and returned $\mathbf{A}$, $\mathbf{b}$, and the radius of the corrected sphere for both sensors.
 
 <Dropdown title='Results'>
-### Results stored in flight code
+## Results stored in flight code
 ```cpp
 // [ax ay az] = [A]([ax' ay' az'] - [b])      corrects for accel calibration and mag distortion 
 const float A_acc[3][3] =   {{1.0055f, 0.0f, -0.0005f}, 
@@ -220,36 +185,24 @@ const float uT_avg = 50.17f;            //norm uT after correction
 
 The diagonal elements in $\mathbf{A}$ are the scale factors for each axis. The off-diagonal elements correct for cross-axis sensitivity and mag distortion. 
 
-### Sensor point clouds pre-/post-calibration
+## Sensor point clouds pre-/post-calibration
 The centroid measures the center of mass of all points to visualize the extent of the non-uniform sampling density. The centroid matches the geometric center of the point cloud well, so sampling density was approximately uniform.
 
-<div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/accel-mag-cal/mag-raw.webp" 
-      alt="Magnetometer point cloud before calibration — an offset, distorted ellipsoid" 
-      style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async"  width="700" height="700" />
-    <p class="fig-caption">Magnetometer points before calibration</p>
-  </div>
-  <div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-    <img 
-      src="/assets/aeolus/accel-mag-cal/mag-corrected.webp" 
-      alt="Magnetometer point cloud after calibration — a centred sphere" 
-      style={{ maxWidth: '100%', borderRadius: '8px' }}
-      class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async"  width="700" height="700" />
-    <p class="fig-caption">Magnetometer points after calibration</p>
-  </div>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8 items-end">
+  <figure class="m-0">
+  <img src="/assets/aeolus/accel-mag-cal/mag-raw.webp" alt="Magnetometer point cloud before calibration — an offset, distorted ellipsoid" class="w-full rounded-lg mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" width="700" height="700" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Magnetometer points before calibration</figcaption>
+</figure>
+  <figure class="m-0">
+  <img src="/assets/aeolus/accel-mag-cal/mag-corrected.webp" alt="Magnetometer point cloud after calibration — a centred sphere" class="w-full rounded-lg mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" width="700" height="700" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Magnetometer points after calibration</figcaption>
+</figure>
 </div>
 
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/accel-mag-cal/accel.webp" 
-    alt="Accelerometer point cloud" 
-    style={{ maxWidth: '50%', borderRadius: '8px' }}
-    class = "mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async"  width="761" height="861" />
-  <p class="fig-caption">Accelerometer points (no visible difference pre/post calibration)</p>
-</div>
+<figure class="not-prose my-6 mx-auto max-w-md">
+  <img src="/assets/aeolus/accel-mag-cal/accel.webp" alt="Accelerometer point cloud" class="w-full rounded-lg mx-auto dark:invert dark:hue-rotate-180" loading="lazy" decoding="async" width="761" height="861" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Accelerometer points (no visible difference pre/post calibration)</figcaption>
+</figure>
 
 </Dropdown>
 
@@ -280,7 +233,7 @@ The ellipsoid calibration makes the sensor accurate about its own axes. It says 
 
 The IMU is soldered to a board, the board is bolted into a printed frame, and the frame is bonded into the airframe. Each of those interfaces contributes a fraction of a degree, and the accumulated result is that the sensor's X axis is not the vehicle's roll axis. No amount of scale and bias correction finds this, because from the sensor's point of view nothing is wrong.
 
-It matters for the reason the [GNC page opens with](/projects/aeolus/gnc#state-estimation): a constant attitude error $\theta$ leaks $g\theta$ of false acceleration into the estimate, and unlike noise, a constant error does not average away.
+It matters for the reason the [navigation page opens with](/projects/aeolus/gnc#state-estimation): a constant attitude error $\theta$ leaks $g\theta$ of false acceleration into the estimate, and unlike noise, a constant error does not average away.
 
 Measuring it takes one reading. Set the vehicle on a level surface and record gravity. With a perfectly aligned X-up sensor it should read $(1000, 0, 0)$ mg. It read:
 
@@ -293,13 +246,13 @@ Roughly 21 mg on each of two axes that should be reading zero.
 Recovering the angles is the direction cosine matrix run backwards. Gravity in the earth frame is $\mathbf{g}_E = (g, 0, 0)$, so the inverse DCM — which for a rotation matrix is just the transpose — maps it into the body frame as
 
 $$
-g_x = g\cos\beta\cos\gamma \qquad g_y = -g\sin\gamma\cos\beta \qquad g_z = g\sin\beta
+\begin{gathered}g_x = g\cos\beta\cos\gamma \\ g_y = -g\sin\gamma\cos\beta \\ g_z = g\sin\beta\end{gathered}
 $$
 
 Three equations, and the pitch and yaw misalignments fall straight out:
 
 $$
-\beta = \arcsin\left(\frac{g_z}{\sqrt{g_x^2 + g_y^2 + g_z^2}}\right) \qquad\qquad \gamma = \arctan\left(-\frac{g_y}{g_x}\right)
+\begin{gathered}\beta = \arcsin\left(\frac{g_z}{\sqrt{g_x^2 + g_y^2 + g_z^2}}\right) \\[6pt] \gamma = \arctan\left(-\frac{g_y}{g_x}\right)\end{gathered}
 $$
 
 For the measured vector, $\beta = 1.18^\circ$ and $\gamma = -1.19^\circ$ — a total tilt of **1.68°** between the sensor's roll axis and the vehicle's. Left uncorrected that is $0.29~\text{m/s}^2$ of permanent false acceleration: 2.9 m/s of velocity error and over 14 m of position error in ten seconds, from a mounting error too small to see.
@@ -316,7 +269,7 @@ $$
 
 That choice is not a loss. The unobservable rotation is about the vehicle's own roll axis, which is precisely the axis where a small offset does the least harm — it does not tilt the gravity vector, so it produces no $g\theta$ leakage at all.
 
-<figure class="not-prose my-6 mx-auto max-w-xl">
+<figure class="not-prose my-6 mx-auto max-w-md">
   <img src="/assets/aeolus/avionics/imu-alignment.webp" alt="Handwritten derivation of the IMU mounting misalignment correction matrix from a single gravity reading" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1913" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Recovering two misalignment angles from one level gravity reading, and the resulting correction matrix.</figcaption>
 </figure>
@@ -423,7 +376,7 @@ This matters directly downstream. A Kalman filter assumes Gaussian measurement n
 
 The vehicle transmits on 915 MHz and receives GNSS on 1575 MHz, with both antennas within centimetres of each other. Rather than wait to discover a problem in flight, the RFM95W was set transmitting at 6 dBm and placed directly on top of the GPS patch antenna — a deliberately worse case than the real installation.
 
-<figure class="not-prose my-6 mx-auto max-w-md">
+<figure class="not-prose my-6 mx-auto max-w-xs">
   <img src="/assets/aeolus/avionics/gps-radio-test.webp" alt="NEO-M9N GPS module mounted directly beneath the RFM9x LoRa radio" class="w-full rounded-lg" loading="lazy" decoding="async"  width="997" height="1600" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The test as run — the 915 MHz LoRa breakout sitting directly on the NEO-M9N, closer than anything in the real airframe.</figcaption>
 </figure>

@@ -59,7 +59,7 @@ const TOC_INACTIVE_CLASSES = "text-stone-500 dark:text-slate-500 bg-transparent 
         )}
 
         {isActive && toc.length > 0 && (
-          <div class="relative ml-3 pl-3 flex flex-col gap-0.5 mt-0.5 mb-2 border-l border-stone-300/50 dark:border-slate-700/60">
+          <div class="relative ml-3 pl-3 flex flex-col gap-0.5 mt-0.5 mb-2 border-l border-stone-300/50 dark:border-slate-700/60 xl:hidden">
             {toc.map((item) => (
               <a
                 href={`#${item.id}`}

@@ -1,8 +1,9 @@
 ---
-title: "Guidance, Navigation, Control"
+title: "Navigation & Guidance"
 order: 4
-navLabel: "GNC"
+navLabel: "Nav & Guidance"
 showHero: false
+description: "How the rocket works out which way is up and where it is, 200 times a second, and how it decides what to do next, from launch to landing."
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 import Table from '../../../components/Table.astro';
@@ -10,7 +11,48 @@ import Table from '../../../components/Table.astro';
 # Overview
 The flight computer has three main jobs: it must determine its current orientation and location (navigation), determine how to get to its desired orientation and position (guidance), and control its hardware to get there (control).
 
-This page covers the first two. The [control](/projects/aeolus/control) page covers the third.
+This page covers the first two, plus the flight state machine that sequences the mission. The [control](/projects/aeolus/control) page covers the third.
+
+---
+
+# Flight Software Structure
+
+The flight code is about 5,300 lines of C++ on the Teensy, split into modules that each own one job. There is no RTOS: one loop runs as fast as it can, and each task fires when its own timer comes due.
+
+<Table
+  maxWidth="max-w-3xl"
+  note="Line counts from the flight computer source, September 2026. Shared types, gains and limits live in config.h (562 lines)."
+  columns={[
+    { key: 'm', label: 'Module', align: 'left' },
+    { key: 'l', label: 'Lines', align: 'right' },
+    { key: 'd', label: 'What it does', align: 'left' }
+  ]}
+  rows={[
+    { m: 'sensors/', l: '817', d: 'IMU, barometer, GPS, power monitors and RPM, each polled on its own interval' },
+    { m: 'state_estimation/', l: '685', d: 'Madgwick attitude, gravity removal, integration, barometer and GPS fusion' },
+    { m: 'control/', l: '484', d: 'Position, velocity, attitude and altitude loops, and the control allocator' },
+    { m: 'flight_state/', l: '599', d: 'The state machine: which loops run, thrust mode, aborts and forced landings' },
+    { m: 'telem_comms/', l: '886', d: 'LoRa command and telemetry link, PSRAM/flash datalogger' },
+    { m: 'actuators/', l: '315', d: 'Servo mixing and per-unit calibration, ESC output and the RPM governor' },
+    { m: 'main.cpp', l: '372', d: 'Start-up calibration and the main loop that schedules everything' }
+  ]}
+/>
+
+## One Control Tick
+
+Every 5 ms (200 Hz) the main loop runs the same sequence, in this order:
+
+1. **Read sensors.** The IMU is read every tick. The barometer (every 20 ms), power monitors (15 ms) and GPS (as messages arrive) are read only when new data is due, so a slow sensor never holds up the tick.
+2. **Estimate the state.** Attitude, then earth-frame acceleration, then velocity and position, with barometer and GPS corrections applied when a new sample is in.
+3. **Compute control authority.** The allocator works out what one degree of vane is worth right now, from *measured* RPM and the current airflow.
+4. **Run the state machine.** It decides the flight state, which control loops are switched on, and how thrust is set.
+5. **Set thrust.** Off, idle, maximum, or governed by the altitude loop, depending on the state.
+6. **Run the outer loops when due.** Position every 120 ms, velocity every 40 ms. Each produces a new setpoint for the loop below it.
+7. **Run attitude and allocation.** The attitude loop asks for an angular acceleration, the allocator turns it into four servo angles, and the servos are driven.
+8. **Command the fan.** Thrust becomes an RPM setpoint for the governor.
+9. **Log the tick.** Sensors, state, controller internals and allocator state go into the PSRAM buffer.
+
+The order matters. Authority is computed before the state machine and the attitude loop because both need it, and the log is written last so each record describes the tick that just ran. Anything slow, like flushing the log to flash, waits until the vehicle is back in `IDLE` on the ground.
 
 ---
 
@@ -50,7 +92,7 @@ R = \begin{bmatrix}
 \end{bmatrix}
 $$
 
-<figure class="not-prose my-6 mx-auto max-w-xl">
+<figure class="not-prose my-6 mx-auto max-w-md">
   <img src="/assets/aeolus/gnc/dcm-derivation.webp" alt="Handwritten derivation of the body-to-earth direction cosine matrix by composing three elementary rotations" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1940" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Composing yaw, pitch and roll into the body-to-earth DCM.</figcaption>
 </figure>
@@ -83,6 +125,60 @@ then takes a single gradient-descent step against that error each cycle, blendin
 The published algorithm — and every reference implementation of it — assumes gravity lies along **Z**. That assumption is not a parameter; it is baked in. Because $\hat{\mathbf{g}} = [0, 0, 1]^{T}$ is a constant, the authors expand $f$ and its Jacobian $J$ analytically and simplify by hand, dropping the terms that multiply the two zero components. What ships is a page of algebra with the Z-up assumption already dissolved into it.
 
 With X as the vertical axis, $\hat{\mathbf{g}} = [1, 0, 0]^{T}$. Different components survive, different terms drop, and the simplified expressions no longer describe the right objective. The gradient $\nabla f = J^{T} f$ has to be re-derived from the objective function for the new reference direction — not translated, not axis-swapped after the fact, but rebuilt from the point where the assumption enters.
+
+<Dropdown title="Show the math: the X-up objective and gradient">
+
+With $\hat{\mathbf{g}} = [1, 0, 0]^T$, the direction the current attitude estimate expects gravity to appear in the body frame is the first row of the body-to-earth rotation matrix. Subtracting the measured, normalised acceleration gives the objective:
+
+$$
+f(\mathbf{q}, \mathbf{a}) =
+\begin{bmatrix}
+q_0^2 + q_1^2 - q_2^2 - q_3^2 - a_x \\
+2(q_1 q_2 - q_0 q_3) - a_y \\
+2(q_1 q_3 + q_0 q_2) - a_z
+\end{bmatrix}
+$$
+
+For comparison, the published Z-up objective is
+
+$$
+f_{Z\text{-up}} =
+\begin{bmatrix}
+2(q_1 q_3 - q_0 q_2) - a_x \\
+2(q_0 q_1 + q_2 q_3) - a_y \\
+2(\tfrac{1}{2} - q_1^2 - q_2^2) - a_z
+\end{bmatrix}
+$$
+
+Every row is different.
+
+Differentiating each row with respect to $q_0 \ldots q_3$ gives the Jacobian:
+
+$$
+J =
+\begin{bmatrix}
+2q_0 & 2q_1 & -2q_2 & -2q_3 \\
+-2q_3 & 2q_2 & 2q_1 & -2q_0 \\
+2q_2 & 2q_3 & 2q_0 & 2q_1
+\end{bmatrix}
+$$
+
+and the gradient $\nabla f = J^T f$ is what the code computes, term by term:
+
+```cpp
+s0 =  2*q0*f1 - 2*q3*f2 + 2*q2*f3;
+s1 =  2*q1*f1 + 2*q2*f2 + 2*q3*f3;
+s2 = -2*q2*f1 + 2*q1*f2 + 2*q0*f3;
+s3 = -2*q3*f1 - 2*q0*f2 + 2*q1*f3;
+```
+
+Each step, the gyro rate is integrated and one normalised gradient step is subtracted, then the quaternion is renormalised:
+
+$$
+\dot{\mathbf{q}} = \tfrac{1}{2}\,\mathbf{q} \otimes [0, \boldsymbol{\omega}] \;-\; \beta \frac{\nabla f}{\lVert \nabla f \rVert}
+$$
+
+</Dropdown>
 
 Rotating the sensor frame to fake a Z-up convention would have been the shortcut. It also would have put the numerically-privileged axis in the wrong place and left every downstream frame — control, guidance, telemetry — disagreeing with the physical vehicle.
 
@@ -120,20 +216,20 @@ $$
 Integrating once returns the trapezoidal sum, which is the familiar result:
 
 $$
-v = v' + \int_0^{\Delta t}\left[a' + \frac{a-a'}{\Delta t}t\right]dt = v' + \left(\frac{a' + a}{2}\right)\Delta t
+\begin{aligned}v &= v' + \int_0^{\Delta t}\left[a' + \frac{a-a'}{\Delta t}t\right]dt \\ &= v' + \left(\frac{a' + a}{2}\right)\Delta t\end{aligned}
 $$
 
 Integrating a second time is where it gets interesting:
 
 $$
-x = x' + \int_0^{\Delta t}\left[v' + a't + \frac{a-a'}{2\Delta t}t^2\right]dt = x' + v'\Delta t + \tfrac{1}{2}a'\Delta t^2 + \frac{a-a'}{6}\Delta t^2
+\begin{aligned}x &= x' + \int_0^{\Delta t}\left[v' + a't + \frac{a-a'}{2\Delta t}t^2\right]dt \\ &= x' + v'\Delta t + \tfrac{1}{2}a'\Delta t^2 + \frac{a-a'}{6}\Delta t^2\end{aligned}
 $$
 
 $$
 x = x' + v'\Delta t + \tfrac{1}{6}\left(2a' + a\right)\Delta t^2
 $$
 
-<figure class="not-prose my-6 mx-auto max-w-xl">
+<figure class="not-prose my-6 mx-auto max-w-md">
   <img src="/assets/aeolus/gnc/rate-integration.webp" alt="Handwritten derivation of trapezoidal velocity and constant-jerk position integration" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1500" height="1537" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Trapezoidal velocity, and the position term that does not follow from it.</figcaption>
 </figure>
@@ -155,6 +251,20 @@ Neither correction is large in a single 5 ms step. Both matter because of what t
 # Vertical Channel
 
 Altitude and vertical velocity fuse the barometer with the accelerometer. The barometer is absolute but slow and noisy at roughly ±0.5 m; integrated acceleration is smooth and fast but drifts without bound. Each covers the other's weakness.
+
+In the code this is two separate corrections on top of the integrated accelerometer.
+
+**Altitude is pulled toward the barometer.** Each new barometer sample (50 Hz) moves the altitude estimate 1% of the way toward the barometer reading:
+
+$$
+h \leftarrow h + K_1\,(h_{baro} - h), \qquad K_1 = 0.01
+$$
+
+At 50 Hz that is a time constant of about $1/(50 \times 0.01) = 2$ s. Short barometer noise is smoothed out, and a steady barometer offset is followed within a few seconds.
+
+**Vertical velocity is corrected by GPS.** GPS Doppler velocity goes through the same one-dimensional Kalman filter as the [horizontal channel](#gps-fusion), with the measurement noise taken from the receiver's reported speed accuracy on each fix.
+
+GPS altitude is not used anywhere. That mattered on the 40 m flight: when the barometer read several metres low during the descent, the altitude estimate followed it within a couple of seconds and nothing else could pull it back. [Teardown on the testing page](/projects/aeolus/testing#it-was-the-barometer-not-the-controller).
 
 ---
 
@@ -184,6 +294,27 @@ Process noise sets how quickly the filter's confidence in its own propagation de
 
 GPS velocity is fused with IMU-integrated velocity through a one-dimensional Kalman filter per axis. This fixed both velocity and position drift, since position is the integral of the corrected velocity rather than an independently estimated state.
 
+<Dropdown title="Show the math: the velocity Kalman filter">
+
+The IMU integration carries velocity forward between GPS fixes, so the filter only has to track how uncertain that velocity has become. For each axis, the variance $P$ grows with time since the last fix:
+
+$$
+P^- = P + Q\,\Delta t
+$$
+
+When a fix arrives, the gain decides how far to move toward the GPS reading:
+
+$$
+\begin{gathered}
+K = \frac{P^-}{P^- + R} \\[4pt]
+v \leftarrow v + K\,(v_{gps} - v), \qquad P = (1 - K)\,P^-
+\end{gathered}
+$$
+
+$Q$ is 0.002 m²/s³ vertically and 0.02 horizontally ([process noise, above](#horizontal-channel)). $R$ is not fixed: it comes from the speed-accuracy estimate $s$ the receiver reports with every fix, as $R_v = s^2/12$ vertically and $R_h = s^2/8.33$ horizontally. A long gap since the last fix makes $P^-$ large and $K$ close to 1, so the GPS is trusted. A fix the receiver itself reports as poor makes $R$ large and $K$ small, so it barely moves the estimate. The term in brackets, $v_{gps} - v$, is the innovation that gets logged.
+
+</Dropdown>
+
 The receiver's **Doppler velocity** is used as the correction, not its position solution. Doppler velocity is derived from carrier frequency shift rather than from code-phase ranging, and it is both more accurate and less prone to the slow wandering that afflicts position fixes under multipath. For a vehicle that needs to hold station rather than know its global coordinates, velocity is also the more directly useful observable.
 
 The filter's **innovation** — the difference between the predicted and measured velocity — is logged on all three axes. That is instrumentation added specifically to debug the filter: innovation is where fusion problems become visible, since a filter that is over-trusting, under-trusting, or being fed outliers shows it in the innovation sequence long before the position estimate visibly fails.
@@ -209,10 +340,34 @@ acceleration    →  tilt + bearing  →  target quaternion
 A tilted vehicle accelerates horizontally because its thrust vector tips. So a commanded horizontal acceleration becomes a commanded tilt:
 
 $$
-\text{tilt} = \arcsin\left(\frac{|\mathbf{a}_{cmd}|}{T/m}\right)
+\text{tilt} = \arcsin\left(\frac{|\mathbf{a}_{cmd}|}{F_{tilt}/m}\right)
 $$
 
-with the argument clamped to $[-1, 1]$ before the `arcsin` rather than trusting the loop above to produce something physical, and the whole thing skipped when thrust is too low to lean on at all. The bearing comes from `atan2` of the two acceleration components, and the pair are composed into a target quaternion.
+where $F_{tilt}$ is the sideways force available per radian of tilt: measured thrust, plus the body's aerodynamic side force, which helps nose-first and opposes base-first. The argument is clamped to $[-1, 1]$ before the `arcsin` rather than trusting the loop above to produce something physical, and the loop holds instead of tilting when there is too little force to lean on, or when thrust and aerodynamic force are close and opposed so the direction of the result is unknowable. The bearing comes from `atan2` of the two acceleration components, and the pair are composed into a target quaternion.
+
+<Dropdown title="Show the math: tilt and bearing to a target quaternion">
+
+With bearing $\psi = \operatorname{atan2}(a_E, a_N)$, the vehicle must tip its up-axis toward the commanded direction $\hat{\mathbf{d}} = (0, \sin\psi, \cos\psi)$, written in (up, east, north). The rotation axis is perpendicular to both, $\hat{\mathbf{n}} = \hat{\mathbf{x}}_{up} \times \hat{\mathbf{d}} = (0, -\cos\psi, \sin\psi)$, so the tilt quaternion is:
+
+$$
+\mathbf{q}_{tilt} = \left(\cos\tfrac{\theta}{2},\; 0,\; -\cos\psi\,\sin\tfrac{\theta}{2},\; \sin\psi\,\sin\tfrac{\theta}{2}\right)
+$$
+
+Roll about the vertical axis is kept separately. Since X is up, the roll part of the previous target is just its $q_0$ and $q_1$ terms, renormalised:
+
+$$
+\mathbf{q}_{roll} = \frac{(q_0,\, q_1,\, 0,\, 0)}{\sqrt{q_0^2 + q_1^2}}
+$$
+
+and the new target applies roll first, then tilt:
+
+$$
+\mathbf{q}_{target} = \mathbf{q}_{tilt} \otimes \mathbf{q}_{roll}
+$$
+
+Why the roll part comes from the previous *target* and not the measured attitude is explained [below](#holding-roll-while-tilting).
+
+</Dropdown>
 
 Every stage is bounded, and each limit protects against something specific:
 
@@ -249,6 +404,48 @@ IDLE → LAUNCH → BOOST_UP → APOGEE → [COAST_DOWN] → DESCENT → LANDING
 
 Each state owns two things: which control loops are active, and what the thrust mode is (off, idle, governed, or max). `BOOST_UP` climbs on the altitude PID. `APOGEE` holds a 3 s hover at the target — deliberately, so the drop always starts from the same known condition rather than from whatever state the climb happened to end in. `DESCENT` tracks a computed arrest curve down to 0.3 m, and `LANDING` takes the last stretch at a fixed 0.1 m/s.
 
+
+<Table
+  maxWidth="max-w-4xl"
+  note="Loops: A = attitude, V = velocity, P = position. Thresholds from config.h."
+  columns={[
+    { key: 's', label: 'State', align: 'left' },
+    { key: 'l', label: 'Loops', align: 'center' },
+    { key: 't', label: 'Thrust', align: 'left' },
+    { key: 'x', label: 'Leaves when', align: 'left' }
+  ]}
+  rows={[
+    { s: 'IDLE', l: '—', t: 'Off (fan under bench control)', x: 'LAUNCH command received' },
+    { s: 'LAUNCH', l: 'A', t: 'Maximum', x: '0.25 m above the pad' },
+    { s: 'BOOST_UP', l: 'A V P', t: 'Governed (altitude loop)', x: 'Within 0.15 m of target altitude and vertical speed under 0.25 m/s' },
+    { s: 'APOGEE', l: 'A V P', t: 'Governed', x: 'After a 3 s hover' },
+    { s: 'COAST_DOWN', l: 'A V', t: 'Idle', x: 'Falls to the relight altitude' },
+    { s: 'DESCENT', l: 'A V P', t: 'Governed', x: 'Below 0.3 m and sinking slower than 0.8 m/s' },
+    { s: 'LANDING', l: 'A V P', t: 'Governed', x: 'Stopped (under 0.04 m/s, below 0.2 m) for 0.6 s, then IDLE' },
+    { s: 'ABORT', l: '—', t: 'Off', x: 'Settled for 0.6 s, then IDLE', groupStart: true }
+  ]}
+/>
+
+What ends a flight early depends on whether cutting thrust would make things worse:
+
+<Table
+  maxWidth="max-w-3xl"
+  columns={[
+    { key: 'c', label: 'Condition', align: 'left' },
+    { key: 'r', label: 'Response', align: 'left' }
+  ]}
+  rows={[
+    { c: 'Tilt beyond 35° while powered', r: 'Abort (cut thrust)' },
+    { c: 'Above the 45 m ceiling', r: 'Abort' },
+    { c: 'Still on the pad 3.5 s after launch', r: 'Abort' },
+    { c: 'ABORT command from the ground', r: 'Abort' },
+    { c: 'Target altitude not reached within 25 s', r: 'Forced landing', groupStart: true },
+    { c: 'Flight longer than 60 s', r: 'Forced landing' },
+    { c: 'Radio link lost', r: 'Forced landing' },
+    { c: 'Sinking faster than full thrust can stop', r: 'Keep braking at full thrust (committed)' }
+  ]}
+/>
+
 `ABORT` is reachable from every state. Two policy decisions in it are worth stating plainly, because both are cases where the obvious response is wrong:
 
 **Link loss lands the vehicle. It never aborts.** Aborting cuts thrust, and a vehicle that has lost its radio is not a vehicle that has lost its ability to fly. Cutting the fan because the operator stopped talking would convert a communications fault into a crash.
@@ -262,7 +459,7 @@ The interesting state is the one that gets skipped.
 `COAST_DOWN` drops the fan to idle and lets the vehicle fall ballistically, which is the whole point of a drop test. Restarting from idle is not instant: the fan takes about 1.5 s to spool, the vehicle keeps accelerating downward the entire time, and only then does braking begin. So before entering the coast the machine solves for the altitude at which it would have to relight:
 
 $$
-h_{relight} = \underbrace{v_d t + \tfrac{t^2}{2}\left(g - \tfrac{T_{idle}}{m}\right) - \tfrac{t^2 (T_{max}-T_{idle})}{6m}}_{\text{fall during spool}} \;+\; \underbrace{\frac{v_{end}^2}{2 a_{dec}}}_{\text{braking}} \;+\; 2\,\mathrm{m}
+\begin{aligned}h_{relight} = {} & \underbrace{v_d t + \tfrac{t^2}{2}\left(g - \tfrac{T_{idle}}{m}\right) - \tfrac{t^2 (T_{max}-T_{idle})}{6m}}_{\text{fall during spool}} \\ & + \underbrace{\frac{v_{end}^2}{2 a_{dec}}}_{\text{braking}} \;+\; 2\,\mathrm{m}\end{aligned}
 $$
 
 The first group integrates a linear thrust ramp from idle to maximum over the spool time; the second is the distance needed to arrest the speed that ramp leaves you with. If that number is larger than the current altitude, there is no coast budget and `COAST_DOWN` is skipped entirely — the fan stays under the governor and the vehicle flies a powered descent instead. In practice that threshold sits near 19 m, so every flight below it descends under power whether or not a drop was requested.
@@ -288,14 +485,6 @@ floored at the ESC's minimum stable speed and capped at hover, since anything ab
 ## Events, Not Just Telemetry
 
 Every transition, abort reason, forced landing, commit latch and touchdown writes a timestamped record into the flash log. Previously that context lived only in `Serial.printf`, which meant it existed only if somebody happened to have a console attached — and the flights that most need explaining are the ones nobody was tethered to.
-
----
-
-# Self-Describing Logs
-
-Every flight log opens with an initialisation record written before any data: gyro biases measured at startup, the initial gravity vector, local $g$, and the ground-level pressure reference.
-
-This costs a few dozen bytes and means a log can be re-analysed months later without hunting for the constants that were in effect when it was recorded. I added it after going back to an old log and realising I no longer knew what gyro bias had been in effect when it was written.
 
 ---
 

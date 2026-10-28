@@ -3,6 +3,7 @@ title: "Testing"
 order: 8
 navLabel: "Testing"
 showHero: false
+description: "Every test and flight in order: what was measured, what went wrong, and what changed because of it."
 ---
 import Dropdown from '../../../components/Dropdown.astro';
 import Table from '../../../components/Table.astro';
@@ -41,14 +42,10 @@ Nearly every number quoted elsewhere on this site came from one of these. The ri
 
 It is important to get thrust and control moments for accurate simulation before flight. It serves as a way to validate the function of the propulsion and control system, and see if my expectations and calculations live up to reality. To test thrust and get control moments, I built the test stand v1 with 4 bar load cells in a + pattern connected to the rocket. The sum of the load cell forces would be the net axial force on the rocket, while the force differential between opposite pairs could be used to calculate moments.
 
-<div style={{ flex: '1', minWidth: '280px', textAlign: 'center' }}>
-  <img 
-    src="/assets/aeolus/testing/stand.webp" 
-    alt="Four-bar load cell test stand" 
-    style={{ maxWidth: '50%'}}
-    class="mx-auto" loading="lazy" decoding="async"  width="2494" height="3116" />
-  <p class="fig-caption">Four load cells in a cross. Summing them gives axial thrust; the differential between opposing pairs gives moment, which is how vane authority was measured.</p>
-</div>
+<figure class="not-prose my-6 mx-auto max-w-md">
+  <img src="/assets/aeolus/testing/stand.webp" alt="Four-bar load cell test stand" class="w-full mx-auto" loading="lazy" decoding="async" width="2494" height="3116" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Four load cells in a cross. Summing them gives axial thrust; the differential between opposing pairs gives moment, which is how vane authority was measured.</figcaption>
+</figure>
 
 The stand is a build in its own right, with its own firmware — load cell conditioning, a radio link, and a dashboard of its own, so that thrust runs could be commanded and logged without anyone standing next to a 53 A motor.
 
@@ -95,7 +92,35 @@ The next round tested roll alone, with pitch and yaw outputs forced to zero. Thr
 
 That constraint is what made the flight data usable as *measurement*. With only roll active, commanded deflection and measured angular acceleration relate through a single unknown, so fitting one against the other [returns the control authority](/projects/aeolus/control#dynamic--from-flight-data) — and the fit's intercept returns the trim angle for free. It also surfaced the [180° quaternion sign flip](/projects/aeolus/control#quaternion-error-and-the-180-problem), which was fixed the following day.
 
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <video poster="/assets/aeolus/control/roll3_final-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg" width="1280" height="1080">
+    <source src="/assets/aeolus/control/roll3_final.webm" type="video/webm" />
+  </video>
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll-only tethered test with the derived gains.</figcaption>
+</figure>
+
+The gain sweep behaved the way the second-order model says it should: low damping produced sustained oscillation, and raising it three-fold produced a visibly overdamped, sluggish return. The values that flew sit between them.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+  <figure class="m-0"><img src="/assets/aeolus/control/gain-underdamped.webp" alt="Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="899" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/aeolus/control/gain-overdamped.webp" alt="Damping raised three-fold — overdamped and sluggish." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1216" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Damping raised three-fold — overdamped and sluggish.</figcaption></figure>
+</div>
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/control/roll-tuned.webp" alt="Roll with the gains that flew." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="842" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll with the gains that flew.</figcaption>
+</figure>
+
 Pitch and yaw followed the same way, disturbed by hand and left to recover. They recovered too slowly and could not reject small taps, which pointed at authority rather than tuning — and led directly to the [vane resize](/projects/aeolus/control#what-doubling-the-area-actually-bought) in August.
+
+After raising the gains, the vehicle recovered from a roughly 4° disturbance in about 0.8 seconds — adequate for holding vertical, though still slower than ideal.
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <video poster="/assets/aeolus/control/pitch-yaw-test-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="406">
+    <source src="/assets/aeolus/control/pitch-yaw-test.webm" type="video/webm" />
+  </video>
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Tethered pitch/yaw disturbance rejection.</figcaption>
+</figure>
 
 ---
 
@@ -111,13 +136,13 @@ The most useful result was not the flight itself but a comparison: measured thru
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 mx-auto max-w-2xl">
   <figure class="m-0">
-    <video controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
-      <source src="/assets/aeolus/free-flight.mp4" type="video/mp4" />
+    <video poster="/assets/aeolus/free-flight-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/free-flight.webm" type="video/webm" />
     </video>
     <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Untethered flight, August 2026.</figcaption>
   </figure>
   <figure class="m-0">
-    <video controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+    <video poster="/assets/aeolus/flight-impulse-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
       <source src="/assets/aeolus/flight-impulse.webm" type="video/webm" />
     </video>
     <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Position-loop impulse test, 27 August. The vehicle is pushed off station by hand mid-hover and the position loop brings it back.</figcaption>
@@ -136,7 +161,7 @@ From September the [state machine](/projects/aeolus/gnc#flight-sequencing) flies
 Four autonomous launch-hover-drop-land flights at 1.5 m, 5 m, and twice at 15 m. All four completed. Three separate defects came out of the logs, and none of them were visible from the ground.
 
 <figure class="not-prose my-6">
-  <video controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="1920" height="1080">
+  <video poster="/assets/aeolus/flight-15m-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="1920" height="1080">
     <source src="/assets/aeolus/flight-15m.webm" type="video/webm" />
   </video>
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">A 15 m flight at night, with the <a href="/projects/aeolus/communications#ground-station">ground station</a> composited over the footage — state transitions, altitude tracking and vane deflection alongside the vehicle they describe.</figcaption>
@@ -156,10 +181,18 @@ The obvious suspect was the fins. Reconstructing vane and fin moments from telem
 
 The log gave up the real cause on a tick-by-tick read. The attitude error's antipodal shortest-path sign is recomputed fresh every control tick from the error quaternion's scalar term. Once roll error crossed roughly 115° while the vehicle was still rotating hard, that sign flipped inside a single 40 ms tick:
 
-| | error | roll rate |
-|---|---|---|
-| tick *n* | +114.3° | −267 °/s |
-| tick *n*+1 | −114.5° | −269 °/s |
+<Table
+  maxWidth="max-w-md"
+  columns={[
+    { key: 'c0', label: '', align: 'left' },
+    { key: 'c1', label: 'error', align: 'left' },
+    { key: 'c2', label: 'roll rate', align: 'left' }
+  ]}
+  rows={[
+    { c0: 'tick n', c1: '+114.3°', c2: '−267 °/s' },
+    { c0: 'tick n+1', c1: '−114.5°', c2: '−269 °/s' }
+  ]}
+/>
 
 The physical state barely moved. The error's sign inverted anyway, which inverted the proportional term, which briefly commanded torque **with** the spin rather than against it — doubling the peak rate.
 
@@ -176,7 +209,7 @@ static inline float rateBlend(float rate_rads) {
 }
 ```
 
-Across a 90–150 °/s band the error fed to P is scaled toward zero; above it, P is suppressed entirely. D never sees the blend — it comes straight from the gyro, which has no wrapped-position ambiguity to invert. Validation was done by replaying the exact recorded `(error, rate, P, D)` sequence from the bad flight through the new logic: the output stays correctly signed through the flip, and every other tick checked — including the first flight's healthy high-rate recovery — is unchanged. Not yet flight tested.
+Across a 90–150 °/s band the error fed to P is scaled toward zero; above it, P is suppressed entirely. D never sees the blend — it comes straight from the gyro, which has no wrapped-position ambiguity to invert. Validation was done by replaying the exact recorded `(error, rate, P, D)` sequence from the bad flight through the new logic: the output stays correctly signed through the flip, and every other tick checked — including the first flight's healthy high-rate recovery — is unchanged. It flew on both 5 September flights, together with retuned roll gains (Kp 16, Kd 6.5). Roll rates never got high enough to engage the blend, so it is still untested in the case it exists for.
 
 ## 5 September — 30 m Clean, 40 m Into a Fence
 
@@ -308,4 +341,4 @@ The 40 m teardown produced a specific list, roughly in priority order.
 
 **Revisit `THRUST_LOSS_COEFF`** and add an axial-airspeed term to the thrust model, or widen the open-loop margins enough to cover the ±8% it is currently unaware of.
 
-**Fly the unwinding fix.** It was validated by replay against recorded flight data, which is strong evidence, but it has not yet been in the air.
+**Exercise the unwinding fix.** It was validated by replay against recorded flight data and has flown since 5 September, but no flight has yet reached the roll rates that engage it.
