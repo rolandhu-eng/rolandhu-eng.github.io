@@ -56,11 +56,19 @@ Aeolus is a solo project. I designed it, built it, wrote the software, and flew 
 
 **Designed and fabricated.** The airframe and full CAD assembly, the four-vane thrust vector linkage, the nose fairing and its generatively designed hinges. Two custom PCBs — power distribution and servo distribution — laid out in EasyEDA, ordered, and hand-soldered including the SMD work. The flight computer is a perfboard build around a Teensy 4.1. I also designed and built the four-bar load cell test stand, with its own firmware and radio link, to characterize the vehicle.
 
-**Wrote.** All flight firmware, in C++: the Madgwick attitude filter re-derived for an X-up body frame, complementary and Kalman fusion for altitude and velocity, the cascaded position/velocity/attitude controllers, the control allocator, the RPM governor, the flight state machine that sequences the mission, and the PSRAM-to-flash datalogger. Also the LoRa command protocol, the ESP32 ground station firmware, and the browser dashboard it talks to over Web Serial.
+**Wrote.** All flight firmware, in C++:
+- the [Madgwick attitude filter](/projects/aeolus/gnc#madgwick-filter), which keeps the gyro's drifting orientation estimate honest using the accelerometer's sense of which way is down, re-derived for an X-up body frame
+- [complementary](/projects/aeolus/gnc#vertical-channel) and [Kalman](/projects/aeolus/gnc#gps-fusion) fusion for altitude and velocity, each pairing a smooth sensor that drifts with a noisy one that doesn't
+- the [cascaded position, velocity and attitude controllers](/projects/aeolus/control#loop-structure), each loop feeding a setpoint to a faster one inside it
+- the [control allocator](/projects/aeolus/control#control-allocation), which turns "rotate this way" into four servo angles
+- the [RPM governor](/projects/aeolus/propulsion#rpm-governor), which holds the fan at a commanded speed as the battery voltage drops
+- the [flight state machine](/projects/aeolus/gnc#flight-sequencing) that sequences the mission, and the [PSRAM-to-flash datalogger](/projects/aeolus/communications#datalogging)
 
-**Measured and analyzed.** Inertia by bifilar pendulum. Vane control authority two independent ways — on the test stand, and again by fitting flight logs. Thrust, current and RPM across the throttle range. Accelerometer and magnetometer calibration by ellipsoid fit. GPS velocity noise characterization. Every flight log analyzed in Python.
+Also the [LoRa command protocol](/projects/aeolus/communications#protocol-design), the ESP32 ground station firmware, and the [browser dashboard](/projects/aeolus/communications#ground-station) it talks to over Web Serial.
 
-**Modelled.** CFD in ANSYS Fluent for the vane and intake aerodynamics, and a 6DOF flight model in MATLAB/Simulink driven by those coefficients and my measured mass properties.
+**Measured and analyzed.** Inertia by [bifilar pendulum](/projects/aeolus/vehicle#bi-filar-pendulum-setup): hang the vehicle from two strings, time how fast it twists back and forth, and work out how hard it is to rotate. [Vane control authority](/projects/aeolus/control#measuring-control-authority), the turning force one degree of vane produces, two independent ways: on the test stand, and again by fitting flight logs. [Thrust, current and RPM](/projects/aeolus/propulsion#thrust-characterization) across the throttle range. [Accelerometer and magnetometer calibration](/projects/aeolus/avionics#sensor-calibration) by ellipsoid fit, which corrects each sensor's offset and scale errors. [GPS velocity noise](/projects/aeolus/avionics#gps-characterization) characterization. Every flight log analyzed in Python.
+
+**Modelled.** [CFD](/projects/aeolus/simulation#cfd) (simulated airflow) in ANSYS Fluent for the vane and intake aerodynamics, and a [6DOF flight model](/projects/aeolus/simulation#simulink), three directions of movement plus three axes of rotation, in MATLAB/Simulink driven by those coefficients and my measured mass properties.
 
 
 ---
@@ -209,6 +217,13 @@ All of this demands precise gain tuning, modelling, simulation, attitude estimat
 
 <div class="not-prose my-8 max-w-2xl mx-auto text-[12px] leading-snug">
 
+  <div class="relative pl-8">
+
+  <div aria-hidden="true" class="pointer-events-none absolute left-2 top-5 bottom-5 w-6 rounded-l-xl border-2 border-r-0 border-dashed border-blue-400/70 dark:border-blue-500/60">
+    <span class="absolute -right-[7px] -top-[9px] text-[11px] leading-none text-blue-500">▶</span>
+    <span class="absolute left-[-11px] top-1/2 -translate-y-1/2 rotate-180 [writing-mode:vertical-rl] whitespace-nowrap bg-[#f5f3ef] dark:bg-[#020817] py-2 font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400">feedback · 200× per second</span>
+  </div>
+
   <a href="/projects/aeolus/avionics#sensors" class="block no-underline rounded-lg border p-3 transition-colors border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:border-blue-500 dark:hover:border-blue-500">
     <div class="font-mono text-[10px] uppercase tracking-wider mb-2 text-slate-400">Sensors</div>
     <div class="flex flex-wrap gap-1.5">
@@ -264,6 +279,18 @@ All of this demands precise gain tuning, modelling, simulation, attitude estimat
       <div class="font-mono text-[10px] uppercase tracking-wider mb-2 text-blue-600 dark:text-blue-400">Thrust</div>
       <div class="text-slate-600 dark:text-slate-400">altitude PID → RPM setpoint → governor → ESC</div>
     </a>
+  </div>
+
+  <div class="flex items-center justify-center gap-2 py-1.5 text-slate-400 dark:text-slate-500">
+    <span class="text-base leading-none">↓</span>
+    <span class="font-mono text-[10px]">vane angles · fan speed</span>
+  </div>
+
+  <a href="/projects/aeolus/vehicle" class="block no-underline rounded-lg border p-3 transition-colors border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:border-blue-500 dark:hover:border-blue-500">
+    <div class="font-mono text-[10px] uppercase tracking-wider mb-2 text-slate-400">Vehicle</div>
+    <div class="text-slate-600 dark:text-slate-400">vanes turn the exhaust · fan sets thrust · the airframe moves, and the sensors measure the result</div>
+  </a>
+
   </div>
 
   <a href="/projects/aeolus/communications" class="mt-2 no-underline rounded-lg border border-dashed border-slate-300 dark:border-slate-700 p-3 flex flex-wrap items-center justify-center gap-2 text-slate-500 dark:text-slate-400 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">

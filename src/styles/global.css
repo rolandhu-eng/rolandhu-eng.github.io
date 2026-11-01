@@ -6,10 +6,10 @@
 @import "katex/dist/katex.min.css";
 @plugin "@tailwindcss/typography";
 
+/* No content-visibility here: skipped equations take a guessed height, and the
+   difference made links to headings below them land hundreds of px too far. */
 .katex,
 .katex-display {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 80px; /* Tells the browser to skip math layout math when off-screen */
   transition: none !important;
 }
 
