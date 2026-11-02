@@ -9,17 +9,61 @@ heroPosition: top
 showHero: true
 ---
 
-# 01. Overview
+import Table from '../../components/Table.astro';
+
+# Overview
 
 The Penny Hockey project was a tabletop game board that combined woodworking, laser cutting, 3D printing, soldering, and Arduino programming. The board features a NASA logo laser engraved into clear plexiglass, surrounded by a wooden frame supported by dado cuts and assembled with miter joints.
 
-<div class="not-prose rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950">
-  <img src="/assets/penny-hockey/pennyHockey.jpg" alt="Penny Hockey game board" class="w-full h-auto object-cover" loading="lazy" decoding="async" />
+<div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-3 my-6">
+  <figure class="m-0"><img src="/assets/penny-hockey/board-rainbow.webp" alt="Finished penny hockey board with the LED strip cycling through rainbow colors around the engraved NASA logo" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1751" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Waiting to start — “PRESS A BUTTON TO START” while the strip runs a rainbow.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/penny-hockey/board-blue.webp" alt="Penny hockey board lit blue mid-game, with the LCD scoreboard at the far end" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1614" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Mid-game — the LCD keeps the score, here 0–6.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/penny-hockey/board-goal.webp" alt="Penny hockey board at the end of a game, with the LCD showing the winner at 10 points" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1675" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Game over — first to 10, and the LCD flags the winner.</figcaption></figure>
 </div>
 
 ---
 
-# 02. Build Details
+# Design Brief
+
+The target was children aged 5 and up. More and more children are drawn to phones and tablets, and those products keep getting more engaging. The aim was a board game that competes for that attention with colour, light and fast gameplay, so children would choose it over a screen.
+
+The constraints:
+
+- completed individually
+- standard 9″ × 12″ playing surface
+- walls ¾″ wide by 1¼″ tall
+- any non-standard materials documented with annotated concept sketches
+- within a **$30** budget
+
+## Research
+
+Most penny hockey sets are a flat wooden board with a hole at each end for the penny to drop through. I kept the wooden frame, the "players" that block shots from certain angles, and the rounded inside corners. The rest borrows from air hockey tables: a clear plexiglass surface raised on legs, with a slot through the end walls as the goal. An LCD with pushbuttons keeps score, an LED strip adds light, and a piezo buzzer adds sound.
+
+---
+
+# Concept Sketches
+
+Two dimensioned concept drawings, one orthographic and one isometric, done before any CAD.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+  <figure class="m-0"><img src="/assets/penny-hockey/sketch-orthographic.webp" alt="Hand-drawn orthographic top view of the penny hockey board, dimensioned 12 by 9 inches with the NASA logo, player positions and goals" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1508" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Orthographic top view, with the 12″ × 9″ surface and player positions dimensioned.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/penny-hockey/sketch-isometric.webp" alt="Hand-drawn isometric view of the penny hockey board showing the frame, legs, players and goal slots" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1580" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Isometric view.</figcaption></figure>
+</div>
+
+---
+
+# CAD Model
+
+The board was modelled in Autodesk Fusion 360. I modelled and dimensioned every part and assembly except the electronics: the LCD ([j.jacck44, 2020](https://www.autodesk.com/community/gallery/project/155964/lcd-1602-i2c)), Arduino Nano ([big_red_frog, 2014](https://www.autodesk.com/community/gallery/project/25248/arduino-nano-v3)) and breadboard ([3dmakernow, 2019](https://www.autodesk.com/community/gallery/project/140202/arduino-breadboard-83x55mm)) were imported. The full assembly can be [viewed in 3D](https://a360.co/42HNbRR).
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+  <figure class="m-0"><img src="/assets/penny-hockey/cad-front.webp" alt="Fusion 360 render of the penny hockey assembly from the front, showing the wooden frame, printed corners and legs, players and LCD" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1859" height="1346" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Front — printed corner brackets and legs, players, and the LCD housing.</figcaption></figure>
+  <figure class="m-0"><img src="/assets/penny-hockey/cad-back.webp" alt="Fusion 360 render of the penny hockey assembly from the back, showing the electronics enclosure with buttons and potentiometer" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1819" height="1335" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Back — the electronics enclosure, with score buttons and volume knob.</figcaption></figure>
+</div>
+
+---
+
+# Build Details
 
 The goals for the penny were made by drilling large corner holes, cutting the openings with a jigsaw, and inserting custom 3D-printed parts so the penny could slide smoothly. Additional printed parts were used for the feet and for holding the electronic components in a compact form factor.
 
@@ -30,8 +74,47 @@ The goals for the penny were made by drilling large corner holes, cutting the op
 
 ---
 
-# 03. Electronics
+# Electronics
 
 LEDs and electronic components were soldered and wired together using solid-core wire so the wiring could hold its shape. The project also pushed the Arduino code beyond simple single-action behavior, requiring control of LEDs, LCDs, a piezo, and pushbuttons in a way that felt simultaneous to the player.
 
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/penny-hockey/electronics-bay.webp" alt="Inside the printed electronics enclosure: Arduino Nano on a breadboard with the piezo, potentiometer, pushbuttons and I2C LCD backpack" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1745" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Inside the enclosure — Arduino Nano, piezo, volume potentiometer and score buttons on one breadboard, with the I2C LCD above.</figcaption>
+</figure>
+
 The project improved 3D modeling, soldering, wiring, and embedded programming skills, especially around packaging several physical and electronic systems into one small playable object.
+
+---
+
+# Bill of Materials
+
+Everything that went into the board, costed by the share of each pack or sheet actually used.
+
+<Table
+  maxWidth="max-w-3xl"
+  note="Cost is the pack price multiplied by the fraction used. Under the $30 budget by $0.84."
+  columns={[
+    { key: 'item', label: 'Item', align: 'left' },
+    { key: 'vendor', label: 'Vendor', align: 'left' },
+    { key: 'used', label: 'Used', align: 'left' },
+    { key: 'price', label: 'Pack price', align: 'right' },
+    { key: 'cost', label: 'Cost', align: 'right' }
+  ]}
+  rows={[
+    { item: 'Whitewood board, 1×6×8 ft', vendor: 'Home Depot', used: '¾″ × 1⅜″ × 48″ for the frame', price: '$7.48', cost: '$0.64' },
+    { item: 'Clear acrylic sheet, ⅛″', vendor: 'Home Depot', used: '9″ × 12″ playing surface', price: '$149.00', cost: '$3.49' },
+    { item: 'PLA filament, 1 kg', vendor: 'Amazon', used: '222 g of printed parts', price: '$14.99', cost: '$3.33' },
+    { item: 'Arduino Nano (3-pack)', vendor: 'Amazon', used: '1 board', price: '$15.99', cost: '$5.33', groupStart: true },
+    { item: 'Breadboard (6-pack)', vendor: 'Amazon', used: '1 board', price: '$7.88', cost: '$1.31' },
+    { item: 'WS2812B LED strip, 5 m', vendor: 'Amazon', used: '32″', price: '$13.99', cost: '$2.27' },
+    { item: '1602 I2C LCD', vendor: 'Amazon', used: '1', price: '$9.99', cost: '$9.99' },
+    { item: '22 AWG solid-core wire', vendor: 'Amazon', used: 'Wiring', price: '$15.19', cost: '$0.23' },
+    { item: 'Tactile pushbuttons (100)', vendor: 'Amazon', used: '2, for scoring', price: '$5.49', cost: '$0.11' },
+    { item: '10 kΩ trim potentiometers (12)', vendor: 'Amazon', used: '1, for volume', price: '$9.99', cost: '$0.42' },
+    { item: 'Passive piezo buzzer (10)', vendor: 'Amazon', used: '1, for sound', price: '$5.99', cost: '$0.60' },
+    { item: '#8-32 × 1″ machine screws (100)', vendor: 'Home Depot', used: '8, for the players', price: '$10.32', cost: '$0.83', groupStart: true },
+    { item: '#8-32 nuts (100)', vendor: 'Home Depot', used: '8', price: '$7.67', cost: '$0.61' },
+    { item: 'Total', vendor: '', used: '', price: '', cost: '$29.16', highlight: true, groupStart: true }
+  ]}
+/>
