@@ -1,6 +1,6 @@
 ---
 title: "Avionics"
-order: 3
+order: 4
 navLabel: "Avionics"
 showHero: false
 description: "The electronics I designed and soldered, and how each sensor was calibrated and checked before I trusted it."
@@ -327,7 +327,7 @@ That choice is not a loss. The unobservable rotation is about the vehicle's own 
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Recovering two misalignment angles from one level gravity reading, and the resulting correction matrix.</figcaption>
 </figure>
 
-$C$ is built once at startup from that level reading, and then applied to the accelerometer, the gyroscope, and the magnetometer before any of the three reaches the estimator. It is a rotation, so it costs three multiplies and three adds per vector and introduces no scaling of its own.
+$C$ is built once at startup from that level reading, and then applied to the accelerometer, the gyroscope, and the magnetometer before any of the three reaches the estimator. It is a fixed rotation, applied as one 3×3 matrix multiply per vector, and introduces no scaling of its own.
 
 ```cpp
 // values are raw gravity readings from placing the vehicle on a flat surface
@@ -387,9 +387,9 @@ The receiver is a u-blox NEO-M9N, used for Doppler velocity rather than raw posi
 
 ## The Default That Was Silently Wrong
 
-The receiver ships in a *pedestrian* dynamic model. That model embeds assumptions about plausible speed and acceleration, and it filters the solution accordingly — assumptions which are wrong for a vehicle that accelerates vertically.
+The receiver ships in its general-purpose *portable* dynamic model. That model embeds assumptions about plausible speed and acceleration, and it filters the solution accordingly — assumptions which are wrong for a vehicle that accelerates vertically.
 
-Switching to the *airborne* model produced an immediate and large improvement in velocity noise:
+Switching to the *airborne* model (rated for under 4 g) produced an immediate and large improvement in velocity noise:
 
 <Table
   maxWidth="max-w-md"
@@ -415,9 +415,9 @@ Nothing was broken beforehand and nothing reported an error. The receiver simply
 
 ## The Noise Is Not Gaussian
 
-Velocity noise was characterized over roughly 8300 static samples. The standard deviation is small — around 0.02 m/s at best — but the distributions have visibly **heavy tails**: they look normal in the middle and produce far more large excursions than a Gaussian would.
+Velocity noise was characterized over roughly 8300 static samples. The standard deviation is small — 0.06 to 0.13 m/s per axis in the table above — but the distributions have visibly **heavy tails**: they look normal in the middle and produce far more large excursions than a Gaussian would.
 
-This matters directly downstream. A Kalman filter assumes Gaussian measurement noise, and a heavy-tailed distribution means occasional outliers many sigma out. Tuning the filter's measurement covariance from the standard deviation alone would leave it over-trusting exactly those samples. Knowing the tails are there is what justifies gating the fusion rather than accepting every fix.
+This matters directly downstream. A Kalman filter assumes Gaussian measurement noise, and a heavy-tailed distribution means occasional outliers many sigma out. Tuning the filter's measurement covariance from the standard deviation alone would leave it over-trusting exactly those samples. The fusion does not gate outliers yet: every fix is used, weighted by the receiver's own accuracy estimate. The heavy tails are the reason to add a gate.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
   <figure class="m-0"><img src="/assets/aeolus/avionics/gps-noise-hist.webp" alt="Velocity error distribution — normal through the middle." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="840" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Velocity error distribution — normal through the middle.</figcaption></figure>
@@ -440,5 +440,5 @@ The vehicle transmits on 915 MHz and receives GNSS on 1575 MHz, with both antenn
 </figure>
 
 
-No measurable change in DOP or any other quality metric. A null result, and worth recording as one: it rules out a failure mode that would otherwise stay on the list of things that might explain a bad flight.
+No measurable change in DOP or any other quality metric. DOP mostly reflects satellite geometry, so it is a weak check here; signal strength (C/N₀) would be the better measure next time. Still a null result, and worth recording as one: it rules out a failure mode that would otherwise stay on the list of things that might explain a bad flight.
 

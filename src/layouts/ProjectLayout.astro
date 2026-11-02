@@ -39,6 +39,8 @@ interface Props {
   ogImage?: string;
   /** Vertical object alignment for hero backgrounds */
   heroPosition?: HeroPosition;
+  /** 'compact' = shorter banner so the page content starts above the fold. */
+  heroSize?: 'full' | 'compact';
   toc: TocItem[];
   /** If provided, renders multi-page navigation with nested TOC under the active page */
   subpages?: SubpageItem[];
@@ -67,6 +69,7 @@ const {
   isVideo = false,
   ogImage,
   heroPosition = 'center',
+  heroSize = 'full',
   toc,
   subpages,
   activePageId,
@@ -102,7 +105,7 @@ const nextPage = (currentIndex !== -1 && currentIndex < flatPages.length - 1) ? 
 <Layout title={`${title} | Roland Hu`} description={description} image={ogImage} wide>
   <!-- HERO -->
   {showHero && (
-    <section class="relative w-full h-[50vh] min-h-[400px] flex items-center overflow-hidden border-b border-slate-200 dark:border-slate-800">
+    <section class={`relative w-full ${heroSize === 'compact' ? 'h-[30vh] min-h-[260px]' : 'h-[50vh] min-h-[400px]'} flex items-center overflow-hidden border-b border-slate-200 dark:border-slate-800`}>
       {isVideo ? (
         <video class={`absolute inset-0 w-full h-full object-cover ${HERO_POSITION[heroPosition]}`} autoplay loop muted playsinline aria-label={`${title} project`}>
           <source src={heroMedia} type="video/mp4" />

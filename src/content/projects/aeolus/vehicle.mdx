@@ -1,6 +1,6 @@
 ---
 title: "Vehicle"
-order: 1
+order: 2
 navLabel: "Vehicle"
 showHero: false
 description: "How the rocket is built, and how I measured how hard it is to rotate, which every control calculation depends on. Also a parachute system that was designed and tested on the bench but has not flown yet."
@@ -422,7 +422,7 @@ For $k = 200$ N/m, $m = 1.5$ kg and $v_0 = 20$ m/s, that gives 1.81 m of stretch
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The energy balance, and the closed form for stretch, peak force and peak deceleration.</figcaption>
 </figure>
 
-That number is a bound, not a prediction, and it is the reason the next section exists. A bungee is not a linear spring — it is soft in the middle of its range and stiffens sharply near full extension — so a single $k$ either overestimates the force at small stretch or underestimates it at large. Getting a usable design load meant measuring the real force–extension curve.
+That number is a bound, not a prediction, and it is the reason the next section exists. A bungee is not a linear spring — it is stiff at small stretch, soft through the middle, and stiffens again near full extension (measured below) — so a single $k$ either overestimates the force at small stretch or underestimates it at large. Getting a usable design load meant measuring the real force–extension curve.
 
 ## Shock Cord Characterization
 

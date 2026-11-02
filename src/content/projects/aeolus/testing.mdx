@@ -1,7 +1,7 @@
 ---
-title: "Testing"
-order: 8
-navLabel: "Testing"
+title: "Flight Testing"
+order: 1
+navLabel: "Flight Testing"
 showHero: false
 description: "Every test and flight in order: what was measured, what went wrong, and what changed because of it."
 ---
@@ -66,7 +66,7 @@ The stand is a build in its own right, with its own firmware — load cell condi
 <p class="text-[11px] text-slate-500 dark:text-slate-400 text-center">The four-bar load cell stand.</p>
 
 
-It also has [documented problems](/projects/aeolus/control#static--thrust-stand). Uneven preload meant pure axial load did not distribute evenly across the cells, and they cross-talked. The measurement was recovered by referencing everything against a known applied moment, which is why the vane numbers survived a rig that was not good enough to trust in absolute terms.
+It also has [documented problems](/projects/aeolus/control#static--thrust-stand). Uneven preload meant pure axial load did not distribute evenly across the cells, and they cross-talked. The measurement was recovered by referencing everything against a known applied moment. That cancels a scale error in each reading as long as the rig responds linearly; it does not remove the cross-talk or uneven bending, so the vane numbers carry that uncertainty.
 
 ---
 
@@ -146,7 +146,7 @@ After raising the gains, the vehicle recovered from a roughly 4° disturbance in
 
 **27 August.** Position hold tested. The first flight of the day suffered RPM sensor interference that produced an oscillating throttle. A later attempt ended in the vehicle's first crash, from hitting a disturbance harder than the loop could reject. Inspection afterwards found no damage.
 
-The most useful result was not the flight itself but a comparison: measured thrust in free flight matched the [Simulink prediction](/projects/aeolus/simulation#validated-again-in-free-flight) almost exactly, which validates a model chain running all the way back to the static thrust sweep in June.
+The most useful result was not the flight itself but a comparison: measured thrust in free flight matched the [Simulink prediction](/projects/aeolus/simulation#validated-again-in-free-flight) almost exactly. In a steady hover thrust has to equal weight, so this mainly confirms the RPM-to-thrust model behind the governor, which runs back to the static thrust sweep in June; it is a weaker check of the rest of the simulation.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 mx-auto max-w-2xl">
   <figure class="m-0">
@@ -198,13 +198,13 @@ The second 15 m flight spun hard right at the `DESCENT`→`LANDING` transition �
 
 The obvious suspect was the fins. Reconstructing vane and fin moments from telemetry through the exact allocator math ruled them out: at the ~5 m/s speeds this vehicle actually reaches, aerodynamic fin moment is **0.3–0.4% of the vane moment**. The fins are a rounding error for the entire flight; all real roll authority is the vane.
 
-The log gave up the real cause on a tick-by-tick read. The attitude error's antipodal shortest-path sign is recomputed fresh every control tick from the error quaternion's scalar term. Once roll error crossed roughly 115° while the vehicle was still rotating hard, that sign flipped between two consecutive 5 ms control ticks:
+The log gave up the real cause on a tick-by-tick read. The attitude error's antipodal shortest-path sign is recomputed fresh every control tick from the error quaternion's scalar term. The logged roll error is $2\sin(\theta/2)$ in radians, which tops out at 2 rad = 114.6° when the true error $\theta$ reaches 180°. So a logged value of about ±114.5° means the vehicle was half a turn from its target, and as it kept spinning through 180° the sign flipped between two consecutive 5 ms control ticks:
 
 <Table
   maxWidth="max-w-md"
   columns={[
     { key: 'c0', label: '', align: 'left' },
-    { key: 'c1', label: 'error', align: 'left' },
+    { key: 'c1', label: 'logged error', align: 'left' },
     { key: 'c2', label: 'roll rate', align: 'left' }
   ]}
   rows={[
@@ -215,9 +215,9 @@ The log gave up the real cause on a tick-by-tick read. The attitude error's anti
 
 The physical state barely moved. The error's sign inverted anyway, which inverted the proportional term, which briefly commanded torque **with** the spin rather than against it — doubling the peak rate.
 
-This is the known *unwinding* failure of quaternion PD attitude control, described by Bhat and Bernstein in 2000. It is not a bug specific to this code; it is a property of the formulation. It had simply never been reached before, because attitude error had never gotten that large.
+This is a known weakness of quaternion attitude control. Picking the shortest-path sign afresh every tick makes the controller discontinuous at 180°, so a fast spin through that point flips the command instantly. It had simply never been reached before, because attitude error had never gotten that large. The textbook fix is to add hysteresis to the sign switch, so it only changes once the error is clearly past 180°.
 
-The fix hands the axis to the derivative term as rates get high enough for the flip to be possible.
+The fix was one I had planned earlier and finally added after this flight. It takes a different route from hysteresis: it hands the axis to the derivative term as rates get high enough for the flip to be possible.
 
 **Before** (flown on 4 September): the roll error goes straight into the PID.
 
@@ -244,8 +244,8 @@ static inline float rateBlend(float rate_rads) {
 Across a 90–150 °/s band the error fed to P is scaled toward zero; above it, P is suppressed entirely. D never sees the blend — it comes straight from the gyro, which has no wrapped-position ambiguity to invert. Validation was done by replaying the exact recorded `(error, rate, P, D)` sequence from the bad flight through the new logic: the output stays correctly signed through the flip, and every other tick checked — including the first flight's healthy high-rate recovery — is unchanged. It flew on both 5 September flights, together with retuned roll gains (Kp 16, Kd 6.5). Roll rates never got high enough to engage the blend, so it is still untested in the case it exists for.
 
 <figure class="not-prose my-6 mx-auto max-w-2xl">
-  <img src="/assets/aeolus/testing/unwinding-before-after.webp" alt="Roll rate, roll error, P and D terms, and roll command around the sign flip on the 4 September 15 m flight, with the fixed code replayed on the same data" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1376" height="1614" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The second 15 m flight, centred on the tick where the roll error flipped. As flown, P flipped sign while D kept braking, and the command swung from full braking to full torque with the spin for about a tenth of a second; roll rate went from −269 to −463 °/s. The fixed code, replayed on the same recorded data, holds full braking through the flip and changes nothing before it by more than 0.5 rad/s². The replay can't show how the flight would have continued, because everything after the flip was shaped by the bad command.</figcaption>
+  <img src="/assets/aeolus/testing/unwinding-before-after.webp" alt="Roll rate, roll error, P and D terms, and roll command around the sign flip on the 4 September 15 m flight, with the fixed code replayed on the same data" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1374" height="1614" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The second 15 m flight, centred on the tick where the logged roll error flipped sign as the true error crossed 180°. As flown, P flipped sign while D kept braking, and the command swung from full braking to full torque with the spin for about a tenth of a second; roll rate went from −269 to −463 °/s. The fixed code, replayed on the same recorded data, holds full braking through the flip and changes nothing before it by more than 0.5 rad/s². The replay can't show how the flight would have continued, because everything after the flip was shaped by the bad command.</figcaption>
 </figure>
 
 ## 5 September — 30 m Clean, 40 m Into a Fence
@@ -263,7 +263,7 @@ t = 22.9 s   COMMITTED_SINK — 3.6 m/s at 5 m indicated
 t = 24.5 s   ABORT_TILT at 35° — fence strike
 ```
 
-### It was the barometer, not the controller
+### Most likely the barometer, not the controller
 
 The vertical loop did its job. The descent built an 8.5 m/s sink — confirmed real by GPS — and the fan arrested it back to about 2 m/s with a sustained 2 m/s² deceleration. Nothing blew through.
 
@@ -294,7 +294,7 @@ Every stage of the horizontal cascade saturated. The position loop sat at its ve
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Top: distance from the pad. The climb wins back an early drift, but from about 10 s the wind takes over and pushes the vehicle 12.8 m away. Bottom: for most of the flight both outer loops ask for everything they are allowed. The position loop wants 2 m/s back toward the pad, and the velocity loop answers with the full 10° of tilt.</figcaption>
 </figure>
 
-Worse, the inner loop could not even hold the tilt it was told to: attitude tracking error ran about 13° RMS during boost. Raising the tilt limit is not an available fix, because tilt trades directly against vertical authority on a vehicle whose hover thrust-to-weight is 1.01.
+Worse, the inner loop could not even hold the tilt it was told to: attitude tracking error ran about 13° RMS during boost. My note right after the flight was to raise the 10° limit. That needs care: tilt trades directly against vertical authority, and on that flight hover thrust-to-weight was 1.01, so a higher limit only helps if it comes with more thrust margin.
 
 ### What the log confirmed anyway
 
@@ -347,9 +347,9 @@ That distinction is the most informative thing about it. A tether adds damping a
 - **Stiction and hunting.** The servo does not move until commanded past its static friction, then overshoots, then has to come back — a classic limit cycle around the setpoint.
 - **A lag-driven limit cycle.** Total loop delay — sensing, filtering, servo response — reaching the point where the correction arrives late enough to sustain the oscillation rather than damp it.
 
-Distinguishing them is tractable: backlash and stiction would show as a phase relationship between command and response that changes with amplitude, while a lag limit cycle would shift frequency with loop rate. Unresolved.
+Distinguishing them is tractable: backlash and stiction would show as a phase relationship between command and response that changes with amplitude, while a lag limit cycle would shift frequency when extra delay is added. Unresolved.
 
-<p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Halve the attitude loop rate and fly again. A lag-driven limit cycle should drop in frequency roughly in proportion; backlash and stiction should not move at all. If it holds at 3.0 Hz, the loop is exonerated and the cause is mechanical.</p>
+<p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Add a known extra delay in software (tens of milliseconds) and fly again. A lag-driven limit cycle should drop in frequency; backlash and stiction should not. Halving the loop rate would not separate them, because it adds only about 2.5 ms of delay, a few degrees of phase at 3 Hz. Varying the disturbance size is a second check: backlash and stiction depend strongly on amplitude, a lag cycle much less.</p>
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
   <figure class="m-0"><img src="/assets/aeolus/testing/roll-oscillation.webp" alt="Roll angle in free flight — the oscillation is small but persistent." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1120" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Roll angle in free flight — the oscillation is small but persistent.</figcaption></figure>
@@ -362,6 +362,12 @@ Distinguishing them is tractable: backlash and stiction would show as a phase re
 The 27 August throttle oscillation came from interference on the RPM pickup. The [governor's filtering](/projects/aeolus/propulsion#cleaning-up-the-rpm-signal) is built to reject noise on a signal that is fundamentally sound; it cannot help when the measurement itself is being corrupted. This is wiring and shielding, not software.
 
 <p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Re-run a static throttle sweep on the stand with the RPM signal line shielded and grounded at one end only, logging raw pulse intervals rather than filtered RPM. Clean intervals under the throttle profile that produced the oscillation would confirm pickup rather than a failing sensor.</p>
+
+## Control Authority Estimates Disagree by 3.5×
+
+CFD and the thrust stand agree with each other at 5° of vane, but both are about 3.5× higher than the [flight-data fit](/projects/aeolus/control#comparing-the-three-estimates), which is the number the controller uses. The cause has not been pinned down. The candidates are still questions: does servo lag or deadband make the flight fit read low? Does fitting in closed loop, while the controller is reacting to the same motion, bias the slope? How accurate was the hand-held 1 N·m reference on the stand?
+
+<p class="not-prose text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400 border-l-2 border-blue-400 dark:border-blue-600 pl-3 my-3"><span class="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">Next test</span>Not yet designed. It needs to separate the flight-fit effects from the stand's reference error.</p>
 
 ## Roll Authority Did Not Scale With Vane Area
 

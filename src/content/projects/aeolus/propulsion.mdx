@@ -1,6 +1,6 @@
 ---
 title: "Propulsion"
-order: 2
+order: 3
 navLabel: "Propulsion"
 showHero: false
 description: "The fan that lifts it: what it really produces on a test stand, and the software that holds it at a set speed so thrust stays the same as the battery drains."
@@ -235,7 +235,7 @@ $$
 P_{loss}(\tau) = \frac{\tau^2 R}{K_e^2} \qquad\qquad \eta(\tau) = 1 - \frac{R}{K_e V}\,\tau
 $$
 
-Efficiency is highest at *zero* torque and falls linearly as you load the motor — the opposite of the intuition that a motor has some efficient operating point in the middle. It also means the vehicle is least efficient exactly where it spends its whole flight, because hover takes about 64% throttle and 90% of the achievable RPM, so the motor is working near the top of its useful range the entire time.
+Taken at face value, this says efficiency is highest at *zero* torque and falls linearly as the motor is loaded; it works out to $\eta = \omega/\omega_0$, the fraction of free-running speed. That is a limitation of the model, not a property of the motor. A real motor draws a no-load current to overcome bearing friction and iron losses, which this model sets to zero, and that pushes its best efficiency into the middle of the load range. It would be tempting to conclude that hover, at about 90% of the achievable RPM, is the least efficient place to fly. The model cannot support that either way: on its own terms 90% of free speed would look efficient, and the losses it leaves out are exactly the ones that decide the answer.
 
 ## What This Justifies
 
@@ -246,6 +246,8 @@ Two consequences run through the rest of the propulsion design.
 **The model also says where it stops.** It predicts torque, and therefore thrust, should keep rising with applied voltage right up to stall. The [bench sweep](#thrust-characterization) shows thrust flattening above 80% throttle with current pinned at 53 A. Nothing in this model produces a plateau — which is how you know the limit is the ESC's current ceiling rather than the motor or the fan.
 
 Being a single-phase steady-state model, it ignores commutation loss, iron loss, and the ESC's own dynamics. It captures the first-order behaviour — the linear torque–speed line and its voltage dependence — and that is what the governor is built on.
+
+**Where the model has to improve.** The efficiency result above is the clearest sign of what is missing. A better version would add the no-load current $I_0$, measured by running the motor without its fan rotor and logging current, so that torque becomes $\tau = K_e(I - I_0)$. Fitted to the bench sweep, that gives an efficiency curve with a real peak, which can then be checked against the electrical power the INA228 already logs in flight. Until then, the model is used only for the shape of the torque–speed line and its voltage dependence, not for efficiency.
 
 ---
 

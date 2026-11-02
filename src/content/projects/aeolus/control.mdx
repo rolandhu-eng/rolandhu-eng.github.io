@@ -1,6 +1,6 @@
 ---
 title: "Control"
-order: 5
+order: 6
 navLabel: "Control"
 showHero: false
 description: "How the rocket steers: four small vanes in the exhaust, and how I calculated the controller settings from measurements instead of by trial and error."
@@ -12,6 +12,11 @@ import DampingDemo from '../../../components/DampingDemo.astro';
 # Vane Design
 
 Four vanes sit in the EDF exhaust, each on an axle offset from but linked to the external fin axles and driven by its own servo. They are the only source of control moment at hover, when airspeed is zero and the fins produce nothing.
+
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/vehicle/cad-aft-section.webp" alt="CAD section through the aft end of Aeolus showing the vanes inside the exhaust duct and the fins outside" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1787" height="1400" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Section through the aft end. The vanes (green) sit in the jet at the duct exit; the fins (orange) sit outside. Each vane is linked to its fin and servo by a pushrod.</figcaption>
+</figure>
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
   <figure class="m-0">
@@ -72,7 +77,7 @@ The new vanes were characterized the same way as the old ones, which makes the c
 
 Pitch and yaw scaled with area exactly as expected. Roll did not — it gained only a third more authority from twice the vane.
 
-I do not have a confirmed explanation. The most plausible one is that roll is the axis where the vanes interfere with each other most: a roll command deflects all four vanes in the same rotational sense, so each one sits in the swirl shed by its neighbours, while a pitch or yaw command only works a single opposing pair. Larger vanes in a confined jet would make that interaction worse, and it would show up on roll alone — which is what the data does. That is a hypothesis, not a result; separating it from a moment-arm or dynamic-pressure-distribution effect would take either CFD on the full four-vane set or a single-vane bench test.
+I do not have a confirmed explanation. The most plausible one is that roll is the axis where the vanes interfere with each other most: a roll command deflects all four vanes in the same rotational sense, so each one sits in the swirl shed by its neighbours, while a pitch or yaw command only works a single opposing pair. Larger vanes in a confined jet would make that interaction worse, and it would show up on roll alone — which is what the data does. That is a hypothesis, not a result; separating it from a moment-arm or dynamic-pressure-distribution effect would take CFD on the full four-vane set, or the stand test proposed on the [testing page](/projects/aeolus/testing#roll-authority-did-not-scale-with-vane-area): measure roll authority with two opposing vanes removed.
 
 It matters because roll authority is what the vane change was meant to fix. The original vanes took about three seconds to null the startup roll transient, which is slow enough to eat into a short flight.
 
@@ -120,7 +125,7 @@ The four servos are not interchangeable, and the flight code does not pretend th
   ]}
 />
 
-The spread is not small. At the same commanded 45°, the four units differ by 60 µs — about **5.6° of vane deflection**. Their scale factors differ by nearly 4% on top of that. Driving all four from one nominal mapping would have baked several degrees of asymmetry into the vehicle before the controller ever ran, and the trim analysis above would have been measuring servo tolerance rather than airframe asymmetry.
+The spread is not small. At the same commanded 45°, the four units differ by 60 µs — about **5.6° of vane deflection**. Their scale factors differ by nearly 4% on top of that. Driving all four from one nominal mapping would have baked several degrees of asymmetry into the vehicle before the controller ever ran, and the trim analysis below would have been measuring servo tolerance rather than airframe asymmetry.
 
 ---
 
@@ -149,7 +154,7 @@ A baseline test was run at 70% throttle to get baseline forces at 0 degree fin d
 </div>
 </Dropdown>
 
-The rig was compromised by uneven preload and cross-talk between cells (details in the dropdown above). Rather than discard the run, the measurement was salvaged by referencing it against a known moment. A 1 N·m pitching moment was applied by hand with a force probe to establish the differential that a known load produces; every subsequent measurement was then read as a ratio against that reference. The absolute per-cell readings stay wrong, but the ratio of differentials is insensitive to the preload error that corrupts them.
+The rig was compromised by uneven preload and cross-talk between cells (details in the dropdown above). Rather than discard the run, the measurement was salvaged by referencing it against a known moment. A 1 N·m pitching moment was applied by hand with a force probe to establish the differential that a known load produces; every subsequent measurement was then read as a ratio against that reference. The absolute per-cell readings stay wrong, but the ratio cancels a scale error in each reading as long as the rig responds linearly. It does not remove the cross-talk or uneven bending, and the hand-applied reference has its own uncertainty, so these numbers are less certain than the load cells' resolution suggests.
 
 Surprisingly, the measured moments at 70% throttle correlated closely with published flat-plate $C_l$ data at comparable Reynolds number. The vane cross-section is a very thin airfoil, which turns out to be near enough to a flat plate.
 
@@ -215,7 +220,7 @@ CFD and the stand agree at 5° and separate at larger deflections. At 5°, both 
 
 # Deriving the Gains
 
-Because the inertia had been measured on a [bifilar pendulum](/projects/aeolus/vehicle#moment-of-inertia-testing) and the vane torque fitted [from flight data](#dynamic--from-flight-data), there was no need to tune the attitude loop by trial and error. Each axis is a rotational mass with a restoring term and a damping term — a damped harmonic oscillator:
+Because vane authority had been fitted [from flight data](#dynamic--from-flight-data) as angular acceleration per degree, the attitude gains could be set from a target response instead of found by trial and error. They were a starting point: the roll gains were lowered after an oscillation on the 4 September flights. Each axis is a rotational mass with a restoring term and a damping term — a damped harmonic oscillator:
 
 $$
 I\ddot{\theta} + K_d\dot{\theta} + K_p\theta = 0
@@ -265,7 +270,7 @@ $$
 \tau \sim \frac{1}{\gamma} = \frac{2I}{K_D} = \frac{1}{\zeta\omega}
 $$
 
-so knowing $I$ from the bifilar pendulum and picking a settling time fully determines the dynamics before anything is flown.
+so the measured authority and a chosen settling time set the starting dynamics before anything is flown.
 
 ### The Step Response
 
@@ -319,7 +324,7 @@ The consequence is that the flight code's gain table is readable as design inten
   ]}
 />
 
-All three axes sit at $\zeta \approx 0.81$–$0.83$, slightly under critical damping, which settles faster than $\zeta = 1$ at the cost of a small overshoot. Nothing in that table is a magic number. The September roll retune came in with the [unwinding fix](/projects/aeolus/testing#the-unwinding-bug).
+All three axes sit at $\zeta \approx 0.81$–$0.83$, slightly under critical damping, which settles faster than $\zeta = 1$ at the cost of a small overshoot. The numbers are design targets rather than values tuned by feel, though the roll target itself was moved after flight testing. The September roll retune came in with the [unwinding fix](/projects/aeolus/testing#the-unwinding-bug).
 
 ## Saturation Set by Physics
 
@@ -354,7 +359,7 @@ The tethered gain sweep and the pitch/yaw disturbance tests behind these results
 The velocity loop was tuned by a different method, deliberately. There, the controller takes velocity error and **outputs acceleration** — so the controller's output is the *first* derivative of the controlled variable, not the second. Writing the PD loop out makes the difference explicit:
 
 $$
-K_p v - K_d\dot{v} = \dot{v} \quad \Longrightarrow \quad K_p v + (K_d + 1)\dot{v} = 0
+-K_p v - K_d\dot{v} = \dot{v} \quad \Longrightarrow \quad K_p v + (K_d + 1)\dot{v} = 0
 $$
 
 The commanded acceleration *is* $\dot{v}$, so the loop closes one derivative lower than the attitude loop does, and there is no $\ddot{v}$ term for a mass to resist. This is a first-order equation, and a first-order equation cannot oscillate. There is no natural frequency to place and no damping ratio to choose; the solution is a pure exponential decay:
@@ -363,15 +368,15 @@ $$
 v(t) = v_0 e^{-t/\tau}, \qquad \tau = \frac{K_d + 1}{K_p}
 $$
 
-So the target was a settling time instead. A 2% settling time of one second is roughly $4\tau$, which set the starting gains at $K_p = 4.0$ with $K_d = 0$ — no derivative term at all, because with nothing to damp, $K_d$ only slows the response down.
+So the target was a settling time instead. A 2% settling time of one second is roughly $4\tau$, which set the starting gains at $K_p = 4.0$ with $K_d = 0$ — no derivative term at all, because in this model there is nothing to damp, and $K_d$ only slows the response down. The model leaves out the attitude loop's lag, though: the vehicle takes time to reach the tilt the velocity loop asks for. In free flight that lag caused an oscillation, and a derivative gain of about 0.5 is what removed it ([Simulation](/projects/aeolus/simulation#used-predictively-not-just-descriptively)).
 
 ## What It Rests On
 
-The whole approach is only as good as the two measurements underneath it, and they fail differently.
+The whole approach rests on one measurement: control authority, the angular acceleration one degree of vane produces.
 
-An error in inertia scales $K_p$ and $K_d$ by the same factor, so the damping ratio survives it — $\zeta$ depends on the *ratio* of the gains, not their magnitude. A vehicle tuned with a 20% inertia error would still settle with the intended shape, just at the wrong frequency. That is a forgiving failure, and it is why sub-5% uncertainty on the bifilar measurement was enough.
+Because authority was fitted from flight data in angular-acceleration units, the measured inertia cancels out of the attitude loop: torque per degree is the fitted slope times $I$, and the controller divides by $I$ again when it turns a commanded acceleration into vane degrees. Inertia only matters when authority comes from a torque measurement, as on the thrust stand or in CFD.
 
-Control authority is less forgiving, because it enters the conversion from commanded angular acceleration to vane degrees. Get $\tau/\text{deg}$ wrong and every gain is wrong proportionally *and* the saturation limit is wrong, so the controller believes it has authority it does not have. That asymmetry is the reason authority was measured twice by unrelated methods rather than once — and why the pitch and yaw axes, whose figure was the less settled of the two at the time, are the ones that came out off-target in flight.
+An error in authority by a factor $k$ scales the effective $K_p$ and $K_d$ by $k$. Since $\omega = \sqrt{K_p}$ and $\zeta = K_d/(2\sqrt{K_p})$, both $\omega$ and $\zeta$ shift by $\sqrt{k}$: a 20% error gives about a 10% change in damping, not none. Authority also sets the saturation limit, so an error there means the controller believes it has authority it does not have. That is why authority was measured by several unrelated methods, and why the pitch and yaw axes, whose figure was the less settled at the time, are the ones that came out off-target in flight.
 
 ---
 
@@ -403,13 +408,13 @@ Attitude error is computed as a quaternion difference rather than as Euler angle
 
 A quaternion and its negation represent the same orientation, so error extracted naively flips sign as the vehicle passes through 180°. In roll testing this showed up concretely: the controller reversed direction past 180°, which meant the high roll rates present at spin-up were driven the wrong way instead of being arrested. It was found in flight data on 22 July and fixed the next day.
 
-That was not the end of it. The July fix handled the wrap at 180°, but the underlying formulation can invert the error sign at *any* large angle if the vehicle is rotating fast enough — which is exactly what happened in September, when a roll error crossing 115° flipped sign in a single tick and briefly drove the spin instead of arresting it. Full diagnosis on the testing page: [the unwinding bug](/projects/aeolus/testing#the-unwinding-bug).
+That was not the end of it. The July fix was the shortest-path sign pick itself. It stops the controller taking the long way round, but because the sign is chosen afresh every tick, a fast spin through 180° flips the command instantly. That is what happened in September: the logged error (which is $2\sin(\theta/2)$, so it tops out at 114.6°) flipped sign in a single tick as the true error crossed 180°, and briefly drove the spin instead of arresting it. Full diagnosis on the testing page: [the unwinding bug](/projects/aeolus/testing#the-unwinding-bug).
 
 The fix ties into a second choice visible in the [PID implementation](#pid-controller): the attitude loop uses a second `update()` overload that takes the measured gyro rate directly, so the derivative term is $-K_d \cdot \dot{\theta}_{measured}$ rather than a numerical difference of the error signal. Taking the derivative on the measurement instead of on the error avoids derivative kick when the setpoint steps, and it sidesteps the sign discontinuity entirely — the gyro does not care how the error is parameterised.
 
 ## Mixing and Saturation
 
-Roll, pitch, and yaw commands are combined additively across the four vanes. The failure mode is worth stating plainly: if the summed command exceeds the mechanical limit, the vanes clip and *none* of the three requested moments is delivered faithfully. A large roll command can quietly consume the authority that pitch and yaw were counting on.
+Roll, pitch, and yaw commands are combined additively across the four vanes. In the original code, if the summed command exceeded the mechanical limit the vanes clipped, and *none* of the three requested moments was delivered faithfully: a large roll command could use up the authority that pitch and yaw were counting on. The allocator now scales all three together instead ([below](#saturating-without-rotating-the-torque)).
 
 This was one of three candidate explanations for the first tethered flight losing attitude on 19 June, alongside mis-set gains and the nonlinear vane force curve.
 
@@ -557,4 +562,4 @@ Instead the allocator finds the peak servo command and, if it exceeds the mechan
 
 Honest status: the aerodynamic half of this has barely been exercised. At the speeds flown so far the vane dominates so heavily that `K_AERO`, the flow-sign logic and the null guard have effectively never been tested in flight — the null guard has yet to arm at all.
 
-Two things make that tolerable. There is a written flight test plan with predicted values and stop criteria for exactly these signals, so the first flight that does exercise them will be instrumented for it. And in the hover regime that *has* been flown extensively, the allocator is arithmetically identical to the fixed-constant code it replaced — so the refactor provably reduces to previously validated behaviour everywhere the vehicle has actually been.
+Two things make that tolerable. There is a written flight test plan with predicted values and stop criteria for exactly these signals, so the first flight that does exercise them will be instrumented for it. And in the hover regime that *has* been flown extensively, the allocator is arithmetically identical to the fixed-constant code it replaced — so the refactor reduces to the same arithmetic as the previously validated code everywhere the vehicle has actually been.

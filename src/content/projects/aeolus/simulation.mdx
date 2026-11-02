@@ -1,6 +1,6 @@
 ---
 title: "Simulation"
-order: 6
+order: 7
 navLabel: "Simulation"
 showHero: false
 description: "Computer models of the airflow and of the whole vehicle in flight, used to predict its behaviour and choose settings before flying."
@@ -98,7 +98,7 @@ The comparison is worth reading for where the curves *separate* as much as where
 
 ## Validated Again in Free Flight
 
-A model tuned against tethered data can quietly encode the tether. The stronger check came later: measured thrust in untethered flight matched the Simulink prediction almost exactly.
+A model tuned against tethered data can quietly encode the tether. The stronger check came later: measured thrust in untethered flight matched the Simulink prediction almost exactly. That is a narrower check than it sounds: in a steady hover thrust has to equal weight, so the match mainly confirms the RPM-to-thrust model, not the rest of the simulation.
 
 That closes a loop that started with an assumption. Thrust was predicted from a fan model, measured on a static stand, [inverted into an RPM setpoint](/projects/aeolus/propulsion#thrust-from-rpm) for the governor, and then confirmed in free flight against the simulation built on top of all of it.
 

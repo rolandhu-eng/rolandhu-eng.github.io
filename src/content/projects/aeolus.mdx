@@ -9,6 +9,7 @@ heroPosition: "center"
 ogImage: "/assets/aeolus/og-aeolus.jpg"
 sidebarTitle: "Contents"
 showHero: true
+heroSize: "compact"
 statusLabel: "Flight Testing"
 statusDot: true
 ---
@@ -16,7 +17,47 @@ import Dropdown from '../../components/Dropdown.astro';
 import Table from '../../components/Table.astro';
 
 
-<div class="not-prose grid grid-cols-2 lg:grid-cols-4 gap-4 my-8 max-w-6xl mx-auto">
+# Overview
+
+<div class="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-8 items-start">
+<div class="not-prose max-w-[300px] mx-auto lg:mx-0 w-full">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/flight-30m-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="608" height="1080">
+      <source src="/assets/aeolus/flight-30m.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Autonomous 30 m flight — 5 September 2026. Launch, climb, hover, descent and land, decided by its own state machine.</figcaption>
+  </figure>
+</div>
+<div>
+
+Aeolus is a rocket-shaped vehicle that flies and lands itself. Instead of a rocket motor it uses an electric ducted fan, a motor-driven fan inside a tube, which can be throttled up and down. That lets it take off, hover in place and come back down to land, in a backyard instead of at a launch field.
+
+Nothing about it is passively stable. When it hovers there is no airflow over its fins, so the only thing keeping it upright is a flight computer that reads its sensors and moves four small vanes in the fan's exhaust 200 times a second. I designed and built every part of it: the airframe, the circuit boards, the flight software, and the test stand used to measure it.
+
+In September 2026 it flew a 30 m flight entirely on its own: launch, climb, hover, descend and land, with no input after I pressed launch. The next attempt, at 40 m in strong wind, ended in a fence. The barometer read several metres low on the way down, so the vehicle flew a correct landing toward ground that was not there yet. The controller did its job with a wrong measurement, though in that wind it also drifted and held its attitude only roughly. The lesson I took from it is that a control system is only as good as the sensors it trusts. [What happened, in detail](/projects/aeolus/testing#5-september--30-m-clean-40-m-into-a-fence).
+
+</div>
+</div>
+
+{/* AUTHOR TO WRITE (blocks sending this link): one or two sentences on why you built Aeolus and what you wanted to learn. Goes right after the first paragraph above. */}
+
+{/* AUTHOR TO WRITE: dated story block, in your words, each line linking to Flight Testing:
+  - 19 June: first hover attempt failed and left no log to explain why  → /projects/aeolus/testing#19-june--first-hover-attempt
+  - What you built because of it (onboard logging)
+  - 4 September: the logs exposed three bugs and the sign-flip failure  → /projects/aeolus/testing#4-september--four-flights-three-bugs
+  - 5 September: 30 m fully autonomous, then 40 m into a fence; barometer error, and GPS altitude was available but never used  → /projects/aeolus/testing#5-september--30-m-clean-40-m-into-a-fence
+  - Closing line: what you changed, or will test next (end on growth, not the crash) */}
+
+<div class="not-prose my-6 flex flex-wrap justify-center gap-2 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">~1 m long</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">1.44 kg</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">70 mm ducted fan</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">200 Hz control loop</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">Solo build</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">Jan–Sep 2026</span>
+</div>
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-4 my-8 max-w-4xl mx-auto">
   <figure class="m-0">
     <img src="/assets/aeolus/vehicle/rocket-night.webp" alt="Aeolus on its launch legs with the outer shell and nose cone removed, avionics lit" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async"  width="933" height="1800" />
     <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The vehicle with its shell and nose cone off — avionics stack, wiring run, EDF section and fins.</figcaption>
@@ -33,43 +74,28 @@ import Table from '../../components/Table.astro';
     </video>
     <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Position-loop impulse test — 27 August 2026. Knocked off station by hand mid-hover; the position loop brings it back.</figcaption>
   </figure>
-  <figure class="m-0">
-    <video poster="/assets/aeolus/flight-30m-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="608" height="1080">
-      <source src="/assets/aeolus/flight-30m.webm" type="video/webm" />
-    </video>
-    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Autonomous 30 m flight — 5 September 2026. Launch, climb, hover, descent and land, decided by its own state machine.</figcaption>
-  </figure>
 </div>
-
-
-# Overview
-
-Aeolus is a rocket-shaped vehicle that flies and lands itself. Instead of a rocket motor it uses an electric ducted fan, a motor-driven fan inside a tube, which can be throttled up and down. That lets it take off, hover in place and come back down to land, in a backyard instead of at a launch field.
-
-Nothing about it is passively stable. When it hovers there is no airflow over its fins, so the only thing keeping it upright is a flight computer that reads its sensors and moves four small vanes in the fan's exhaust 200 times a second. I designed and built every part of it: the airframe, the circuit boards, the flight software, and the test stand used to measure it.
-
-In September 2026 it flew a 30 m flight entirely on its own: launch, climb, hover, descend and land, with no input after I pressed launch. The next attempt, at 40 m in strong wind, ended in a fence. The barometer read several metres low on the way down, so the vehicle flew a correct landing toward ground that was not there yet. The controller did its job with a wrong measurement, and the lesson I took from it is that a control system is only as good as the sensors it trusts. [What happened, in detail](/projects/aeolus/testing#5-september--30-m-clean-40-m-into-a-fence).
 
 ---
 
-Aeolus is a solo project. I designed it, built it, wrote the software, and flew it.
+# How It Steers
 
-**Designed and fabricated.** The airframe and full CAD assembly, the four-vane thrust vector linkage, the nose fairing and its generatively designed hinges. Two custom PCBs — power distribution and servo distribution — laid out in EasyEDA, ordered, and hand-soldered including the SMD work. The flight computer is a perfboard build around a Teensy 4.1. I also designed and built the four-bar load cell test stand, with its own firmware and radio link, to characterize the vehicle.
+At hover, airspeed is zero. Fins need airflow to generate a restoring moment, so below a few meters per second they do nothing at all. That is why I also included vanes in the exhaust. The angle of both the external fins and the internal vanes can be steered, enabling active control. This system generates a control moment from two sources:
 
-**Wrote.** All flight firmware, in C++:
-- the [Madgwick attitude filter](/projects/aeolus/gnc#madgwick-filter), which keeps the gyro's drifting orientation estimate honest using the accelerometer's sense of which way is down, re-derived for an X-up body frame
-- [complementary](/projects/aeolus/gnc#vertical-channel) and [Kalman](/projects/aeolus/gnc#gps-fusion) fusion for altitude and velocity, each pairing a smooth sensor that drifts with a noisy one that doesn't
-- the [cascaded position, velocity and attitude controllers](/projects/aeolus/control#loop-structure), each loop feeding a setpoint to a faster one inside it
-- the [control allocator](/projects/aeolus/control#control-allocation), which turns "rotate this way" into four servo angles
-- the [RPM governor](/projects/aeolus/propulsion#rpm-governor), which holds the fan at a commanded speed as the battery voltage drops
-- the [flight state machine](/projects/aeolus/gnc#flight-sequencing) that sequences the mission, and the [PSRAM-to-flash datalogger](/projects/aeolus/communications#datalogging)
+$$
+\frac{\tau}{\text{deg}} \;=\; \underbrace{K_{vane} \cdot T}_{\text{exhaust thrust vectoring}} \;+\; \underbrace{K_{fin} \cdot \bar{q}}_{\text{fins in freestream air}}
+$$
 
-Also the [LoRa command protocol](/projects/aeolus/communications#protocol-design), the ESP32 ground station firmware, and the [browser dashboard](/projects/aeolus/communications#ground-station) it talks to over Web Serial.
+The vanes work whenever the fan is spinning. The fins work whenever the vehicle is moving. Between them there is *almost* no phase of flight — hover, climb, or unpowered fall — where the vehicle has nothing to steer with. The exception is restarting the fan while falling tail-first: the exhaust and the oncoming air push in opposite directions, so the linked vanes and fins produce opposing moments, and the [allocator](/projects/aeolus/control#control-allocation) has to work out which one is winning before it can decide which way to deflect.
 
-**Measured and analyzed.** Inertia by [bifilar pendulum](/projects/aeolus/vehicle#bi-filar-pendulum-setup): hang the vehicle from two strings, time how fast it twists back and forth, and work out how hard it is to rotate. [Vane control authority](/projects/aeolus/control#measuring-control-authority), the turning force one degree of vane produces, two independent ways: on the test stand, and again by fitting flight logs. [Thrust, current and RPM](/projects/aeolus/propulsion#thrust-characterization) across the throttle range. [Accelerometer and magnetometer calibration](/projects/aeolus/avionics#sensor-calibration) by ellipsoid fit, which corrects each sensor's offset and scale errors. [GPS velocity noise](/projects/aeolus/avionics#gps-characterization) characterization. Every flight log analyzed in Python.
+<figure class="not-prose my-6 mx-auto max-w-sm">
+  <img src="/assets/aeolus/vehicle/aft-end-vanes-fins.webp" alt="The aft end of Aeolus, looking into the exhaust: four vanes inside the duct and two of the fins outside" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1787" height="2000" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Looking into the exhaust: the four vanes sit inside the duct, and the fins sit outside.</figcaption>
+</figure>
 
-**Modelled.** [CFD](/projects/aeolus/simulation#cfd) (simulated airflow) in ANSYS Fluent for the vane and intake aerodynamics, and a [6DOF flight model](/projects/aeolus/simulation#simulink), three directions of movement plus three axes of rotation, in MATLAB/Simulink driven by those coefficients and my measured mass properties.
+So far the vanes have done almost all the work. At the speeds flown (around 5 m/s), the fins produce under 0.5% of the vane moment, so the fin half of the design has [not yet been tested in flight](/projects/aeolus/control#what-is-still-untested).
 
+All of this demands precise gain tuning, modelling, simulation, attitude estimates, and more—each of those is a page here.
 
 ---
 
@@ -110,12 +136,32 @@ Also the [LoRa command protocol](/projects/aeolus/communications#protocol-design
     </li>
     <li class="flex gap-2.5">
       <span class="shrink-0 mt-0.5 h-5 w-5 rounded-full bg-blue-600 text-white text-[10px] font-mono flex items-center justify-center">6</span>
-      <span><span class="font-semibold text-slate-900 dark:text-white">Vanes and fins</span><br /><span class="text-slate-600 dark:text-slate-400">Four servos, each driving a vane inside the exhaust and a fin outside, on one shaft. All the control authority is here.</span></span>
+      <span><span class="font-semibold text-slate-900 dark:text-white">Vanes and fins</span><br /><span class="text-slate-600 dark:text-slate-400">Four servos, each driving a vane inside the exhaust and a fin outside on linked shafts. All the control authority is here.</span></span>
     </li>
   </ol>
 
 </div>
+<p class="not-prose -mt-4 mb-8 mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">CAD render of the final design, not a photo.</p>
 
+<Dropdown title="For engineers: what I designed, wrote, measured and modelled">
+
+**Designed and fabricated.** The airframe and full CAD assembly, the four-vane thrust vector linkage, the nose fairing and its generatively designed hinges. Two custom PCBs — power distribution and servo distribution — laid out in EasyEDA, ordered, and hand-soldered including the SMD work. The flight computer is a perfboard build around a Teensy 4.1. I also designed and built the four-bar load cell test stand, with its own firmware and radio link, to characterize the vehicle.
+
+**Wrote.** All flight firmware, in C++:
+- the [Madgwick attitude filter](/projects/aeolus/gnc#madgwick-filter), which keeps the gyro's drifting orientation estimate honest using the accelerometer's sense of which way is down, re-derived for an X-up body frame
+- [complementary](/projects/aeolus/gnc#vertical-channel) and [Kalman](/projects/aeolus/gnc#gps-fusion) fusion for altitude and velocity, each pairing a smooth sensor that drifts with a noisy one that doesn't
+- the [cascaded position, velocity and attitude controllers](/projects/aeolus/control#loop-structure), each loop feeding a setpoint to a faster one inside it
+- the [control allocator](/projects/aeolus/control#control-allocation), which turns "rotate this way" into four servo angles
+- the [RPM governor](/projects/aeolus/propulsion#rpm-governor), which holds the fan at a commanded speed as the battery voltage drops
+- the [flight state machine](/projects/aeolus/gnc#flight-sequencing) that sequences the mission, and the [PSRAM-to-flash datalogger](/projects/aeolus/communications#datalogging)
+
+Also the [LoRa command protocol](/projects/aeolus/communications#protocol-design), the ESP32 ground station firmware, and the [browser dashboard](/projects/aeolus/communications#ground-station) it talks to over Web Serial.
+
+**Measured and analyzed.** Inertia by [bifilar pendulum](/projects/aeolus/vehicle#bi-filar-pendulum-setup): hang the vehicle from two strings, time how fast it twists back and forth, and work out how hard it is to rotate. [Vane control authority](/projects/aeolus/control#measuring-control-authority), the turning force one degree of vane produces, two independent ways: on the test stand, and again by fitting flight logs (the two disagree by about 3.5×, which is still unexplained). [Thrust, current and RPM](/projects/aeolus/propulsion#thrust-characterization) across the throttle range. [Accelerometer and magnetometer calibration](/projects/aeolus/avionics#sensor-calibration) by ellipsoid fit, which corrects each sensor's offset and scale errors. [GPS velocity noise](/projects/aeolus/avionics#gps-characterization) characterization. Every flight log analyzed in Python.
+
+**Modelled.** [CFD](/projects/aeolus/simulation#cfd) (simulated airflow) in ANSYS Fluent for the vane and intake aerodynamics, and a [6DOF flight model](/projects/aeolus/simulation#simulink), three directions of movement plus three axes of rotation, in MATLAB/Simulink driven by those coefficients and my measured mass properties.
+
+</Dropdown>
 
 <Dropdown title="Full specifications">
 <Table
@@ -192,29 +238,6 @@ Also the [LoRa command protocol](/projects/aeolus/communications#protocol-design
   ]}
 />
 </Dropdown>
-
----
-
-# How It Steers
-
-Aeolus is a thrust-vectored electric ducted fan (EDF) rocket built to hover and fly under active control. Unlike a solid motor, an EDF throttles continuously — which buys controlled ascent, hover, and landing without the field clearance a solid motor demands. It also combines two different control systems to provide authority during both hover and engine-off coast.
-
-At hover, airspeed is zero. Fins need airflow to generate a restoring moment, so below a few meters per second they do nothing at all. That is why I also included vanes in the exhaust. The angle of both the external fins and the internal vanes can be steered, enabling active control. This system generates a control moment from two sources:
-
-$$
-\frac{\tau}{\text{deg}} \;=\; \underbrace{K_{vane} \cdot T}_{\text{exhaust thrust vectoring}} \;+\; \underbrace{K_{fin} \cdot \bar{q}}_{\text{fins in freestream air}}
-$$
-
-The vanes work whenever the fan is spinning. The fins work whenever the vehicle is moving. Between them there is *almost* no part of the envelope — hover, climb, or unpowered fall — where the vehicle has nothing to steer with. The only exception is engine relight in base-first descent: the exhaust flow and external airflow are opposed, so the vanes and fins sharing a shaft will produce opposing control moments. The [allocator](/projects/aeolus/control#control-allocation) has to decide which effector is winning before it can decide which way to deflect.
-
-<figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/vehicle/cad-aft-section.webp" alt="CAD section through the aft end of Aeolus showing the vanes inside the exhaust duct and the fins outside" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1787" height="1400" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Section through the aft end. The vanes (green) sit in the jet at the duct exit; the fins (orange) sit outside. Each vane is linked to its fin and servo by a pushrod.</figcaption>
-</figure>
-
-So far the vanes have done almost all the work. At the speeds flown (around 5 m/s), the fins produce under 0.5% of the vane moment, so the fin half of the design has [not yet been tested in flight](/projects/aeolus/control#what-is-still-untested).
-
-All of this demands precise gain tuning, modelling, simulation, attitude estimates, and more—each of those is a page here.
 
 ---
 
@@ -313,143 +336,20 @@ All of this demands precise gain tuning, modelling, simulation, attitude estimat
 
 # Contents
 
-**1. [Vehicle](/projects/aeolus/vehicle)** — How it is built and the structural design, and how I measured the moment of inertia with a bi-filar pendulum setup, which the rest of the control and software was based around. Also the parachute recovery system, which is designed and characterized but not currently flown.
+**1. [Flight Testing](/projects/aeolus/testing)** — Probably every test and every flight, failures, successes, and analysis documented.
 
-**2. [Propulsion](/projects/aeolus/propulsion)** — The ducted fan, what it actually produces on a test stand rather than the stated specs, and the software that holds it at a commanded *speed* — because as the battery drains, the same throttle stops meaning the same thrust.
+**2. [Vehicle](/projects/aeolus/vehicle)** — How it is built and the structural design, and how I measured the moment of inertia with a bi-filar pendulum setup, which the rest of the control and software was based around. Also the parachute recovery system, which is designed and characterized but not currently flown.
 
-**3. [Avionics](/projects/aeolus/avionics)** — The electronics, designed and soldered by hand. The flight computer and two custom PCBs: a power distribution board and a simple servo distribution board.
+**3. [Propulsion](/projects/aeolus/propulsion)** — The ducted fan, what it actually produces on a test stand rather than the stated specs, and the software that holds it at a commanded *speed* — because as the battery drains, the same throttle stops meaning the same thrust.
 
-**4. [Navigation & Guidance](/projects/aeolus/gnc)** — How it works out its current orientation and movement, to a fraction of a degree, because a one-degree error becomes eight meters of position error in ten seconds. Also the state machine that flies the mission unaided.
+**4. [Avionics](/projects/aeolus/avionics)** — The electronics, designed and soldered by hand. The flight computer and two custom PCBs: a power distribution board and a simple servo distribution board.
 
-**5. [Control](/projects/aeolus/control)** — How it corrects for disturbances and commands 200 times per second, and how it physically does that. Also how the vehicle response is modelled to solve for optimal gains analytically, compared to the common trial-and-error tuning.
+**5. [Navigation & Guidance](/projects/aeolus/gnc)** — How it works out its current orientation and movement, to a fraction of a degree, because a one-degree error becomes eight meters of position error in ten seconds. Also the state machine that flies the mission unaided.
 
-**6. [Simulation](/projects/aeolus/simulation)** — Airflow simulation and a six-degree-of-freedom flight model, used to simulate software settings before real flight. Predicts what the vehicle will behave like before actually flying.
+**6. [Control](/projects/aeolus/control)** — How it corrects for disturbances and commands 200 times per second, and how it physically does that. Also how the vehicle response is modelled to solve for optimal gains analytically, compared to the common trial-and-error tuning.
 
-**7. [Communications](/projects/aeolus/communications)** — Radio link, command protocol, flight recorder, and the browser dashboard I fly from.
+**7. [Simulation](/projects/aeolus/simulation)** — Airflow simulation and a six-degree-of-freedom flight model, used to simulate software settings before real flight. Predicts what the vehicle will behave like before actually flying.
 
-**8. [Testing](/projects/aeolus/testing)** — Probably every test and every flight, failures, successes, and analysis documented.
+**8. [Communications](/projects/aeolus/communications)** — Radio link, command protocol, flight recorder, and the browser dashboard I fly from.
 
 **9. [Build Log](/projects/aeolus/log)** — The working notebook, entry by entry, as I wrote it during the build.
-
-# Timeline
-
-export const phases = [
-  {
-    date: 'Jan 2026',
-    title: 'Modeling & Feasibility',
-    items: [
-      'Simulated a 70 m apogee trajectory in MATLAB',
-      'Estimated aerodynamic coefficients in RASAero II',
-      'Settled on a PLA shell over carbon fibre rods',
-    ],
-  },
-  {
-    date: 'Mar — Apr 2026',
-    title: 'CAD & Fabrication',
-    items: [
-      'Modeled the full vehicle assembly',
-      'Fabricated the four-vane thrust vector linkage',
-      'Measured servo PWM limits per unit',
-    ],
-  },
-  {
-    date: 'May 2026',
-    title: 'Avionics Integration',
-    items: [
-      'Routed custom power and servo distribution PCBs',
-      'Built the flight computer around a Teensy 4.1',
-      'Wrote the LoRa link and browser ground station',
-    ],
-  },
-  {
-    date: 'Jun 2026',
-    title: 'Characterization',
-    items: [
-      'Static thrust sweeps on a four-bar load cell stand',
-      'Vane moments recovered against a known 1 N·m reference',
-      'Inertia measured by bifilar pendulum to under 5%',
-      'First tethered hover departed — and produced no log',
-    ],
-    note: {
-      label: 'Aliasing current bug',
-      body: 'Current sample rates aliased directly into the radio transmission windows. Ghost 150–260 mA oscillations, solved by remapping the sample intervals.',
-    },
-  },
-  {
-    date: 'Jul 2026',
-    title: 'Estimation & Tethered Control',
-    items: [
-      'Madgwick filter and ellipsoid IMU calibration',
-      'Closed-loop RPM governor with median and plausibility filtering',
-      'Derived the attitude gains from measured inertia and vane torque',
-      'Validated each axis in isolation on a tether',
-    ],
-  },
-  {
-    date: 'Aug 2026',
-    title: 'Free Flight',
-    items: [
-      'Fused GPS velocity with the IMU to kill drift',
-      'Enlarged the vanes and re-measured control authority',
-      'Flew the horizontal velocity loop — 21 Aug',
-      'First untethered flight — 22 Aug',
-    ],
-  },
-  {
-    date: 'Sep 2026 — Present',
-    title: 'Autonomous Profile',
-    active: true,
-    items: [
-      'Onboard state machine flies launch, hover, drop and land unaided',
-      'Four autonomous flights to 15 m; found and fixed a quaternion unwinding bug',
-      'Clean 30 m flight',
-      '40 m attempt lost to barometer error in wind',
-    ],
-  },
-];
-
-<div class="not-prose my-8 max-w-2xl mx-auto text-[12px] leading-snug">
-  <div class="relative">
-    <div class="absolute left-[5px] top-2 bottom-2 w-px bg-slate-200 dark:bg-slate-800"></div>
-
-    <div class="space-y-2">
-      {phases.map((p) => (
-        <div class="relative pl-7">
-          <span class={`absolute left-0 top-[15px] h-[11px] w-[11px] rounded-full border-2 border-white dark:border-slate-950 ${p.active ? 'bg-emerald-500 ring-4 ring-emerald-500/20' : 'bg-slate-300 dark:bg-slate-700'}`}></span>
-
-          <div class={`rounded-lg border p-3 ${p.active ? 'border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950'}`}>
-            <div class="flex items-baseline gap-2 flex-wrap mb-2">
-              <span class={`font-mono text-[10px] uppercase tracking-wider ${p.active ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}>{p.date}</span>
-              <span class="text-slate-900 dark:text-white font-semibold text-[13px]">{p.title}</span>
-            </div>
-
-            <ul class="space-y-1 list-none p-0 m-0">
-              {p.items.map((t) => (
-                <li class="text-slate-600 dark:text-slate-400 pl-3 -indent-3">
-                  <span class="text-slate-300 dark:text-slate-700 mr-1.5">—</span>{t}
-                </li>
-              ))}
-            </ul>
-
-            {p.note && (
-              <details class="mt-2">
-                <summary class="cursor-pointer list-none font-mono text-[10px] uppercase tracking-wider text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
-                  {p.note.label} +
-                </summary>
-                <p class="mt-1.5 text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 pl-2.5">
-                  {p.note.body}
-                </p>
-              </details>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</div>
-
----
-
-# Log
-
-The day-by-day notebook I kept from January to September, from the first trajectory sketch to the 40 m flight, is on its own page: **[Build Log →](/projects/aeolus/log)**

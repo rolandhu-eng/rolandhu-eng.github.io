@@ -1,6 +1,6 @@
 ---
 title: "Navigation & Guidance"
-order: 4
+order: 5
 navLabel: "Nav & Guidance"
 showHero: false
 description: "How the rocket works out which way is up and where it is, 200 times a second, and how it decides what to do next, from launch to landing."
@@ -97,7 +97,7 @@ $$
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Composing yaw, pitch and roll into the body-to-earth DCM.</figcaption>
 </figure>
 
-The flight code does not build this matrix in the fast path. Rotating a vector by a quaternion directly is cheaper — nine multiplies and no trigonometry at all — and it avoids the gimbal singularity that the Euler parameterisation carries at $\beta = 90^\circ$, which for an X-up rocket is a horizontal attitude rather than an exotic one:
+The flight code does not build this matrix in the fast path. Rotating a vector by the quaternion directly is cheaper — 18 multiplies and no trigonometry at all — and it avoids the gimbal singularity that the Euler parameterisation carries at $\beta = 90^\circ$, which for an X-up rocket is a horizontal attitude rather than an exotic one:
 
 ```cpp
 // t = 2 * cross(q_vec, v);  v_earth = v + qw*t + cross(q_vec, t)
@@ -188,7 +188,7 @@ $\beta = 0.04$ in flight. It is a trust parameter: raise it and the filter corre
 
 The reference implementation normalizes vectors with the famous `0x5f3759df` bit-hack — an integer approximation of $1/\sqrt{x}$ from an era when floating-point division was expensive.
 
-It was replaced with a plain `1.0f / sqrtf(x)` after it showed instability. On a Teensy 4.1 the substitution costs nothing measurable: the Cortex-M7 has a hardware floating-point unit with a square-root instruction, so the trick optimises away a problem the processor no longer has. The trick was solving a problem this processor does not have.
+It was replaced with a plain `1.0f / sqrtf(x)` after it showed instability. On a Teensy 4.1 the substitution costs nothing measurable: the Cortex-M7 has a hardware floating-point unit with a square-root instruction, so the trick optimises away a problem the processor no longer has.
 
 The replacement is guarded, and the guard is argued from physics rather than defensiveness:
 
@@ -250,7 +250,7 @@ Neither correction is large in a single 5 ms step. Both matter because of what t
 
 # Vertical Channel
 
-Altitude and vertical velocity fuse the barometer with the accelerometer. The barometer is absolute but slow and noisy at roughly ±0.5 m; integrated acceleration is smooth and fast but drifts without bound. Each covers the other's weakness.
+Altitude and vertical velocity fuse the barometer with the accelerometer. The barometer is absolute but slow and imprecise: at rest its sample noise is only a few centimetres, but it drifts by a metre or more over minutes ([measured](/projects/aeolus/testing#most-likely-the-barometer-not-the-controller)), and in flight disturbed airflow adds more; integrated acceleration is smooth and fast but drifts without bound. Each covers the other's weakness.
 
 In the code this is two separate corrections on top of the integrated accelerometer.
 
@@ -264,7 +264,7 @@ At 50 Hz that is a time constant of about $1/(50 \times 0.01) = 2$ s. Short baro
 
 **Vertical velocity is corrected by GPS.** GPS Doppler velocity goes through the same one-dimensional Kalman filter as the [horizontal channel](#gps-fusion), with the measurement noise taken from the receiver's reported speed accuracy on each fix.
 
-GPS altitude is not used anywhere. That mattered on the 40 m flight: when the barometer read several metres low during the descent, the altitude estimate followed it within a couple of seconds and nothing else could pull it back. [Teardown on the testing page](/projects/aeolus/testing#it-was-the-barometer-not-the-controller).
+GPS altitude is not used anywhere. That mattered on the 40 m flight: when the barometer read several metres low during the descent, the altitude estimate followed it within a couple of seconds and nothing else could pull it back. [Teardown on the testing page](/projects/aeolus/testing#most-likely-the-barometer-not-the-controller).
 
 ---
 

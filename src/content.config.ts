@@ -23,6 +23,8 @@ const projectsCollection = defineCollection({
     isVideo: z.boolean().default(false),
     /** Object-position for the hero crop. Mapped to a static Tailwind class in ProjectLayout. */
     heroPosition: z.enum(['top', 'center', 'bottom']).default('center'),
+    /** 'compact' shortens the hero banner so content starts above the fold. */
+    heroSize: z.enum(['full', 'compact']).default('full'),
     /** Hide from /projects while keeping the page routable. */
     hidden: z.boolean().default(false),
     /** Heading above the sidebar nav. Defaults to "On This Page". */
