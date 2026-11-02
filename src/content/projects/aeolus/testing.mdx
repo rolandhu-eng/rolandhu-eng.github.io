@@ -54,6 +54,15 @@ The stand is a build in its own right, with its own firmware — load cell condi
   <figure class="m-0"><img src="/assets/aeolus/testing/stand-2.webp" alt="Load cell mounting detail on the test stand" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1200" height="1600" /></figure>
   <figure class="m-0"><img src="/assets/aeolus/testing/stand-3.webp" alt="Test stand with the vehicle mounted" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1200" height="1600" /></figure>
 </div>
+
+<div class="not-prose my-6 mx-auto max-w-xs">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/testing/test-stand-run-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/testing/test-stand-run.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">A run on the stand outside, 30 May, ending with the logged data on the laptop.</figcaption>
+  </figure>
+</div>
 <p class="text-[11px] text-slate-500 dark:text-slate-400 text-center">The four-bar load cell stand.</p>
 
 
@@ -66,6 +75,11 @@ It also has [documented problems](/projects/aeolus/control#static--thrust-stand)
 ## 19 June — First Hover Attempt
 
 **Setup.** The vehicle was suspended on a string so it could rotate freely while staying captive, with thrust-to-weight held just under 1:1.
+
+<figure class="not-prose my-6 mx-auto max-w-xs">
+  <img src="/assets/aeolus/testing/first-hover-tether.webp" alt="Aeolus hanging from a string in a garage for its first tethered hover attempt" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1087" height="2000" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">19 June: hung from a string for the first hover attempt, free to rotate but held captive.</figcaption>
+</figure>
 
 **What happened.** Roll, pitch, and yaw control were all enabled, and the roll gain was accidentally set ten times too high, which produced immediate oscillation. With that corrected and pitch and yaw disabled to isolate roll, the vehicle was commanded to hover at 0.5 m. It quickly lost orientation and veered away from vertical.
 
@@ -156,6 +170,11 @@ The most useful result was not the flight itself but a comparison: measured thru
 
 From September the [state machine](/projects/aeolus/gnc#flight-sequencing) flies the whole profile — launch, climb, hover, drop, land — with no input after the launch command. That changed what a test flight produces: instead of a pilot's impression, every flight now returns a timestamped event log alongside the telemetry, so failures can be reconstructed tick by tick.
 
+<figure class="not-prose my-6 mx-auto max-w-xs">
+  <img src="/assets/aeolus/testing/cad-launch-mount.webp" alt="CAD model of the printed launch mount, a ribbed cone with four pads on top" class="w-full rounded-lg" loading="lazy" decoding="async"  width="792" height="951" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Launch mount, designed on 3 September for the autonomous flights. The vehicle stands on the four pads at the top; the exhaust blows down onto the curved floor and out between the ribs.</figcaption>
+</figure>
+
 ## 4 September — Four Flights, Three Bugs
 
 Four autonomous launch-hover-drop-land flights at 1.5 m, 5 m, and twice at 15 m. All four completed. Three separate defects came out of the logs, and none of them were visible from the ground.
@@ -179,7 +198,7 @@ The second 15 m flight spun hard right at the `DESCENT`→`LANDING` transition �
 
 The obvious suspect was the fins. Reconstructing vane and fin moments from telemetry through the exact allocator math ruled them out: at the ~5 m/s speeds this vehicle actually reaches, aerodynamic fin moment is **0.3–0.4% of the vane moment**. The fins are a rounding error for the entire flight; all real roll authority is the vane.
 
-The log gave up the real cause on a tick-by-tick read. The attitude error's antipodal shortest-path sign is recomputed fresh every control tick from the error quaternion's scalar term. Once roll error crossed roughly 115° while the vehicle was still rotating hard, that sign flipped inside a single 40 ms tick:
+The log gave up the real cause on a tick-by-tick read. The attitude error's antipodal shortest-path sign is recomputed fresh every control tick from the error quaternion's scalar term. Once roll error crossed roughly 115° while the vehicle was still rotating hard, that sign flipped between two consecutive 5 ms control ticks:
 
 <Table
   maxWidth="max-w-md"
@@ -189,8 +208,8 @@ The log gave up the real cause on a tick-by-tick read. The attitude error's anti
     { key: 'c2', label: 'roll rate', align: 'left' }
   ]}
   rows={[
-    { c0: 'tick n', c1: '+114.3°', c2: '−267 °/s' },
-    { c0: 'tick n+1', c1: '−114.5°', c2: '−269 °/s' }
+    { c0: 'tick n', c1: '+114.5°', c2: '−269 °/s' },
+    { c0: 'tick n+1', c1: '−114.6°', c2: '−268 °/s' }
   ]}
 />
 
@@ -198,7 +217,20 @@ The physical state barely moved. The error's sign inverted anyway, which inverte
 
 This is the known *unwinding* failure of quaternion PD attitude control, described by Bhat and Bernstein in 2000. It is not a bug specific to this code; it is a property of the formulation. It had simply never been reached before, because attitude error had never gotten that large.
 
-The fix hands the axis to the derivative term as rates get high enough for the flip to be possible:
+The fix hands the axis to the derivative term as rates get high enough for the flip to be possible.
+
+**Before** (flown on 4 September): the roll error goes straight into the PID.
+
+```cpp
+out_roll = rollPID.update(e_roll_rad, state.dt, vState.angular_velocity_rads[0]);
+```
+
+**After** (flown from 5 September): the error is scaled by roll rate first. D still takes the gyro rate directly.
+
+```cpp
+float rollErrForPID = e_roll_rad * rateBlend(vState.angular_velocity_rads[0]);
+out_roll = rollPID.update(rollErrForPID, state.dt, vState.angular_velocity_rads[0]);
+```
 
 ```cpp
 static inline float rateBlend(float rate_rads) {
@@ -210,6 +242,11 @@ static inline float rateBlend(float rate_rads) {
 ```
 
 Across a 90–150 °/s band the error fed to P is scaled toward zero; above it, P is suppressed entirely. D never sees the blend — it comes straight from the gyro, which has no wrapped-position ambiguity to invert. Validation was done by replaying the exact recorded `(error, rate, P, D)` sequence from the bad flight through the new logic: the output stays correctly signed through the flip, and every other tick checked — including the first flight's healthy high-rate recovery — is unchanged. It flew on both 5 September flights, together with retuned roll gains (Kp 16, Kd 6.5). Roll rates never got high enough to engage the blend, so it is still untested in the case it exists for.
+
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/testing/unwinding-before-after.webp" alt="Roll rate, roll error, P and D terms, and roll command around the sign flip on the 4 September 15 m flight, with the fixed code replayed on the same data" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1376" height="1614" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The second 15 m flight, centred on the tick where the roll error flipped. As flown, P flipped sign while D kept braking, and the command swung from full braking to full torque with the spin for about a tenth of a second; roll rate went from −269 to −463 °/s. The fixed code, replayed on the same recorded data, holds full braking through the flip and changes nothing before it by more than 0.5 rad/s². The replay can't show how the flight would have continued, because everything after the flip was shaped by the bad command.</figcaption>
+</figure>
 
 ## 5 September — 30 m Clean, 40 m Into a Fence
 
@@ -232,13 +269,30 @@ The vertical loop did its job. The descent built an 8.5 m/s sink — confirmed r
 
 The barometer was reading **2.5–5 m low** during the terminal descent. Ambient pressure drift accounts for only about 1.5 m of that; dead-reckoning from the apogee anchor puts the vehicle at least 2.4 m higher than the loop believed at the moment of abort, and eyeballing the video suggests closer to 5 m.
 
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/testing/flight-40m-altitude.webp" alt="Altitude during the 40 m flight: target, the barometer-based altitude the controller flew on, and an IMU-only estimate from apogee, which runs above it through the descent" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1204" height="726" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The 40 m flight from launch to the abort. During the descent the IMU-only estimate stays above the altitude the controller was flying on, and the two are 2.4 m apart when it aborts. The target follows the controller's belief down to the ground, which in reality was still metres below.</figcaption>
+</figure>
+
 The mechanism is static-source error: a fast, tilted, buffeting, base-first descent puts the pressure port in disturbed flow, and the filter carried that error forward with lag. So the landing setpoint walked down to 0.15 m while the vehicle was still roughly 5 m up and drifting. It flew a correct landing profile into a ground that was not there yet.
+
+For scale, this is the same barometer with the vehicle sitting still. Its sample noise is only about 7 cm; what it does instead is wander slowly, by up to 2.5 m over several minutes. A 25 s flight sees a fraction of that, not the several metres that appeared in a few seconds of descent.
+
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/testing/baro-at-rest.webp" alt="Barometric altitude with the vehicle at rest for 7.7 minutes after a cold start, raw samples and 1 s averages" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1233" height="569" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Barometer at rest after a cold start, over 7.7 minutes. Nothing moved; the drift is the air and the sensor.</figcaption>
+</figure>
 
 The detail that stings: **GPS held a healthy 3D fix on 9–11 satellites for the entire flight and agreed with fused velocity to within 0.2 m/s — but GPS altitude was never used to check the barometer.** A cross-check that was already available would have caught it.
 
 ### Wind, and the limits of 10° of tilt
 
 Every stage of the horizontal cascade saturated. The position loop sat at its velocity limit, the velocity loop sat at `MAX_TILT_DEG`, and the vehicle still lost ground — 4.8 m of drift by apogee, another 5 m during the 3 s hover, 12.8 m at peak. Estimated wind was 11–16 m/s.
+
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/testing/flight-40m-wind.webp" alt="Top: distance from the pad during the 40 m flight, peaking at 12.8 m. Bottom: commanded tilt and commanded speed back to the pad as a share of their limits, both at 100 percent for most of the flight" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1377" height="975" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Top: distance from the pad. The climb wins back an early drift, but from about 10 s the wind takes over and pushes the vehicle 12.8 m away. Bottom: for most of the flight both outer loops ask for everything they are allowed. The position loop wants 2 m/s back toward the pad, and the velocity loop answers with the full 10° of tilt.</figcaption>
+</figure>
 
 Worse, the inner loop could not even hold the tilt it was told to: attitude tracking error ran about 13° RMS during boost. Raising the tilt limit is not an available fix, because tilt trades directly against vertical authority on a vehicle whose hover thrust-to-weight is 1.01.
 

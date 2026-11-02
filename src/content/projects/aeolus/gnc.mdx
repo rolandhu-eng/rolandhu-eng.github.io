@@ -426,6 +426,11 @@ Each state owns two things: which control loops are active, and what the thrust 
   ]}
 />
 
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/gnc/flight-15m-profile.webp" alt="Estimated and target altitude for a 15 m autonomous flight on 4 September, shaded by flight state from launch to confirmed touchdown" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1204" height="646" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">One whole flight from 4 September, launch to touchdown in 29 s with no input after the launch command. Each shaded band is a state; the target altitude is what that state asked for. This is also the flight that hit the <a href="/projects/aeolus/testing#the-unwinding-bug">unwinding bug</a>: the spin starts at the DESCENT to LANDING handover, and the small rise after 20 s happens during it.</figcaption>
+</figure>
+
 What ends a flight early depends on whether cutting thrust would make things worse:
 
 <Table

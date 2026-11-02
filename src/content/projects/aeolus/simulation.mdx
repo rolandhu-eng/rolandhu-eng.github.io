@@ -24,6 +24,11 @@ To obtain an accurate aerodynamic model for use in the full MATLAB/Simulink cont
 
 The geometry is the reason the cheap tools did not work. Standard rocket aero codes assume a body with fins in clean external flow. Aeolus has an intake partway up the airframe, an internal duct, and control surfaces sitting in the exhaust jet rather than in freestream — three interactions those codes have no representation for. A vane in a jet sees dynamic pressure set by the fan, not by airspeed, which is precisely why the vehicle has any control authority at hover at all.
 
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/simulation/cad-intake-section.webp" alt="CAD section through the Aeolus intake showing air entering partway up the body and turning into the duct ahead of the fan" class="w-full rounded-lg" loading="lazy" decoding="async"  width="2000" height="815" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Section through the intake. Air enters through openings partway up the body and turns inward into the duct ahead of the fan (left).</figcaption>
+</figure>
+
   <figure class="not-prose my-6 mx-auto max-w-2xl">
   <img src="/assets/aeolus/simulation/cfd_parametric.webp" alt="Parametric CFD study across vane deflection angles" class="w-full mx-auto" loading="lazy" decoding="async" width="1878" height="1118" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Vane deflection swept against lateral force. The slope of this curve is the control authority every attitude gain is derived from.</figcaption>

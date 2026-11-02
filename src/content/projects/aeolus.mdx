@@ -207,6 +207,11 @@ $$
 
 The vanes work whenever the fan is spinning. The fins work whenever the vehicle is moving. Between them there is *almost* no part of the envelope — hover, climb, or unpowered fall — where the vehicle has nothing to steer with. The only exception is engine relight in base-first descent: the exhaust flow and external airflow are opposed, so the vanes and fins sharing a shaft will produce opposing control moments. The [allocator](/projects/aeolus/control#control-allocation) has to decide which effector is winning before it can decide which way to deflect.
 
+<figure class="not-prose my-6 mx-auto max-w-xl">
+  <img src="/assets/aeolus/vehicle/cad-aft-section.webp" alt="CAD section through the aft end of Aeolus showing the vanes inside the exhaust duct and the fins outside" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1787" height="1400" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Section through the aft end. The vanes (green) sit in the jet at the duct exit; the fins (orange) sit outside. Each vane is linked to its fin and servo by a pushrod.</figcaption>
+</figure>
+
 So far the vanes have done almost all the work. At the speeds flown (around 5 m/s), the fins produce under 0.5% of the vane moment, so the fin half of the design has [not yet been tested in flight](/projects/aeolus/control#what-is-still-untested).
 
 All of this demands precise gain tuning, modelling, simulation, attitude estimates, and more—each of those is a page here.

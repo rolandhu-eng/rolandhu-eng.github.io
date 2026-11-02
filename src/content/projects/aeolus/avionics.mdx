@@ -34,6 +34,15 @@ A custom flight computer PCB was not used for this prototype as I was still not 
 
 My flight computer was built around the Teensy 4.1, chosen for its clock speed, allowing for fast control loops and math, along with soldered-on PSRAM and flash for datalogging. [State estimation](gnc) and [communication](communications) were handled by the IMU, barometer, and LoRa radio (see [table below](#sensor-table)).
 
+<div class="not-prose my-6 mx-auto max-w-xs">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/avionics/psram-soldering-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1020">
+      <source src="/assets/aeolus/avionics/psram-soldering.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Soldering the PSRAM chip (left) beside the flash chip on the underside of the Teensy 4.1.</figcaption>
+  </figure>
+</div>
+
 In the future, I will likely switch to an LSM6DSOX or ISM330DHCX IMU for lower drift than my current setup. I will also switch to a BMP581 for its ~3 cm altitude precision compared to my current ~50 cm precision.
 
 ## Bus Allocation
@@ -72,12 +81,30 @@ The GPS is on a hardware UART for the same reason. Early bench testing with the 
 </figure>
 </div>
 
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/avionics/cad-fc-board.webp" alt="CAD model of the flight computer perfboard, front and back" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1970" height="1176" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The flight computer in CAD. Front (left): Teensy 4.1, ICM-20948 IMU and BMP388 barometer. Back (right): RFM95W radio with its spring antenna.</figcaption>
+</figure>
+
 ---
 
 # PCB Design
 These were the first PCBs I've designed and my first opportunity to solder SMD components. I decided to make the PCBs out of the necessity for compact and reliable electronics as well as for the fun challenge and new skills. I made a power distribution board and a servo distribution board.
 
 Both PCBs were designed in EasyEDA for its interface with JLCPCB for manufacturing. 5 boards of each were ordered for a total of just \$6. The 0805 metric was chosen for components as it is compact but large enough to be comfortably hand-soldered with a soldering iron. I used screw terminals and JST connectors for easy connection and disconnection of components.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 mx-auto max-w-2xl items-start">
+  <figure class="m-0">
+    <img src="/assets/aeolus/avionics/pcbs-bare.webp" alt="The bare power distribution and servo distribution PCBs as delivered" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1500" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The bare boards as they arrived: power distribution (centre) and servo distribution (right).</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video poster="/assets/aeolus/avionics/smd-soldering-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/avionics/smd-soldering.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Hand-soldering the SMD parts on the power distribution board, then powering it up.</figcaption>
+  </figure>
+</div>
 
 ## Power Distribution Board
 The avionics run on a dedicated 2S LiPo, entirely separate from the 6S LiPo powering the EDF. This split exists because the EDF motor draws high current under load, which would sag or inject noise onto a shared rail—putting the flight computer, IMU, and radio on their own isolated battery keeps sensor and logic power clean regardless of what the motor is doing.
@@ -99,6 +126,19 @@ The power distribution board was designed to distribute and convert power from t
 </figure>
 </div>
 
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 mx-auto max-w-2xl items-start">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/avionics/power-dist-test-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/avionics/power-dist-test.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Bench test, 16 May: the power board running the flight computer, sensors and radio.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/avionics/power-dist-serial.webp" alt="Serial monitor output listing INA260 power, BMP388 pressure and altitude, ICM-20948 accelerometer, gyro and magnetometer readings, and an RFM95W transmit confirmation" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1080" height="790" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The serial monitor at the end of that test: power draw from the INA260, pressure and altitude from the BMP388, the ICM-20948's three sensors, and the radio confirming a transmit.</figcaption>
+  </figure>
+</div>
+
 ## Servo Distribution Board
 The servo distribution board was simple as it just needed to distribute power and signals to each servo. The board was designed to be as compact as possible while still being hand-solderable with an iron. It included ground and power planes for better current handling (up to 5A worst case) and noise reduction, with a 470 $\mathrm{\mu F}$ low ESR capacitor to smooth the power delivery. I also included 10 $\mathrm{\mu F}$ capacitors on each servo's power line to reduce noise and 330 $\Omega$ resistors on each signal line for protection and to reduce ringing.
 
@@ -111,6 +151,19 @@ The servo distribution board was simple as it just needed to distribute power an
   <img src="/assets/aeolus/avionics/svr-board.webp" alt="Servo distribution board mounted in the vehicle" class="max-h-[500px] w-auto mx-auto rounded-lg" loading="lazy" decoding="async" width="1445" height="2000" />
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Servo distribution board mounted</figcaption>
 </figure>
+</div>
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 mx-auto max-w-2xl items-start">
+  <figure class="m-0">
+    <img src="/assets/aeolus/avionics/servo-perfboard.webp" alt="The first servo distribution board, built on perfboard inside the aft section" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1500" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The first servo distribution board, on perfboard inside the aft section, before the PCB replaced it.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video poster="/assets/aeolus/avionics/servo-perfboard-powerup-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/avionics/servo-perfboard-powerup.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Its first power-up from a bench supply, 21 April.</figcaption>
+  </figure>
 </div>
 
 ---
@@ -310,6 +363,11 @@ B = \frac{\mu_0 I R^2}{2 d^3} \approx 2.5~\mu\mathrm{T}
 $$
 
 Twenty times smaller, and squarely in line with what was observed.
+
+<figure class="not-prose my-6 mx-auto max-w-sm">
+  <img src="/assets/aeolus/avionics/ina-wire-loop.webp" alt="The INA228 EDF power monitor with the motor wiring that doubles back into a small loop" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1500" height="2000" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The INA228 EDF power monitor (blue board) and the motor wiring around it, which doubles back into the small loop the dipole estimate is based on.</figcaption>
+</figure>
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
   <figure class="m-0"><img src="/assets/aeolus/avionics/mag-edf-off.webp" alt="Reference recording, EDF off." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="934" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Reference recording, EDF off.</figcaption></figure>

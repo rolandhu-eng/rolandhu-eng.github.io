@@ -26,6 +26,16 @@ import Table from '../../../components/Table.astro';
   <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Initial systems planning, January. Most of it survived — the parachute recovery path is the part that did not.</figcaption>
 </figure>
 
+<figure class="not-prose my-6 mx-auto max-w-2xl">
+  <img src="/assets/aeolus/vehicle/cad-evolution.webp" alt="An early Aeolus CAD assembly from April 2026 above the final assembly from September 2026, drawn at the same scale" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1486" height="878" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">An early CAD assembly (top, April 2026) and the final one (bottom, September), at the same scale. The aft end carried over; the forward section went from a bare rod frame with a short nose to a full shell and a longer nose that holds the recovery bay.</figcaption>
+</figure>
+
+<figure class="not-prose my-6 mx-auto ">
+  <img src="/assets/aeolus/vehicle/cad-exploded.webp" alt="Exploded view of the final Aeolus CAD assembly along its long axis" class="w-full rounded-lg" loading="lazy" decoding="async"  width="2000" height="597" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The final assembly pulled apart along its axis: the cushion ring at the very base, aft control section, EDF and its jacket, intake, the carbon-rod frame carrying the batteries, ESC and avionics, the printed shell (lifted off above it), and the nose.</figcaption>
+</figure>
+
 <div class="max-w-2xl mx-auto not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-8">
   <figure class="m-0"><img src="/assets/aeolus/vehicle/rocket-night.webp" alt="The assembled vehicle with its outer shell and nose cone removed" class="w-full rounded-lg" loading="lazy" decoding="async"  width="933" height="1800" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The real thing, shell and nose cone off — avionics stack, battery bay, EDF, and fins.</figcaption></figure>
   <figure class="m-0"><img src="/assets/aeolus/vehicle/rocket-intake-night.webp" alt="Intake end of the vehicle with internals exposed" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1132" height="1600" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Intake end, showing the wiring run between the avionics bay and the EDF section.</figcaption></figure>
@@ -48,7 +58,45 @@ import Table from '../../../components/Table.astro';
 
 The airframe was divided into two sections: the aft section (aft of the intake) and the forward section (forward of the intake). The aft section needed to accommodate the EDF and control mechanism, and was designed to be supported purely through 3D printed parts due to the rather tight space and complex geometry. The forward section held the batteries, ESC, and avionics, and was designed to have 4 carbon fiber rods acting as the main structural support with a thin 3D printed shell around it. The CF rods give it good strength and minimal weight compared to an entirely 3D printed structure.
 
+<div class="not-prose my-6 space-y-6">
+  <figure class="m-0">
+    <img src="/assets/aeolus/vehicle/cad-section.webp" alt="Lengthwise section through the Aeolus CAD assembly, aft end on the left and nose on the right" class="w-full rounded-lg" loading="lazy" decoding="async"  width="2000" height="509" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Lengthwise section through the CAD assembly. From the left: fins and exhaust vanes, the ducted fan and its tail cone, the intake, the battery and ESC bay, the avionics bay, and the nose with the servo that releases the fairing.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/vehicle/cad-structure.webp" alt="Aeolus CAD assembly with the printed shell hidden, showing four carbon fiber rods running through printed bulkheads" class="w-full rounded-lg" loading="lazy" decoding="async"  width="2000" height="508" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The same assembly with the shell hidden. Aft of the intake, printed parts carry the load; forward of it, four 4 × 6 mm carbon fiber rods run through printed bulkheads to the nose.</figcaption>
+  </figure>
+</div>
+
 The split is really a split in **load path**. Aft of the intake, thrust and vane reaction loads are fed into printed structure directly, because the geometry there is too congested for rods to run through cleanly. Forward of the intake, the four CF rods carry essentially all axial load, and the printed shell around them is an aerodynamic fairing rather than a structural member — which is what lets it be thin. Mass in the forward section is also the mass furthest from the centre of mass, so it is the mass that costs the most pitch and yaw inertia. Keeping the shell non-structural was as much a control decision as a weight one.
+
+<div class="not-prose grid grid-cols-2 sm:grid-cols-3 gap-4 my-8 items-start">
+  <figure class="m-0">
+    <img src="/assets/aeolus/vehicle/build-1-sections.webp" alt="The aft section and the EDF section of Aeolus before being joined" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1331" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">1. The aft section and the EDF section, before joining.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/vehicle/build-2-edf-fitted.webp" alt="Fitting the EDF into its printed section" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1080" height="1301" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">2. 29 March: the aft section and EDF assembled, minutes before the fan was first spun up.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/vehicle/build-3-first-rod.webp" alt="A single carbon fiber tube fitted into the intake" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1098" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">3. The first carbon fiber tube going into the intake.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/vehicle/build-4-rods-intake.webp" alt="Aft section, intake and carbon fiber tubes assembled with the forward bay still empty" class="w-full rounded-lg" loading="lazy" decoding="async"  width="574" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">4. Aft section, intake and tubes, with the forward bay still almost empty.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/vehicle/build-5-battery-esc.webp" alt="Battery and ESC mounted between the carbon fiber tubes" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1064" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">5. Battery and ESC mounted between the tubes.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/vehicle/build-6-loaded.webp" alt="The forward bay fully loaded with batteries, ESC and avionics between the carbon fiber tubes" class="w-full rounded-lg" loading="lazy" decoding="async"  width="834" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">6. The forward bay fully loaded: batteries, ESC and avionics.</figcaption>
+  </figure>
+</div>
 
 Since this was a first prototype, all 3D printed parts were made from regular PLA due to its high stiffness, relatively good strength, and low cost. Future versions will likely use PC for its tensile strength, impact resistance, and stiffness while still being relatively affordable.
 
@@ -336,6 +384,15 @@ The fabric column is left blank for the toroid deliberately: projected area sets
 
 The final canopy is a **12-gore toroidal design**. The gore pattern was generated in openchute, an open-source parachute pattern tool, which outputs a DXF for laser cutting.
 
+<div class="not-prose my-6 mx-auto max-w-xs">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/vehicle/parachute-sewing-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/vehicle/parachute-sewing.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Sewing the canopy gores together.</figcaption>
+  </figure>
+</div>
+
 ## A First Estimate of the Opening Load
 
 Before measuring anything, the peak load is worth bounding. Treat the vehicle as a mass on a spring, the canopy as an effectively fixed end, and the vehicle as already falling at $v_0$ when the cord goes taut. Peak force then occurs at maximum extension, where the vehicle has momentarily stopped.
@@ -482,6 +539,19 @@ Two recovery parts were designed rather than simply drawn: the fairing hinges, w
 </figure>
 
 The hinge is a small part with an awkward job: it has to survive the deployment load, fit inside a curved keep-out volume, and add as little mass as possible at the very top of the vehicle, where mass is most expensive in pitch and yaw inertia. Rather than iterating by hand, the load cases and keep-out volumes were handed to a generative study and the resulting population of candidates compared directly.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 mx-auto max-w-2xl items-start">
+  <figure class="m-0">
+    <img src="/assets/aeolus/vehicle/fairing-assembly.webp" alt="A nose fairing half with its printed generative-design hinge, beside the nose base and release servo" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1500" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">A fairing half with its printed generative-design hinge, next to the nose base and the release servo.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video poster="/assets/aeolus/vehicle/fairing-spring-test-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/vehicle/fairing-spring-test.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Spring test: the fairing halves swinging open when released.</figcaption>
+  </figure>
+</div>
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
   <img src="/assets/aeolus/vehicle/gen-design-fairing.webp" alt="Generated fairing hinge geometry." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1365" />

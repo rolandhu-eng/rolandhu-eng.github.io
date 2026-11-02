@@ -13,13 +13,38 @@ import DampingDemo from '../../../components/DampingDemo.astro';
 
 Four vanes sit in the EDF exhaust, each on an axle offset from but linked to the external fin axles and driven by its own servo. They are the only source of control moment at hover, when airspeed is zero and the fins produce nothing.
 
-<figure class="not-prose my-6 mx-auto max-w-xl">
-  <img src="/assets/aeolus/control/vane-linkage.webp" alt="Control section with the vane linkage exposed" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1600" height="1200" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The control section with its shell off — four servos driving pushrods and bellcranks onto the vane axles, which run through bearings out to the external fins.</figcaption>
-</figure>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+  <figure class="m-0">
+    <img src="/assets/aeolus/control/cad-linkage.webp" alt="CAD of the control section with the shell removed, showing servos, pushrods, bearings, fins and vanes" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1937" height="1450" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The control section as designed in CAD, shown with the original 25 × 20 mm vanes.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/control/vane-linkage.webp" alt="Control section with the vane linkage exposed" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1600" height="1200" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The control section with its shell off — four servos driving pushrods and bellcranks onto the vane axles, which run through bearings out to the external fins.</figcaption>
+  </figure>
+</div>
 
 
 Each vane is a half-ellipse — the planform that minimises induced drag for a given area. The first set had a 25 mm span and a 20 mm chord. In August they were replaced with a 40 mm chord on the same 25 mm span, doubling the area.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-3 gap-4 my-6 mx-auto max-w-3xl items-start">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/control/linkage-servo-test-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/control/linkage-servo-test.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">15 April: the servo driving the linkage in a half-shell of the aft section.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video poster="/assets/aeolus/control/linkage-quarter-test-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/control/linkage-quarter-test.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">16 April: a quarter-section print with the fin attached, checking the full linkage.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/aeolus/control/exhaust-vanes-view.webp" alt="Looking up the exhaust duct at the four vanes, with the tail cone and fan blades behind them" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1500" height="2000" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Looking up the exhaust: the four vanes in the jet, with the tail cone and fan blades behind them.</figcaption>
+  </figure>
+</div>
 
 <figure class="not-prose my-6 mx-auto max-w-xl">
   <img src="/assets/aeolus/control/vanes-old-new.webp" alt="Original and replacement vanes side by side" class="w-full rounded-lg" loading="lazy" decoding="async"  width="1600" height="1244" />
@@ -362,6 +387,15 @@ altitude PID      →  thrust           →  RPM setpoint          →  governor
 ```
 
 The outer loops are slow because they only need to nudge a setpoint; the attitude loop is fast because attitude error leaks directly into position error. Guidance is not allowed unlimited say over attitude — the commanded tilt is clamped to 10°, so a confused position loop cannot ask for an attitude the vehicle should not be in.
+
+<div class="not-prose my-6 mx-auto max-w-xs">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/control/fins-tilt-response-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="720" height="1280">
+      <source src="/assets/aeolus/control/fins-tilt-response.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Bench check, 7 June: tilting the vehicle by hand, and the fins moving in response.</figcaption>
+  </figure>
+</div>
 
 ## Quaternion Error and the 180° Problem
 
