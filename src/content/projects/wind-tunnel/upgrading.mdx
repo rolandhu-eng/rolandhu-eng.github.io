@@ -1,0 +1,102 @@
+---
+title: "Upgrading It"
+order: 2
+navLabel: "Upgrading It"
+showHero: false
+description: "How I turned the class tunnel into a measurement instrument for research: measured airspeed, a new force balance and wing mount, ESP32 logging, and a safe way to power a 40 kV wing."
+---
+
+# From Demonstration to Instrument
+
+For the research the tunnel had to do more than show airflow: it had to measure small forces repeatably, at known angles and a known airspeed, on a wing carrying 40 kV. The body stayed the same — foam board, acrylic windows, straw flow straighteners before and after the test section, and the same fan. Everything that measures, holds or powers the wing was redone, and this part I did on my own.
+
+<figure class="not-prose my-6">
+  <img src="/assets/wind-tunnel/tunnel-labeled.webp" alt="Side view of the research wind tunnel, labelled: inlet contraction, straw flow straighteners, lit test section, fan, test rig, microcontroller and wires to the power supply" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1023" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The tunnel as used for the research. Air is pulled left to right.</figcaption>
+</figure>
+
+<figure class="not-prose my-6 mx-auto max-w-md">
+  <img src="/assets/wind-tunnel/rig-schematic.webp" alt="Three-part schematic: (a) side view of the tunnel with inlet contraction, test section, straighteners and 200 mm duct fan; (b) the airfoil with emitter, collector, ionic wind, thrust, lift and drag; (c) the test rig with servo, pushrod, two load cells, HX711 amplifiers, ESP32-S3, transformer and magnetic contacts" class="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white" loading="lazy" decoding="async" width="1520" height="2000" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">(a) The tunnel, test section to scale. (b) The actuator on the wing; lift and drag are measured in tunnel axes. (c) The rig: the wing pivots on the mounting arm, a pushrod from the servo sets the angle, and every force on the wing passes through both load cells.</figcaption>
+</figure>
+
+---
+
+# Measuring Airspeed
+
+The class version worked airspeed out on paper: the fan's rated 623 cubic feet per minute divided by the test section's area gave 13 m/s. That assumes the fan delivers its rating through straws, a contraction and a test section, which it does not.
+
+So I measured it with a U-tube manometer: a bent straw filled with water and a little dish soap (to lower the surface tension), one end open to the test section and the other to the room. The faster air in the tunnel is at lower pressure, so the water rises on that side. From the height difference $\Delta h$, Bernoulli's equation gives the speed:
+
+$$
+v = \sqrt{\frac{2\rho_w g\,\Delta h}{\rho_a}}
+$$
+
+where $\rho_w$ and $\rho_a$ are the densities of water and air. The measured airspeed was 11 m/s, about 15% below the calculation. With the 80 mm wing chord, that is a Reynolds number of about 60,000, typical of small drones and light model aircraft.
+
+<figure class="not-prose my-6 mx-auto max-w-sm">
+  <img src="/assets/wind-tunnel/u-tube.webp" alt="U-tube manometer beside the test section, with the water level difference marked" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1675" height="2000" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The U-tube manometer. The water level difference gives the airspeed.</figcaption>
+</figure>
+
+---
+
+# Force Balance and Wing Mount
+
+Two 1000 g bar load cells are mounted at right angles: a vertical one measures drag, and its base sits on the free end of a horizontal one that measures lift. Each has an HX711 amplifier, and they are rated to ±0.01 g.
+
+The wing snaps onto a new 3D-printed arm through a joint that lets it pivot, and a pushrod from a small servo sets the angle. I sized the linkage so the wing's angle of attack equals the servo angle, so setting the servo sets the angle directly. The mount's own forces were measured on their own and subtracted from the wing readings.
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-[1546fr_2000fr] gap-4 my-8 items-start">
+  <figure class="m-0">
+    <img src="/assets/wind-tunnel/wing-cad.webp" alt="CAD model of the NACA 4412 wing on its teardrop mounting arm, with the pushrod beside it" class="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white" loading="lazy" decoding="async" width="1546" height="1232" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The wing on its mounting arm, in CAD.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/wind-tunnel/research-rig.webp" alt="Labelled photos: the wing on its mounting arm in the test section with servo and load cells below; the actuator with emitter, collector and their contacts; the corona glowing in the dark" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1363" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">(a) The rig under the test section. (b) The actuator and its contacts. (c) The corona discharge.</figcaption>
+  </figure>
+</div>
+
+---
+
+# Control and Logging
+
+The Arduino was replaced by an ESP32-S3. It reads both load cells every 100–200 ms, sets the servo angle, and serves a web page over the local network that plots lift and drag live and logs every reading. That let me run each test from a distance while the wing was at 40 kV.
+
+<figure class="not-prose my-6">
+  <img src="/assets/wind-tunnel/web-interface.webp" alt="The tunnel's web interface: angle and logging controls, a live plot of lift and drag, and a data log" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="894" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The ESP32's web interface: live forces, servo control and logging.</figcaption>
+</figure>
+
+---
+
+# Powering a Wing on a Scale
+
+One problem in the setup was getting high voltage to the electrodes without the wires touching anything that would carry force. Any stiff wire from the wing to the tunnel wall becomes part of the balance and spoils the reading.
+
+After trying several approaches, the one that worked was a contact pad. The two transformer leads are held to the inside wall of the test section with magnets, which can be slid to suit each angle of attack. Short, thin copper wires from each electrode just touch the magnets. They conduct, but are too floppy to carry any meaningful force, so the load cells still see the whole aerodynamic load.
+
+<figure class="not-prose my-6 mx-auto max-w-lg">
+  <img src="/assets/wind-tunnel/contacts.webp" alt="The wing in the test section with fine copper wires from each electrode resting on magnetic contacts on the tunnel walls" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1824" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Magnetic contacts on the side walls. The fine copper wires carry current but almost no force.</figcaption>
+</figure>
+
+---
+
+# Safety
+
+The actuator runs from a small 40 kV DC–DC transformer module, the kind used in electric fly swatters and lighters. It cannot supply a dangerous current, but I still treated it as hazardous:
+
+- eye protection the whole time, and adult supervision for every test
+- all wiring outside the test section insulated, and a clear zone around the actuator and supply while powered
+- every run started and stopped remotely through the web interface
+- a discharge stick used on the electrodes after each test
+- about 60 s off between runs so the transformer would not overheat
+
+<figure class="not-prose my-6 mx-auto max-w-sm">
+  <img src="/assets/wind-tunnel/transformer.webp" alt="The small black 40 kV DC-DC transformer module with red and black leads" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1415" />
+  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The 40 kV transformer module.</figcaption>
+</figure>
+
+With the tunnel ready, the [research](/projects/wind-tunnel/research) could start.

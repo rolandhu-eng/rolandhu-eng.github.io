@@ -1,112 +1,73 @@
 ---
 title: "Wind Tunnel"
-description: "Designed and built a subsonic wind tunnel for aerodynamic testing of scale models."
-dateRange: "Dec 2024 - Feb 2025"
-tags: ["Aerodynamics", "CAD", "Fabrication"]
+description: "A wind tunnel I led a team of three to build for class, then turned into a measurement instrument for my own research on ionic wind flow control."
+dateRange: "Dec 2024 - Feb 2026"
+tags: ["Aerodynamics", "Research", "CAD", "ESP32", "Fabrication"]
 cover: "/assets/wind-tunnel/windtunnelEAD.mp4"
 coverAlt: "Wind tunnel airflow demonstration"
 isVideo: true
 showHero: true
+heroSize: "compact"
+sidebarTitle: "Contents"
 ---
 
 import Chart from '../../components/Chart.astro';
 
-This started as an engineering class project in my freshman year, where I led a team of three to design and build the tunnel. I later rebuilt it for the [ionic wind research](#ionic-wind-research) below.
+# Overview
 
-<section id="video">
-  <div class="w-full rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900 shadow-sm aspect-video">
-    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/CyA2bT-weZY?si=hkfePSx6LSkGiCMR"
-      title="YouTube video player" frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-    </iframe>
-  </div>
-</section>
+In my freshman engineering class I led a team of three to design and build a wind tunnel: a cheap, small tool for seeing and measuring how air moves around an object. A year later I turned it into a measurement instrument and used it, on my own, to answer a research question: can a wing be made more efficient with no moving parts, using a wire held at 40,000 volts?
 
----
+{/* AUTHOR TO WRITE: one or two sentences, in your words, on how you got from the class project to the research — what made you want to test ionic wind, and why on this tunnel. (Your JEI author note has the start of it: the ionic wind fan video you saw and built yourself.) */}
 
-# Abstract
+<div class="not-prose my-6 flex flex-wrap justify-center gap-2 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">15 × 15 × 34 cm test section</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">11 m/s</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">Re ≈ 60,000</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">2-axis load cell balance</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">40 kV actuator</span>
+  <span class="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">Team of 3, then solo</span>
+</div>
 
-Many aspiring STEM students who may be interested in aerodynamics do not have a way to learn and study it, especially aerodynamic forces and airflow around objects. Therefore, our goal was to design and develop a tool that can be used to understand aerodynamics in an intuitive and engaging way. It should be constructed to be affordable and accessible, and its operation should not be extremely complicated.
-
----
-
-# Design
-
-Our wind tunnel uses foam board and acrylic windows for the main tunnel section with a 3D printed adapter to connect the fan. Straws were used to straighten the airflow, which ensures the incoming air flows straight through the tunnel with minimal turbulence. For the test stand, we used two load cells to measure force and a servo motor to control the angle of the test object. These were connected to an Arduino, allowing us to control and visualize the forces on the object.
-
-Also, to visualize the airflow, a smoke generator was used. However, a challenge was that the airflow was too fast even on the lowest fan setting, resulting in unavoidable turbulence in the airstream, which caused the smoke to disperse and be faint. Another challenge was attaching all the straws, which took a significant amount of time.
-
-<figure class="not-prose my-6">
-  <img src="/assets/wind-tunnel/smoke-airfoil.webp" alt="Smoke streaks from a rake of tubes bending around an airfoil in the lit acrylic test section" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="838" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Smoke streaks from the tube rake bending around an airfoil in the test section.</figcaption>
-</figure>
-
-Overall, I learned many things throughout this project. I learned how to use load cells to measure forces and then plot the data using an Arduino, creating a real time graph of the forces. Also, I learned how to use the laser cutter to cut materials. Finally, my 3D modelling and 3D printing skills have significantly improved as a result of this project since it uses a variety of 3D printed parts. If I were to do anything differently, I would use a fine honeycomb mesh instead of individual straws, and I would use a larger smoke generator with a higher smoke output.
-
-## CAD Model
-
-<figure class="not-prose my-6">
-  <img src="/assets/wind-tunnel/cad.webp" alt="Fusion 360 render of the wind tunnel on a wooden base: inlet with honeycomb straightener, open test section with a model aircraft on its stand, the contraction to the round fan housing, and the load cells and Arduino beneath" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1083" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The full assembly in Fusion 360, with the load cell stand and electronics under the test section.</figcaption>
-</figure>
-
-<div class="not-prose my-6 w-full aspect-[4/3] sm:aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
-  <iframe
-    src="https://glenbrook225741.autodesk360.com/shares/public/SH30dd5QT870c25f12fc24201e737237987e?mode=embed"
-    title="Wind tunnel CAD model viewer"
-    loading="lazy"
-    class="w-full h-full"
-    frameborder="0"
-    allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+<div class="not-prose grid grid-cols-1 sm:grid-cols-[2387fr_1955fr] gap-4 my-8">
+  <figure class="m-0">
+    <img src="/assets/wind-tunnel/smoke-airfoil.webp" alt="The class-project tunnel: smoke streaks from a rake of tubes bending around an airfoil in the lit acrylic test section" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="838" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center"><span class="font-semibold">Then, spring 2025.</span> The class build, showing airflow with smoke.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <img src="/assets/wind-tunnel/tunnel-labeled.webp" alt="The research tunnel from the side, labelled: inlet contraction, straw flow straighteners, test section, fan, test rig, microcontroller and wires to the power supply" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="1023" />
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center"><span class="font-semibold">Now, 2025–26.</span> The same tunnel, set up to measure forces for the research.</figcaption>
+  </figure>
 </div>
 
 ---
 
-# Physics
+# The Story
 
-The wind tunnel is in essence a physics research tool: it studies the motion of air and the forces it puts on objects. Two load cells are fixed perpendicular to each other, so lift and drag are measured separately. By changing the fan speed and the angle of the test object, we can see how those forces change, plotted live on a computer by the Arduino. The smoke trails make flow phenomena like flow separation visible. The electronics — the Arduino, servo motor, load cells and potentiometers for input — are circuits in their own right.
+The same tunnel, in three stages. Each one links to its own page.
 
-The airspeed in the test section comes from continuity of flow. Well below 100 m/s air is effectively incompressible, and the tunnel has one inlet and one outlet, so the volumetric flow rate $Q$ is the same through every cross-section:
-
-$$
-Av = Q = \text{constant} \quad\Rightarrow\quad v = \frac{Q}{A}
-$$
-
-Knowing the fan's flow rate and the area of the test section gives the airspeed there. With the speed known, the measured forces give the lift and drag coefficients $C_L$ and $C_D$ of the test object.
-
----
-
-# Project Proposal
-
-The proposal we wrote before building: brainstorming and a decision matrix, the design brief, research, concept sketches, physics principles, schedule, budget, tools and safety.
-
-<div class="not-prose rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900/40">
-  <object data="/assets/wind-tunnel/proposal.pdf" type="application/pdf" class="w-full h-[600px]" aria-label="Wind tunnel project proposal (PDF)">
-    <p class="p-4 text-sm text-slate-600 dark:text-slate-400">Your browser can't show the PDF here. <a href="/assets/wind-tunnel/proposal.pdf" class="underline">Open the proposal</a>.</p>
-  </object>
-</div>
-
-<p class="text-sm"><a href="/assets/wind-tunnel/proposal.pdf">Download the proposal (PDF, 3.5 MB)</a></p>
-
----
-
-# Materials Bill of Quantities
-
-<div class="rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900/40 p-1">
-  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vT-glcq7bKmy-9AkKgCuUQBpq0rWlXGB5gYYL2ekwoJLCFAXFxT46j6jy74n18SSjE-MlkJu9mn44hI/pubhtml?widget=true&amp;headers=false"
-    frameborder="0" width="100%" height="450" class="rounded opacity-90 dark:invert-[0.9] dark:hue-rotate-180"></iframe>
+<div class="not-prose my-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+  <a href="/projects/wind-tunnel/building" class="block no-underline rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-slate-400 mb-1">1 · Spring 2025 · team of 3</div>
+    <div class="font-semibold text-slate-900 dark:text-white mb-2">Building it</div>
+    <p class="text-[12.5px] leading-snug text-slate-600 dark:text-slate-400 m-0">A class project I led as project manager: a $125 tunnel of foam board, acrylic and 3D-printed parts, with straw flow straighteners, two load cells on an Arduino, and a smoke generator to show the airflow.</p>
+  </a>
+  <a href="/projects/wind-tunnel/upgrading" class="block no-underline rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-slate-400 mb-1">2 · 2025–26 · solo</div>
+    <div class="font-semibold text-slate-900 dark:text-white mb-2">Upgrading it</div>
+    <p class="text-[12.5px] leading-snug text-slate-600 dark:text-slate-400 m-0">Turning a demonstration into an instrument: measured airspeed instead of calculated, an ESP32 that sets the angle and logs every reading, a new wing mount, and a way to feed 40 kV to a wing sitting on a force balance.</p>
+  </a>
+  <a href="/projects/wind-tunnel/research" class="block no-underline rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+    <div class="font-mono text-[10px] uppercase tracking-wider text-slate-400 mb-1">3 · 2025–26 · solo</div>
+    <div class="font-semibold text-slate-900 dark:text-white mb-2">Ionic wind research</div>
+    <p class="text-[12.5px] leading-snug text-slate-600 dark:text-slate-400 m-0">An electroaerodynamic actuator on a 3D-printed NACA 4412 wing, measured with the actuator off and on from 0° to 24°. Lift went up at every angle; stall did not move.</p>
+  </a>
 </div>
 
 ---
 
-# Ionic Wind Research
+# The Result
 
-{/* TODO: add recognition (IJAS, the ISEF-affiliated fair, the JEI submission) and a link to the paper once you decide what to state publicly. */}
-
-I later rebuilt the tunnel for a research project: can a wing be made more efficient with no moving parts? An electroaerodynamic actuator uses a high-voltage corona discharge to push air along the wing's surface — an "ionic wind" that speeds up the slow air right at the surface. Most published work shows the effect with smoke; I measured it, as lift and drag on a 3D-printed NACA 4412 wing with the actuator on and off, from 0° to 24°.
-
-A thin copper wire near the leading edge is held at up to 40 kV, which ionizes the air around it — the purple glow. The ions are pulled toward a grounded brass tube further back and drag neutral air along with them.
+A thin copper wire near the front of the wing is held at up to 40 kV. It ionizes the air around it, and the ions are pulled toward a grounded brass tube further back, dragging air along with them. That "ionic wind" speeds up the slow layer of air right at the wing's surface.
 
 <div class="not-prose grid grid-cols-1 sm:grid-cols-[2000fr_1649fr] gap-4 my-8">
   <figure class="m-0">
@@ -119,24 +80,6 @@ A thin copper wire near the leading edge is held at up to 40 kV, which ionizes t
   </figure>
 </div>
 
-For the research the tunnel gained an ESP32-S3 in place of the Arduino — reading the load cells, driving the servo, and serving a web page that plots lift and drag live and logs every run. A U-tube manometer measured the airspeed at 11 m/s, the mount's own forces were measured and subtracted, and the electrodes are fed through magnetic contacts on the walls so no wiring pulls on the load cells.
-
-<figure class="not-prose my-6">
-  <img src="/assets/wind-tunnel/tunnel.webp" alt="The rebuilt wind tunnel from the side: contraction, straw flow straighteners, lit acrylic test section with the wing inside, and the fan" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="679" />
-  <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The rebuilt tunnel, with the wing mounted in the test section.</figcaption>
-</figure>
-
-<div class="not-prose grid grid-cols-1 sm:grid-cols-[2000fr_751fr] gap-4 my-8">
-  <figure class="m-0">
-    <img src="/assets/wind-tunnel/web-interface.webp" alt="The tunnel's web interface: angle and logging controls, a live plot of lift and drag, and a data log" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="2000" height="894" />
-    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The ESP32's web interface — live forces, servo control and logging.</figcaption>
-  </figure>
-  <figure class="m-0">
-    <img src="/assets/wind-tunnel/u-tube.webp" alt="U-tube manometer beside the test section, with the water level difference marked" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" loading="lazy" decoding="async" width="1675" height="2000" />
-    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">The U-tube manometer.</figcaption>
-  </figure>
-</div>
-
 <Chart
   labels={[0, 4, 8, 12, 16, 18, 20, 24]}
   xLabel="Angle of attack (°)"
@@ -144,20 +87,14 @@ For the research the tunnel gained an ESP32-S3 in place of the Arduino — readi
   yMin={0}
   ariaLabel="Lift to drag ratio versus angle of attack. With the actuator on the ratio is higher at every angle, peaking at 8.9 at 4 degrees against the unpowered peak of 6.5 at 8 degrees."
   series={[
-    { label: 'Actuator off', data: [{ x: 0, y: 3.96 }, { x: 4, y: 6.09 }, { x: 8, y: 6.52 }, { x: 12, y: 6.09 }, { x: 16, y: 5.68 }, { x: 18, y: 5.43 }, { x: 20, y: 3.53 }, { x: 24, y: 2.08 }], color: 'stone', dashed: true },
-    { label: 'Actuator on', data: [{ x: 0, y: 7.67 }, { x: 4, y: 8.93 }, { x: 8, y: 8.14 }, { x: 12, y: 7.68 }, { x: 16, y: 6.74 }, { x: 18, y: 6.03 }, { x: 20, y: 4.04 }, { x: 24, y: 2.3 }], color: 'emerald' },
+    { label: 'Actuator off', data: [{ x: 0, y: 3.96 }, { x: 4, y: 6.10 }, { x: 8, y: 6.52 }, { x: 12, y: 6.10 }, { x: 16, y: 5.68 }, { x: 18, y: 5.43 }, { x: 20, y: 3.53 }, { x: 24, y: 2.08 }], color: 'stone', dashed: true },
+    { label: 'Actuator on', data: [{ x: 0, y: 7.69 }, { x: 4, y: 8.94 }, { x: 8, y: 8.15 }, { x: 12, y: 7.69 }, { x: 16, y: 6.74 }, { x: 18, y: 6.03 }, { x: 20, y: 4.04 }, { x: 24, y: 2.30 }], color: 'emerald' },
   ]}
 />
 
-**The result:** lift up 5–13% at every angle, and drag down most at shallow angles, where it matters for cruise — 43% at 0°. At 8°, where the unpowered wing is most efficient, lift-to-drag rose 25%.
+- **Lift rose 5–13% at every angle tested.**
+- **Measured drag fell most at shallow angles** — 43% at 0°, shrinking to about 1% at 24°. Part of that is the actuator's own forward push, which this setup could not separate from the aerodynamic effect; [the research page](/projects/wind-tunnel/research#separating-thrust-from-drag) works out how much.
+- **At 8°, where the unpowered wing is most efficient, lift-to-drag rose 25%.**
+- **Stall was not delayed.** It stayed at 18–20° with the actuator on or off. The ionic wind carries too little momentum to hold the flow on the wing near stall.
 
-It did not delay stall, which stayed at 18–20° either way. The ionic wind carries too little momentum to hold the flow attached near stall, and as the angle increases the point where the flow separates moves forward of the actuator. More power, or actuators closer to the leading edge, are the next things to try.
-
----
-
-# Daily Log
-
-<div class="rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900/40 p-1">
-  <iframe src="https://docs.google.com/document/d/e/2PACX-1vSGw2yi7sChjvjG2loJxZCY8sUeYMAXFgMUzfUqK-Z9sTLhJNcg4Zj-k8Y-8c9jMAMgP_qzP8eu917h/pub?embedded=true"
-    frameborder="0" width="100%" height="500" class="rounded opacity-90 dark:invert-[0.9] dark:hue-rotate-180"></iframe>
-</div>
+The tunnel made this possible because it measures forces, not just flow. Most published work on this kind of actuator studies how the flow moves; I wanted the forces on the wing, and that is what the [upgrades](/projects/wind-tunnel/upgrading) were for.
