@@ -1,6 +1,6 @@
 ---
 title: "Flight Testing"
-order: 1
+order: 8
 navLabel: "Flight Testing"
 showHero: false
 description: "Every test and flight in order: what was measured, what went wrong, and what changed because of it."
@@ -83,6 +83,21 @@ It also has [documented problems](/projects/aeolus/control#static--thrust-stand)
 
 **What happened.** Roll, pitch, and yaw control were all enabled, and the roll gain was accidentally set ten times too high, which produced immediate oscillation. With that corrected and pitch and yaw disabled to isolate roll, the vehicle was commanded to hover at 0.5 m. It quickly lost orientation and veered away from vertical.
 
+<div class="not-prose grid grid-cols-2 gap-4 my-6 mx-auto max-w-2xl">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/testing/tether-jun-gain-10x-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="480" height="720">
+      <source src="/assets/aeolus/testing/tether-jun-gain-10x.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">19 June, roll gain ten times too high (Kp 1.0): the vehicle rocks back and forth about the string.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video poster="/assets/aeolus/testing/tether-jun-departs-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="480" height="720">
+      <source src="/assets/aeolus/testing/tether-jun-departs.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Gain corrected (Kp 0.1, Kd 0.05), roll only: it still swings away from vertical, and nothing was logged to say why.</figcaption>
+  </figure>
+</div>
+
 **Three candidate causes**, none of which could be separated at the time:
 
 1. Gains not adequately tuned, producing unstable behaviour.
@@ -115,7 +130,22 @@ That constraint is what made the flight data usable as *measurement*. With only 
 
 The gain sweep behaved the way the second-order model says it should: low damping produced sustained oscillation, and raising it three-fold produced a visibly overdamped, sluggish return. The values that flew sit between them.
 
-<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+<div class="not-prose grid grid-cols-2 gap-4 mt-6 mb-4 mx-auto max-w-2xl">
+  <figure class="m-0">
+    <video poster="/assets/aeolus/testing/tether-jul-underdamped-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="480" height="720">
+      <source src="/assets/aeolus/testing/tether-jul-underdamped.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">22 July, Kp 0.3, Kd 0.05: low damping, so it keeps oscillating after release.</figcaption>
+  </figure>
+  <figure class="m-0">
+    <video poster="/assets/aeolus/testing/tether-jul-overdamped-poster.webp" controls playsinline preload="metadata" class="w-full rounded-lg border border-slate-200 dark:border-slate-800" width="480" height="720">
+      <source src="/assets/aeolus/testing/tether-jul-overdamped.webm" type="video/webm" />
+    </video>
+    <figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">22 July, Kp 0.3, Kd 0.15: damping tripled, so the return is slow and sluggish.</figcaption>
+  </figure>
+</div>
+
+<div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
   <figure class="m-0"><img src="/assets/aeolus/control/gain-underdamped.webp" alt="Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="899" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Low damping — sustained oscillation. Lower panel shows the P, I and D contributions separately.</figcaption></figure>
   <figure class="m-0"><img src="/assets/aeolus/control/gain-overdamped.webp" alt="Damping raised three-fold — overdamped and sluggish." class="w-full rounded-lg" loading="lazy" decoding="async"  width="1400" height="1216" /><figcaption class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">Damping raised three-fold — overdamped and sluggish.</figcaption></figure>
 </div>

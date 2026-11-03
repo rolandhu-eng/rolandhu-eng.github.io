@@ -336,20 +336,20 @@ Also the [LoRa command protocol](/projects/aeolus/communications#protocol-design
 
 # Contents
 
-**1. [Flight Testing](/projects/aeolus/testing)** — Probably every test and every flight, failures, successes, and analysis documented.
+**1. [Vehicle](/projects/aeolus/vehicle)** — How it is built and the structural design, and how I measured the moment of inertia with a bi-filar pendulum setup, which the rest of the control and software was based around. Also the parachute recovery system, which is designed and characterized but not currently flown.
 
-**2. [Vehicle](/projects/aeolus/vehicle)** — How it is built and the structural design, and how I measured the moment of inertia with a bi-filar pendulum setup, which the rest of the control and software was based around. Also the parachute recovery system, which is designed and characterized but not currently flown.
+**2. [Propulsion](/projects/aeolus/propulsion)** — The ducted fan, what it actually produces on a test stand rather than the stated specs, and the software that holds it at a commanded *speed* — because as the battery drains, the same throttle stops meaning the same thrust.
 
-**3. [Propulsion](/projects/aeolus/propulsion)** — The ducted fan, what it actually produces on a test stand rather than the stated specs, and the software that holds it at a commanded *speed* — because as the battery drains, the same throttle stops meaning the same thrust.
+**3. [Avionics](/projects/aeolus/avionics)** — The electronics, designed and soldered by hand. The flight computer and two custom PCBs: a power distribution board and a simple servo distribution board.
 
-**4. [Avionics](/projects/aeolus/avionics)** — The electronics, designed and soldered by hand. The flight computer and two custom PCBs: a power distribution board and a simple servo distribution board.
+**4. [Navigation & Guidance](/projects/aeolus/gnc)** — How it works out its current orientation and movement, to a fraction of a degree, because a one-degree error becomes eight meters of position error in ten seconds. Also the state machine that flies the mission unaided.
 
-**5. [Navigation & Guidance](/projects/aeolus/gnc)** — How it works out its current orientation and movement, to a fraction of a degree, because a one-degree error becomes eight meters of position error in ten seconds. Also the state machine that flies the mission unaided.
+**5. [Control](/projects/aeolus/control)** — How it corrects for disturbances and commands 200 times per second, and how it physically does that. Also how the vehicle response is modelled to solve for optimal gains analytically, compared to the common trial-and-error tuning.
 
-**6. [Control](/projects/aeolus/control)** — How it corrects for disturbances and commands 200 times per second, and how it physically does that. Also how the vehicle response is modelled to solve for optimal gains analytically, compared to the common trial-and-error tuning.
+**6. [Simulation](/projects/aeolus/simulation)** — Airflow simulation and a six-degree-of-freedom flight model, used to simulate software settings before real flight. Predicts what the vehicle will behave like before actually flying.
 
-**7. [Simulation](/projects/aeolus/simulation)** — Airflow simulation and a six-degree-of-freedom flight model, used to simulate software settings before real flight. Predicts what the vehicle will behave like before actually flying.
+**7. [Communications](/projects/aeolus/communications)** — Radio link, command protocol, flight recorder, and the browser dashboard I fly from.
 
-**8. [Communications](/projects/aeolus/communications)** — Radio link, command protocol, flight recorder, and the browser dashboard I fly from.
+**8. [Flight Testing](/projects/aeolus/testing)** — Probably every test and every flight, failures, successes, and analysis documented.
 
 **9. [Build Log](/projects/aeolus/log)** — The working notebook, entry by entry, as I wrote it during the build.
